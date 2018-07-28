@@ -125,10 +125,10 @@ void updatePossibleValues(unsigned int row, unsigned int col, unsigned int val) 
 	}
 
 	/* Block */
-	i = BLOCK_ROWS*((row)/BLOCK_ROWS); /* Index of the first row of the block */
-	j = BLOCK_COLS*((col)/BLOCK_COLS); /* Index of the first column of the block */
-	for(count_i = 0; count_i < BLOCK_ROWS; count_i++) {
-		for(count_j = 0; count_j < BLOCK_COLS; count_j++) {
+	i = N_ROWS*((row)/N_ROWS); /* Index of the first row of the block */
+	j = M_COLS*((col)/M_COLS); /* Index of the first column of the block */
+	for(count_i = 0; count_i < N_ROWS; count_i++) {
+		for(count_j = 0; count_j < M_COLS; count_j++) {
 			if(val > 0) {
 				gameBoard[i+count_i][j+count_j].possible_vals[val-1] = FALSE;
 			}
@@ -191,17 +191,47 @@ void repeatChar(char c, unsigned int n, char* out) {
 }
 
 
+void printCellRow(unsigned int row) {
+	unsigned int col;
+	unsigned int block;
+	printf("|");
+	for(block = 0; block < N_ROWS; block++) {
+		for(col = block*M_COLS; col < block*M_COLS + M_COLS; col++) {
+			printf(" ");
+			if(gameBoard[row][col].value == 0){
+				printf("  ");
+			}
+			else {
+				printf("%2d", gameBoard[row][col].value);
+			}
+			if(gameBoard[row][col].fixed) {
+				printf(".");
+			}
+			/* else if(markErrors == TRUE && gameBoard[row][col].error) {
+			 * 	printf("*");
+			 * } */
+			else {
+				printf(" ");
+			}
+		}
+		printf("|");
+	}
+	printf("\n");
+}
+
+
 /*
  * Prints the game board.
  */
 void printBoard() {
 	char*				separatorRow;
-	unsigned int		i, row = 0, col = 0;
+	unsigned int		i,j;
 	static unsigned int	sepSize;
-	unsigned int		temp = N/BLOCK_COLS;
+	/*unsigned int		temp = N/BLOCK_COLS;*/
 
-	temp += temp < (double) N/BLOCK_COLS;
-	sepSize = 3*N+temp*2+1;
+	/*temp += temp < (double) N/BLOCK_COLS;*/
+	/*sepSize = 3*N+temp*2+1;*/
+	sepSize = 4*N + N_ROWS + 1;
 	separatorRow = (char*) malloc((sepSize+2)*sizeof(char)); /* allocate enough space for the number of '-' characters needed + '\n' + '\0'. */
 	if(separatorRow == NULL) {
 		printf("Error: malloc has failed\n");
@@ -209,7 +239,19 @@ void printBoard() {
 	}
 	separatorRow[sepSize+1] = '\0';
 	repeatChar('-',sepSize,separatorRow);
-	for(i = 0; i < N+(N)/BLOCK_ROWS+1; i++) { /* board printing */
+
+	/* NEW BOARD PRINT FORMAT */
+	printf("%s",separatorRow);
+
+	for(i = 0; i < M_COLS; i++) {
+		for(j = 0; j < N_ROWS; j++) {
+			printCellRow(i*N_ROWS+j);
+		}
+		printf("%s",separatorRow);
+	}
+
+
+/*	for(i = 0; i < N+(N)/BLOCK_ROWS+1; i++) {  board printing
 		if(i%(BLOCK_ROWS+1) == 0) {
 			if(i < N+(N)/BLOCK_ROWS) {
 				printf("%s",separatorRow);
@@ -220,16 +262,16 @@ void printBoard() {
 				if(col%(BLOCK_COLS) == 0) {
 					printf("| ");
 				}
-				if(gameBoard[row][col].fixed) { /* print a dot for a fixed cell. a cell with a value of 0 should never be fixed. */
+				if(gameBoard[row][col].fixed) {  print a dot for a fixed cell. a cell with a value of 0 should never be fixed.
 					printf(".");
 				}
-				else { /* print a space for an unfixed cell */
+				else {  print a space for an unfixed cell
 					printf(" ");
 				}
-				if(gameBoard[row][col].value == 0) { /* empty cell */
+				if(gameBoard[row][col].value == 0) {  empty cell
 					printf("  ");
 				}
-				else { /* print cell value */
+				else {  print cell value
 					printf("%d ",gameBoard[row][col].value);
 				}
 			}
@@ -237,6 +279,7 @@ void printBoard() {
 			row++;
 		}
 	}
-	printf("%s",separatorRow);
+	printf("%s",separatorRow);*/
 	free(separatorRow);
 }
+

@@ -1,8 +1,8 @@
 #define	FALSE		0
 #define	TRUE		1
-#define	BLOCK_ROWS	3						/* number of rows in each block */
-#define	BLOCK_COLS	3						/* number of columns in each block */
-#define	N 			((BLOCK_ROWS)*(BLOCK_COLS))	/* number of rows and columns on the game board. */
+#define	N_ROWS	3						/* number of rows in each block */
+#define	M_COLS	4						/* number of columns in each block */
+#define	N 			((N_ROWS)*(M_COLS))	/* number of rows and columns on the game board. */
 
 
 /*

@@ -26,6 +26,8 @@ int main(int argc, char* argv[]) {
 		srand(time(NULL));
 	}
 
+	printf("Sudoku\n------\n");
+
 	startNewGame(); /* Ask user for the number of filled cells, generate the board and print it. */
 
 	/* Ask user for commands and execute them until user enters "exit". */
@@ -34,11 +36,11 @@ int main(int argc, char* argv[]) {
 		isValidCommand = interpretCommand(input,command); /* Determine if input is valid, and if it is - store it in command array. */
 		if(isValidCommand) {
 			if(!executeCommand(command)) { /* Try to execute command. If not executed print error message */
-				printf("Error: invalid command\n");
+				printf("ERROR: invalid command\n");
 			}
 		}
 		else {
-			printf("Error: invalid command\n");
+			printf("ERROR: invalid command\n");
 		}
 	}
 	printf("Exiting...\n");

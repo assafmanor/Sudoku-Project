@@ -38,10 +38,10 @@ void possibleVals(unsigned int row, unsigned int col, unsigned int* possible) {
 	}
 
 	/* Block */
-	i = BLOCK_ROWS*((row)/BLOCK_ROWS); /* Index of the first row of the block */
-	j = BLOCK_COLS*((col)/BLOCK_COLS); /* Index of the first column of the block */
-	for(count_i = 0; count_i < BLOCK_ROWS; count_i++) {
-		for(count_j = 0; count_j < BLOCK_COLS; count_j++) {
+	i = N_ROWS*((row)/N_ROWS); /* Index of the first row of the block */
+	j = M_COLS*((col)/M_COLS); /* Index of the first column of the block */
+	for(count_i = 0; count_i < N_ROWS; count_i++) {
+		for(count_j = 0; count_j < M_COLS; count_j++) {
 			val = getCell(i+count_i,j+count_j)->sug_val;
 			if(val > 0) {
 				possible[val-1] = FALSE;
