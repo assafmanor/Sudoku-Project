@@ -2,11 +2,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include "SPBufferset.h"
 #include "MainAux.h"
 #include "Parser.h"
 #include "Game.h"
 
-
+/* ITS WORKING!!!*/
 /*
  * The main function.
  *
@@ -18,6 +19,7 @@ int main(int argc, char* argv[]) {
 	unsigned int	command[4] = { 0 };
 	unsigned int    seed;
 
+	SP_BUFF_SET()
 	if(argc > 1) { /* Get seed entered in command line */
 		seed = toInt(argv[1]); 	/* Convert seed to integer - assuming valid input */
 		srand(seed);
