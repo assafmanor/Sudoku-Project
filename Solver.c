@@ -374,7 +374,7 @@ void autofill(){
 			/* there is only one choice: */
 			for(k=0; k<N; k++){
 				if(possible[k]){
-					cell->value=k+1;
+					setCellVal(i+1,j+1,k+1);
 					break;
 			}}
 	}}
