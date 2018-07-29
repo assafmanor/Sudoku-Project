@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include "Game.h"
 #include "Solver.h"
-
+/* hai */
 /* TRUE,FALSE, N, BLOCK_ROWS, and BLOCK_COLS are defined in Game.h. */
 
 
