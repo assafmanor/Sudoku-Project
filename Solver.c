@@ -269,7 +269,7 @@ void fixSuggestedVals() {
 unsigned int detBacktracking(){
 	unsigned int	solvable;
 
-	/* step 1 - copy
+	/* step 1 - copy:
 	 * all the suggested values by detBacktracking
 	 * are the values which already on the board: */
 	initSugValues();
@@ -330,3 +330,69 @@ void generateBoard(unsigned int numOfHints) {
 unsigned int validate() {
 	return 	detBacktracking();
 }
+/*---------------------------- ron update ---------------------------*/
+unsigned int checkerrounous(){
+	/* to be implemented */
+	return TRUE;
+}
+
+
+/* fill cells which contain a single legal value
+ * pre: assume we are in Solve mode */
+void autofill(){
+	unsigned int 	errounous, i , j, k;
+	unsigned int 	possible[N+1] = {0};
+	unsigned int	posValsCount;
+	Cell* 			cell;
+
+	/* c - check if there is errounous cells */
+	errounous = checkerrounous(); /*if there are errors --> errounous = TRUE*/
+	if (errounous){
+		printf("Error:board contains erroneous values\n");
+	}
+
+	/* d1 - copy:
+	 * all the suggested values by autofill
+	 * are the values which already on the board: */
+	initSugValues();
+
+	/* d2 - update the board with new values.
+	 * cell->sug_value is not changing , while cell->value
+	 * can be changed in the nested for loop*/
+
+	for(i = 0; i < N; i++) {
+		for(j = 0; j < N; j++) {
+			cell = getCell(i,j);
+			/* Calculate all the possible values for current cell and save in possible
+			 * this calculation refers to cell->sug_val which is not change */
+			possibleVals(i,j,possible);
+			posValsCount = possible[N]; /* Number of possible values */
+			/* if there are a few choices- ignore this cell */
+			if(posValsCount != 1){
+				continue;
+			}
+			/* there is only one choice: */
+			for(k=0; k<N; k++){
+				if(possible[k]){
+					setCellVal(i+1,j+1,k+1);
+					break;
+			}}
+	}}
+
+	/* d4 - nullify suggested values for future use */
+	fixSuggestedVals();
+
+	/* g - print the new board */
+	printBoard();
+
+}
+
+
+
+
+
+
+
+
+
+
