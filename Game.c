@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include "Game.h"
 #include "Solver.h"
-/* hai */
+
 /* TRUE,FALSE, N, BLOCK_ROWS, and BLOCK_COLS are defined in Game.h. */
 
 
@@ -10,6 +10,7 @@
 Cell			gameBoard[N][N];	/* a Sudoku board with N rows and N columns */
 unsigned int	numOfFixedCells;	/* number of fixed cells */
 unsigned int	cellsDisplayed;		/* number of cells  displayed on the board - used for game over */
+unsigned int	gameMode;			/* current game mode (init / solve / edit). */
 
 
 
@@ -125,10 +126,10 @@ void updatePossibleValues(unsigned int row, unsigned int col, unsigned int val) 
 	}
 
 	/* Block */
-	i = N_ROWS*((row)/N_ROWS); /* Index of the first row of the block */
-	j = M_COLS*((col)/M_COLS); /* Index of the first column of the block */
-	for(count_i = 0; count_i < N_ROWS; count_i++) {
-		for(count_j = 0; count_j < M_COLS; count_j++) {
+	i = BLOCK_M*((row)/BLOCK_M); /* Index of the first row of the block */
+	j = BLOCK_N*((col)/BLOCK_N); /* Index of the first column of the block */
+	for(count_i = 0; count_i < BLOCK_M; count_i++) {
+		for(count_j = 0; count_j < BLOCK_N; count_j++) {
 			if(val > 0) {
 				gameBoard[i+count_i][j+count_j].possible_vals[val-1] = FALSE;
 			}
@@ -195,8 +196,10 @@ void printCellRow(unsigned int row) {
 	unsigned int col;
 	unsigned int block;
 	printf("|");
-	for(block = 0; block < N_ROWS; block++) {
-		for(col = block*M_COLS; col < block*M_COLS + M_COLS; col++) {
+	/* For each block row */
+	for(block = 0; block < BLOCK_M; block++) {
+		/* For each block column: */
+		for(col = block*BLOCK_N; col < block*BLOCK_N + BLOCK_N; col++) {
 			printf(" ");
 			if(gameBoard[row][col].value == 0){
 				printf("  ");
@@ -227,11 +230,8 @@ void printBoard() {
 	char*				separatorRow;
 	unsigned int		i,j;
 	static unsigned int	sepSize;
-	/*unsigned int		temp = N/BLOCK_COLS;*/
 
-	/*temp += temp < (double) N/BLOCK_COLS;*/
-	/*sepSize = 3*N+temp*2+1;*/
-	sepSize = 4*N + N_ROWS + 1;
+	sepSize = 4*N + BLOCK_M + 1;
 	separatorRow = (char*) malloc((sepSize+2)*sizeof(char)); /* allocate enough space for the number of '-' characters needed + '\n' + '\0'. */
 	if(separatorRow == NULL) {
 		printf("Error: malloc has failed\n");
@@ -243,43 +243,21 @@ void printBoard() {
 	/* NEW BOARD PRINT FORMAT */
 	printf("%s",separatorRow);
 
-	for(i = 0; i < M_COLS; i++) {
-		for(j = 0; j < N_ROWS; j++) {
-			printCellRow(i*N_ROWS+j);
+	for(i = 0; i < BLOCK_N; i++) {
+		for(j = 0; j < BLOCK_M; j++) {
+			printCellRow(i*BLOCK_M+j);
 		}
 		printf("%s",separatorRow);
 	}
 
-
-/*	for(i = 0; i < N+(N)/BLOCK_ROWS+1; i++) {  board printing
-		if(i%(BLOCK_ROWS+1) == 0) {
-			if(i < N+(N)/BLOCK_ROWS) {
-				printf("%s",separatorRow);
-			}
-		}
-		else {
-			for(col = 0; col < N; col++) {
-				if(col%(BLOCK_COLS) == 0) {
-					printf("| ");
-				}
-				if(gameBoard[row][col].fixed) {  print a dot for a fixed cell. a cell with a value of 0 should never be fixed.
-					printf(".");
-				}
-				else {  print a space for an unfixed cell
-					printf(" ");
-				}
-				if(gameBoard[row][col].value == 0) {  empty cell
-					printf("  ");
-				}
-				else {  print cell value
-					printf("%d ",gameBoard[row][col].value);
-				}
-			}
-			printf("|\n");
-			row++;
-		}
-	}
-	printf("%s",separatorRow);*/
 	free(separatorRow);
+}
+
+void setGameMode(unsigned int newGameMode) {
+	gameMode = newGameMode;
+}
+
+unsigned int getGameMode() {
+	return gameMode;
 }
 

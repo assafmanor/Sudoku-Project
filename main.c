@@ -33,7 +33,7 @@ int main(int argc, char* argv[]) {
 	startNewGame(); /* Ask user for the number of filled cells, generate the board and print it. */
 
 	/* Ask user for commands and execute them until user enters "exit". */
-	while(command[0] != 3) { /* While command is not "exit". */
+	while(command[0] != 15) { /* While command is not "exit". */
 		getUserInput(input); /* Wait for user input */
 		isValidCommand = interpretCommand(input,command); /* Determine if input is valid, and if it is - store it in command array. */
 		if(isValidCommand) {

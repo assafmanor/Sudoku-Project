@@ -119,13 +119,24 @@ int toInt(char* str) {
  * -updates array command such that:
  *
  * 	command[0] = :
- * 		1 - validate
- * 		2 - restart
- * 		3 - exit
- * 		4 - hint
+ * 		1 - solve
+ * 		2 - edit
+ * 		3 - mark_errors
+ * 		4 - print_board
  * 		5 - set
+ * 		6 - validate
+ * 		7 - generate
+ * 		8 - undo
+ * 		9 - redo
+ * 		10 - save
+ * 		11 - hint
+ * 		12 - num_solutions
+ * 		13 - autofill
+ * 		14 - reset
+ * 		15 - exit
  *
- *	 if command[0] == 4 (hint):
+ *
+ *	 if command[0] == 11 (hint):
  * 		command[1] = column number (1-9)
  * 		command[2] = row number (1-9)
  *
@@ -143,25 +154,27 @@ unsigned int interpretCommand (char* input, unsigned int* command) {
 	unsigned int 	i1,i2,i3;
 	unsigned int	i;
 	char*			strArr[4] = {'\0'};
-	unsigned int 	isValid = TRUE;
+	unsigned int 	isValidCommand = TRUE;
 	commandToArray(input,strArr); /* insert each one of the first four words of input into the array strArr */
 	i1 = toInt(strArr[1]);
 	i2 = toInt(strArr[2]);
 	i3 = toInt(strArr[3]);
-	if (stringsEqual(strArr[0],"validate")) {
+	if (stringsEqual(strArr[0],"solve")) {
 		command[0] = 1;
+		/*command[1] =*/
 	}
-	else if (stringsEqual(strArr[0],"restart")) {
+/*	else if (stringsEqual(strArr[0],"restart")) {
+			command[0] = 2;
+	}*/
+	else if (stringsEqual(strArr[0],"edit")) {
 		command[0] = 2;
 	}
-	else if (stringsEqual(strArr[0],"exit")) {
+	else if (stringsEqual(strArr[0],"mark_errors")) {
 		command[0] = 3;
-	}
-	else if (stringsEqual(strArr[0],"hint") &&
-			1 <= i1 && i1 <= N && 1 <= i2 && i2 <= N) {
-		command[0] = 4;
 		command[1] = i1;
-		command[2] = i2;
+	}
+	else if (stringsEqual(strArr[0],"print_board")) {
+		command[0] = 4;
 	}
 	else if (stringsEqual(strArr[0],"set") &&
 			1 <= i1 && i1  <= N && 1 <= i2 && i2 <= N && i3 <= N) {
@@ -170,13 +183,52 @@ unsigned int interpretCommand (char* input, unsigned int* command) {
 		command[2] = i2;
 		command[3] = i3;
 	}
+	else if (stringsEqual(strArr[0],"validate")) {
+		command[0] = 6;
+	}
+	else if (stringsEqual(strArr[0],"generate")) {
+		command[0] = 7;
+		command[1] = i1;
+		command[2] = i2;
+	}
+	else if (stringsEqual(strArr[0],"undo")) {
+		command[0] = 8;
+	}
+	else if (stringsEqual(strArr[0],"redo")) {
+		command[0] = 9;
+	}
+	else if (stringsEqual(strArr[0],"save")) {
+		command[0] = 10;
+	}
+	else if (stringsEqual(strArr[0],"hint") &&
+			1 <= i1 && i1 <= N && 1 <= i2 && i2 <= N) {
+		command[0] = 11;
+		command[1] = i1;
+		command[2] = i2;
+	}
+	else if (stringsEqual(strArr[0],"num_solutions")) {
+		command[0] = 12;
+	}
+	else if (stringsEqual(strArr[0],"autofill")) {
+		command[0] = 13;
+	}
+	else if (stringsEqual(strArr[0],"reset")) {
+		command[0] = 14;
+	}
+	else if (stringsEqual(strArr[0],"exit")) {
+		command[0] = 15;
+	}
+	/* TEMPORARY COMMAND!!!!! FOR TESTING */
+	else if (stringsEqual(strArr[0],"game_mode")) {
+		command[0] = 16;
+	}
 	else {
-		isValid = FALSE;
+		isValidCommand = FALSE;
 	}
 	/* Free allocated memory */
 	for(i = 0; i < 4; i++) {
 		free(strArr[i]);
 	}
 
-	return isValid;
+	return isValidCommand;
 }
