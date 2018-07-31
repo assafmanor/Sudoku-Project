@@ -356,58 +356,140 @@ unsigned int validate(Board* boardPtr) {
 	return 	detBacktracking(boardPtr);
 }
 /*---------------------------- ron update ---------------------------*/
-/*unsigned int checkerrounous(){
-	 to be implemented
+unsigned int checkerrounous(){
+	 /*to be implemented*/
 	return TRUE;
 }
 
 
- fill cells which contain a single legal value
- * pre: assume we are in Solve mode
-void autofill(){
+ /*fill cells which contain a single legal value
+  * pre: assume we are in Solve mode*/
+void autofill(Board* boardPtr){
+	Board 			constBoard = {'\0'};		/* This board will be a copy of board, and won't change*/
+	unsigned int	m = boardPtr->m, n = boardPtr->n;
+	unsigned int 	N = m*n;
 	unsigned int 	errounous, i , j, k;
-	unsigned int 	possible[N+1] = {0};
+	unsigned int* 	possible;
 	unsigned int	posValsCount;
 	Cell* 			cell;
 
-	 c - check if there is errounous cells
-	errounous = checkerrounous(); if there are errors --> errounous = TRUE
+	/* c - check if there are errounous cells*/
+	errounous = checkerrounous(); /*if there are errors --> errounous = TRUE*/
 	if (errounous){
 		printf("Error:board contains erroneous values\n");
 	}
 
-	 d1 - copy:
-	 * all the suggested values by autofill
-	 * are the values which already on the board:
-	initSugValues();
+	/* allocate array of possibilities */
+	possible = (unsigned int*)calloc(N+1, sizeof(unsigned int));
+	if(possible == NULL) {
+		printf("Error: calloc has failed\n");
+		exit(1);
+	}
 
-	 d2 - update the board with new values.
+	/* d1 - copy:
+	 * all the suggested values by autofill
+	 * are the values which already on the board:*/
+	initializeBoard(&constBoard,m,n);
+	copyBoard(boardPtr, &constBoard);
+
+	/* d2 - update the board with new values.
 	 * cell->sug_value is not changing , while cell->value
-	 * can be changed in the nested for loop
+	 * can be changed in the nested for loop*/
 
 	for(i = 0; i < N; i++) {
 		for(j = 0; j < N; j++) {
-			cell = getCell(i,j);
-			 Calculate all the possible values for current cell and save in possible
-			 * this calculation refers to cell->sug_val which is not change
-			possibleVals(i,j,possible);
-			posValsCount = possible[N];  Number of possible values
-			 if there are a few choices- ignore this cell
-			if(posValsCount != 1){
-				continue;
-			}
-			 there is only one choice:
+			cell = getCell(&constBoard,i,j);
+			if (cell->value!=0)continue; /*cell is not empty-->continue*/
+			/* Calculate all the possible values for current cell, and save in possible:*/
+			possibleVals(&constBoard,i,j,possible);
+			posValsCount = possible[N];  /*Number of possible values*/
+			/* if there are a few choices- ignore this cell:*/
+			if(posValsCount != 1)continue;
+			 /*there is only one choice-->find it*/
 			for(k=0; k<N; k++){
 				if(possible[k]){
-					setCellVal(i+1,j+1,k+1);
+					setCellVal(boardPtr,i+1,j+1,k+1);
+					printf("Cell<%d,%d> set to %d\n",i+1,j+1,k+1);
 					break;
 			}}
 	}}
 
-	 d4 - nullify suggested values for future use
-	fixSuggestedVals();
+	/* g - print the new board */
+	printBoard(*boardPtr);
 
-	 g - print the new board
-	printBoard();
+	free(possible);
+	freeBoard(constBoard);
+}
 
-}*/
+
+/*------------------- Ron stack example-----------------------------*/
+/* C program for linked list implementation of stack */
+
+
+
+/* A structure to represent a stack*/
+struct StackNode
+{
+    int data;
+    struct StackNode* next;
+};
+
+struct StackNode* newNode(int data)
+{
+    struct StackNode* stackNode =
+              (struct StackNode*) malloc(sizeof(struct StackNode));
+    stackNode->data = data;
+    stackNode->next = NULL;
+    return stackNode;
+}
+
+int isEmpty(struct StackNode *root)
+{
+    return !root;
+}
+
+void push(struct StackNode** root, int data)
+{
+    struct StackNode* stackNode = newNode(data);
+    stackNode->next = *root;
+    *root = stackNode;
+    printf("%d pushed to stack\n", data);
+}
+
+int pop(struct StackNode** root)
+{
+	int popped;
+	struct StackNode* temp;
+    if (isEmpty(*root))
+        return INT_MIN;
+    temp = *root;
+    *root = (*root)->next;
+    popped = temp->data;
+    free(temp);
+
+    return popped;
+}
+
+int peek(struct StackNode* root)
+{
+    if (isEmpty(root))
+        return INT_MIN;
+    return root->data;
+}
+
+/*
+int main()
+{
+    struct StackNode* root = NULL;
+
+    push(&root, 10);
+    push(&root, 20);
+    push(&root, 30);
+
+    printf("%d popped from stack\n", pop(&root));
+
+    printf("Top element is %d\n", peek(root));
+
+    return 0;
+}
+*/
