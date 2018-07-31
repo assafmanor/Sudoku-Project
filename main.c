@@ -16,7 +16,7 @@
 int main(int argc, char* argv[]) {
 	unsigned int    isValidCommand;
 	char            input[1024] = {'\0'};
-	unsigned int	command[4] = { 0 };
+	int				command[4] = { 0 };
 	unsigned int    seed;
 
 	SP_BUFF_SET()
@@ -28,12 +28,13 @@ int main(int argc, char* argv[]) {
 		srand(time(NULL));
 	}
 
-	printf("Sudoku\n------\n");
+	initGame();
 
-	startNewGame(); /* Ask user for the number of filled cells, generate the board and print it. */
+	printf("Sudoku\n------\n");
 
 	/* Ask user for commands and execute them until user enters "exit". */
 	while(command[0] != 15) { /* While command is not "exit". */
+		printf("Enter your command:\n");
 		getUserInput(input); /* Wait for user input */
 		isValidCommand = interpretCommand(input,command); /* Determine if input is valid, and if it is - store it in command array. */
 		if(isValidCommand) {

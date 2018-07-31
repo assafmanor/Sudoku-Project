@@ -150,7 +150,7 @@ int toInt(char* str) {
  * char*			input		-	User input.
  * unsigned int*	command		-	The encoded command will be stored on this array.
  */
-unsigned int interpretCommand (char* input, unsigned int* command) {
+unsigned int interpretCommand (char* input, int* command) {
 	unsigned int 	i1,i2,i3;
 	unsigned int	i;
 	char*			strArr[4] = {'\0'};
@@ -168,6 +168,13 @@ unsigned int interpretCommand (char* input, unsigned int* command) {
 	}*/
 	else if (stringsEqual(strArr[0],"edit")) {
 		command[0] = 2;
+
+		/* //// Temporary ////
+		 * For convenience only!
+		 */
+		command[1] = i1;
+		command[2] = i2;
+		command[3] = i3;
 	}
 	else if (stringsEqual(strArr[0],"mark_errors")) {
 		command[0] = 3;
@@ -176,8 +183,7 @@ unsigned int interpretCommand (char* input, unsigned int* command) {
 	else if (stringsEqual(strArr[0],"print_board")) {
 		command[0] = 4;
 	}
-	else if (stringsEqual(strArr[0],"set") &&
-			1 <= i1 && i1  <= N && 1 <= i2 && i2 <= N && i3 <= N) {
+	else if (stringsEqual(strArr[0],"set")) {
 		command[0] = 5;
 		command[1] = i1;
 		command[2] = i2;
@@ -200,8 +206,7 @@ unsigned int interpretCommand (char* input, unsigned int* command) {
 	else if (stringsEqual(strArr[0],"save")) {
 		command[0] = 10;
 	}
-	else if (stringsEqual(strArr[0],"hint") &&
-			1 <= i1 && i1 <= N && 1 <= i2 && i2 <= N) {
+	else if (stringsEqual(strArr[0],"hint")) {
 		command[0] = 11;
 		command[1] = i1;
 		command[2] = i2;

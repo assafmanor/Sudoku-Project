@@ -1,35 +1,39 @@
 #define	FALSE		0
 #define	TRUE		1
-#define	BLOCK_M	3						/* number of rows in each block */
-#define	BLOCK_N	5						/* number of columns in each block */
-#define	N 			((BLOCK_M)*(BLOCK_N))	/* number of rows and columns on the game board. */
 
 /* Game modes */
-#define INIT 0
-#define SOLVE 1
-#define EDIT 2
+#define INIT		0
+#define SOLVE		1
+#define EDIT		2
 
 
 /*
  * Cell structure. The Sudoku board consists of N*N Cell's.
  */
 typedef struct cell_t {
-	unsigned int value;				/* the value shown */
+	unsigned int value;				/* Cell value*/
 	unsigned int fixed;				/* TRUE or FALSE */
-	unsigned int sol_val;			/* solved board value */
-	unsigned int sug_val;			/* Suggested value - used for backtracking */
-
-	unsigned int possible_vals[N];	/* the possible values for this cell.
+	unsigned int* possible_vals;	/* the possible values for this cell.
 									 * ie. value val is possible iff:
 									 * possible_vals[val-1] = 1
 									 */
 } Cell;
 
+typedef struct board_t {
+	Cell**	board;
+	unsigned int cellsDisplayed;
+	unsigned int m;
+	unsigned int n;
+} Board;
 
-/*
- * Initializes the game board's parameters for a new game.
- */
-void			initializeBoard();
+
+void initializeBoard(Board*, unsigned int m, unsigned int n);
+
+
+void newGame(Board*, Board*, unsigned int, unsigned int);
+
+
+void freeBoard(Board);
 
 
 /*
@@ -38,7 +42,7 @@ void			initializeBoard();
  * unsigned int	row		-	Row number (between 0 and N-1).
  * unsigned int col		-	Column number (between 0 and N-1).
  */
-Cell*			getCell(unsigned int, unsigned int);
+Cell*			getCell(Board*, unsigned int, unsigned int);
 
 
 /*
@@ -74,7 +78,7 @@ unsigned int	isSetValid(unsigned int, unsigned int, unsigned int);
 /*
  * Returns TRUE iff all cells are filled.
  */
-unsigned int	isGameOver();
+unsigned int	isBoardComplete(Board);
 
 
 /*
@@ -85,7 +89,7 @@ unsigned int	isGameOver();
  * unsigned int	row		-	Row number (between 0 and N-1).
  * unsigned int	val		-	The value the user assigned to the cell. (Between 0 and N).
  */
-void			updatePossibleValues(unsigned int, unsigned int, unsigned int);
+void			updatePossibleValues(Board*, unsigned int, unsigned int, unsigned int);
 
 
 /*
@@ -97,15 +101,25 @@ void			updatePossibleValues(unsigned int, unsigned int, unsigned int);
  * unsigned int	row		-	Row number (between 1 and N).
  * unsigned int	val		-	The value being assigned to the cell. (Between 0 and N).
  */
-void			setCellVal(unsigned int, unsigned int, unsigned int);
+void			setCellVal(Board*, unsigned int, unsigned int, unsigned int);
 
 
 /*
  * Prints the game board.
  */
-void			printBoard();
+void			printBoard(Board);
 
 
 void			setGameMode(unsigned int);
 
 unsigned int 	getGameMode();
+
+/*
+ * Copies the contents of the first board to the latter.
+ */
+void			copyBoard(Board*, Board*);
+
+
+Board* getGameBoardPtr();
+
+Board* getSolutionBoardPtr();

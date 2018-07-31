@@ -1,36 +1,89 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "Game.h"
-#include "Solver.h"
-
-/* TRUE,FALSE, N, BLOCK_ROWS, and BLOCK_COLS are defined in Game.h. */
 
 
 
-Cell			gameBoard[N][N];	/* a Sudoku board with N rows and N columns */
-unsigned int	numOfFixedCells;	/* number of fixed cells */
+Board			gameBoard;			/* a board storing the game values (the ones shown) */
+Board			solutionBoard;		/* a board storing the solved values */
 unsigned int	cellsDisplayed;		/* number of cells  displayed on the board - used for game over */
 unsigned int	gameMode;			/* current game mode (init / solve / edit). */
-
 
 
 /*
  * Initializes the game board's parameters for a new game.
  */
-void initializeBoard() {
-	unsigned int	i, j, count;
+void initializeBoard(Board* boardPtr, unsigned int m, unsigned int n) {
+	unsigned int i, j, k;
+	unsigned int N = m*n;
 
-	cellsDisplayed = 0;
+	boardPtr->m = m;
+	boardPtr->n = n;
+
+	/* Allocate space */
+    boardPtr->board = (Cell**)malloc(N * sizeof(Cell*)); 											/* rows */
+	if(boardPtr->board == NULL) {
+		printf("Error: malloc has failed\n");
+		exit(1);
+	}
+    for (i = 0; i < N; i++) {
+    	boardPtr->board[i] = (Cell*)malloc(N * sizeof(Cell));	 									/* Cells */
+     	if(boardPtr->board[i] == NULL) {
+     		printf("Error: malloc has failed\n");
+     		exit(1);
+     	}
+         for(j = 0; j < N; j++) {
+        	 boardPtr->board[i][j].possible_vals = (unsigned int*)malloc(N * sizeof(unsigned int));	/* Possible values */
+        		if(boardPtr->board[i][j].possible_vals == NULL) {
+        			printf("Error: malloc has failed\n");
+        			exit(1);
+        		}
+         }
+    }
+
+    /* set empty values */
 	for(i = 0; i < N; i++) {
 		for(j = 0; j < N; j++) {
-			gameBoard[i][j].value = 0;
-			gameBoard[i][j].fixed = FALSE;
-			gameBoard[i][j].sug_val = 0;
-			for(count = 0; count < N; count++) {
-				gameBoard[i][j].possible_vals[count] = TRUE;
+			boardPtr->board[i][j].value = 0;
+			boardPtr->board[i][j].fixed = FALSE;
+			for(k = 0; k < N; k++) {
+				boardPtr->board[i][j].possible_vals[k] = TRUE;
 			}
 		}
 	}
+
+	boardPtr->cellsDisplayed = 0;
+}
+
+
+/*
+ * Initializes a new empty game board and a solution board.
+ */
+void newGame(Board* gBoard, Board* sBoard, unsigned int m, unsigned int n) {
+	gameBoard = (*gBoard);
+	solutionBoard = (*sBoard);
+
+	initializeBoard(&gameBoard,m,n);
+	initializeBoard(&solutionBoard,m,n);
+	cellsDisplayed = 0;
+}
+
+
+/* Frees allocated space used by a board */
+void freeBoard(Board board) {
+	unsigned int i, j;
+	unsigned int N = board.m*board.n;
+	/* free allocated possible_vals for each cell, and free rows */
+	for(i = 0; i < N; i++) {
+		for(j = 0; j < N; j++) {
+	        free(board.board[i][j].possible_vals);
+		}
+		/* free allocated row */
+		free(board.board[i]);
+	}
+
+	/* free the board itself */
+	free(board.board);
 }
 
 
@@ -40,8 +93,8 @@ void initializeBoard() {
  * unsigned int	row		-	Row number (between 0 and N-1).
  * unsigned int col		-	Column number (between 0 and N-1).
  */
-Cell* getCell(unsigned int row, unsigned int col) {
-	return &gameBoard[row][col];
+Cell* getCell(Board* boardPtr, unsigned int row, unsigned int col) {
+	return &(boardPtr->board[row][col]);
 }
 
 
@@ -52,7 +105,7 @@ Cell* getCell(unsigned int row, unsigned int col) {
  * unsigned int row		-	Row number (between 1 and N).
  */
 unsigned int getHint(unsigned int col, unsigned int row) {
-	return gameBoard[row-1][col-1].sol_val;
+	return solutionBoard.board[row-1][col-1].value;
 }
 
 
@@ -63,7 +116,7 @@ unsigned int getHint(unsigned int col, unsigned int row) {
  * unsigned int row		-	Row number (between 1 and N).
  */
 unsigned int isCellFixed(unsigned int col, unsigned int row) {
-	return gameBoard[row-1][col-1].fixed;
+	return gameBoard.board[row-1][col-1].fixed;
 }
 
 
@@ -80,36 +133,39 @@ unsigned int isSetValid(unsigned int col, unsigned int row, unsigned int val) {
 	if(val == 0) {
 		return TRUE;
 	}
-	return gameBoard[row-1][col-1].possible_vals[val-1]; /* returns TRUE iff val is a possible value for this cell */
+	return gameBoard.board[row-1][col-1].possible_vals[val-1]; /* returns TRUE iff val is a possible value for this cell */
 }
 
 /*
  * Returns TRUE iff all cells are filled.
  */
-unsigned int isGameOver() {
-	return cellsDisplayed == N*N;
+unsigned int isBoardComplete(Board board) {
+	unsigned int N = board.m*board.n;
+	return board.cellsDisplayed == N*N;
 }
 
 
 /*
- * Given a row a column and a new value, updates the possible values for the row,
+ * Given a row a column and a new valueupdates the possible values for the row,
  * column, and block.
  *
  * unsigned int	col		-	Column number (between 0 and N-1).
  * unsigned int	row		-	Row number (between 0 and N-1).
  * unsigned int	val		-	The value the user assigned to the cell. (Between 0 and N).
  */
-void updatePossibleValues(unsigned int row, unsigned int col, unsigned int val) {
+void updatePossibleValues(Board* boardPtr, unsigned int row, unsigned int col, unsigned int val) {
 	unsigned int	i, j, count_i, count_j;
-	unsigned int	lastVal = gameBoard[row][col].value;	/* remember the last value of cell */
+	unsigned int	m = boardPtr->m, n = boardPtr->n;
+	unsigned int	N = m*n;
+	unsigned int	lastVal = boardPtr->board[row][col].value;	/* remember the last value of cell */
 
 	/* Row */
 	for(j = 0; j < N; j++) {
 		if(val > 0) {
-			gameBoard[row][j].possible_vals[val-1] = FALSE; /* set new val as invalid for the whole row. */
+			boardPtr->board[row][j].possible_vals[val-1] = FALSE; /* set new val as invalid for the whole row. */
 		}
 		if(lastVal > 0) {
-			gameBoard[row][j].possible_vals[lastVal-1] = TRUE; /* set last val as valid for the whole column. */
+			boardPtr->board[row][j].possible_vals[lastVal-1] = TRUE; /* set last val as valid for the whole column. */
 		}
 
 	}
@@ -118,30 +174,30 @@ void updatePossibleValues(unsigned int row, unsigned int col, unsigned int val) 
 	/* Column */
 	for(i = 0; i < N; i++) {
 		if(val > 0) {
-			gameBoard[i][col].possible_vals[val-1] = FALSE;
+			boardPtr->board[i][col].possible_vals[val-1] = FALSE;
 		}
 		if(lastVal > 0) {
-			gameBoard[i][col].possible_vals[lastVal-1] = TRUE;
+			boardPtr->board[i][col].possible_vals[lastVal-1] = TRUE;
 		}
 	}
 
 	/* Block */
-	i = BLOCK_M*((row)/BLOCK_M); /* Index of the first row of the block */
-	j = BLOCK_N*((col)/BLOCK_N); /* Index of the first column of the block */
-	for(count_i = 0; count_i < BLOCK_M; count_i++) {
-		for(count_j = 0; count_j < BLOCK_N; count_j++) {
+	i = m*((row)/m); /* Index of the first row of the block */
+	j = n*((col)/n); /* Index of the first column of the block */
+	for(count_i = 0; count_i < m; count_i++) {
+		for(count_j = 0; count_j < n; count_j++) {
 			if(val > 0) {
-				gameBoard[i+count_i][j+count_j].possible_vals[val-1] = FALSE;
+				boardPtr->board[i+count_i][j+count_j].possible_vals[val-1] = FALSE;
 			}
 			if(lastVal > 0) {
-				gameBoard[i+count_i][j+count_j].possible_vals[lastVal-1] = TRUE;
+				boardPtr->board[i+count_i][j+count_j].possible_vals[lastVal-1] = TRUE;
 			}
 		}
 	}
 
 	/* Make 'changing' value to be the same as before possible. */
 	if(val > 0) {
-		gameBoard[row][col].possible_vals[val-1] = TRUE;
+		boardPtr->board[row][col].possible_vals[val-1] = TRUE;
 	}
 }
 
@@ -149,108 +205,27 @@ void updatePossibleValues(unsigned int row, unsigned int col, unsigned int val) 
 /*
  * Assigns the value of val to cell[row-1][col-1].value (assuming value is possible),
  * updates the possible values of all the cells in the row, column and block,
- * and updates the number of cells displayed on the board.
  *
+ * Cell**		board	-	A game board.
  * unsigned int	col		-	Column number (between 1 and N).
  * unsigned int	row		-	Row number (between 1 and N).
  * unsigned int	val		-	The value being assigned to the cell. (Between 0 and N).
  */
-void setCellVal(unsigned int col, unsigned int row, unsigned int val) {
-	unsigned int	lastVal = gameBoard[row-1][col-1].value;	/* remember the last value */
+void setCellVal(Board* boardPtr, unsigned int col, unsigned int row, unsigned int val) {
+	unsigned int	lastVal = boardPtr->board[row-1][col-1].value;	/* remember the last value */
 	if(val == lastVal) { /* if you want to change the value to be the same as before - there's nothing to do */
 		return;
 	}
+	updatePossibleValues(boardPtr, row-1, col-1, val);
+	boardPtr->board[row-1][col-1].value = val; 			/* update to new value */
+
 	/* update the number of cells displayed (used for checking if game over) */
 	if(val > 0 && lastVal == 0) {
-		cellsDisplayed++;
+		boardPtr->cellsDisplayed++;
 	}
 	if(val == 0 && lastVal > 0) {
-		cellsDisplayed--;
+		boardPtr->cellsDisplayed--;
 	}
-
-	updatePossibleValues(row-1, col-1, val);
-	gameBoard[row-1][col-1].value = val; 			/* update to new value */
-
-}
-
-
-/*
- * Repeats the character c n times in string out.
- * Used for making the separator row for printing the board.
- *
- * char	c			-	The character to be repeated.
- * unsigned int n	-	The number of times the character will be repeated.
- * char* out		-	The string that the outcome will be saved to.
- */
-void repeatChar(char c, unsigned int n, char* out) {
-	unsigned int	i;
-
-	for(i = 0; i < n; i++) {
-		out[i] = c;
-	}
-	out[n] = '\n';
-}
-
-
-void printCellRow(unsigned int row) {
-	unsigned int col;
-	unsigned int block;
-	printf("|");
-	/* For each block row */
-	for(block = 0; block < BLOCK_M; block++) {
-		/* For each block column: */
-		for(col = block*BLOCK_N; col < block*BLOCK_N + BLOCK_N; col++) {
-			printf(" ");
-			if(gameBoard[row][col].value == 0){
-				printf("  ");
-			}
-			else {
-				printf("%2d", gameBoard[row][col].value);
-			}
-			if(gameBoard[row][col].fixed) {
-				printf(".");
-			}
-			/* else if(markErrors == TRUE && gameBoard[row][col].error) {
-			 * 	printf("*");
-			 * } */
-			else {
-				printf(" ");
-			}
-		}
-		printf("|");
-	}
-	printf("\n");
-}
-
-
-/*
- * Prints the game board.
- */
-void printBoard() {
-	char*				separatorRow;
-	unsigned int		i,j;
-	static unsigned int	sepSize;
-
-	sepSize = 4*N + BLOCK_M + 1;
-	separatorRow = (char*) malloc((sepSize+2)*sizeof(char)); /* allocate enough space for the number of '-' characters needed + '\n' + '\0'. */
-	if(separatorRow == NULL) {
-		printf("Error: malloc has failed\n");
-		exit(1);
-	}
-	separatorRow[sepSize+1] = '\0';
-	repeatChar('-',sepSize,separatorRow);
-
-	/* NEW BOARD PRINT FORMAT */
-	printf("%s",separatorRow);
-
-	for(i = 0; i < BLOCK_N; i++) {
-		for(j = 0; j < BLOCK_M; j++) {
-			printCellRow(i*BLOCK_M+j);
-		}
-		printf("%s",separatorRow);
-	}
-
-	free(separatorRow);
 }
 
 void setGameMode(unsigned int newGameMode) {
@@ -261,3 +236,42 @@ unsigned int getGameMode() {
 	return gameMode;
 }
 
+
+/*
+ * Copies the contents of the original board to the copied board.
+ * Assumes both boards are of equal sizes.
+ *
+ * Cell**	original	-	Original board.
+ * Cell**	copied		-	Copied board.
+ * char*	N			-	Number of rows/columns in both boards.
+ */
+void copyBoard(Board* original, Board* copy) {
+	unsigned int	m = original->m, n = original->n;
+	unsigned int	N = m*n;
+	unsigned int i, j, k;
+	Cell* copyCell;
+	for(i = 0; i < N; i++) {
+		for(j = 0; j < N; j++) {
+			copyCell = getCell(copy,i,j);
+			copyCell->fixed = getCell(original,i,j)->fixed;
+			copyCell->value = getCell(original,i,j)->value;
+			for(k = 0; k < N; k++) {
+				getCell(copy,i,j)->possible_vals[k] = getCell(original,i,j)->possible_vals[k];
+			}
+		}
+
+	}
+	copy->m = m;
+	copy->n = n;
+	copy->cellsDisplayed = original->cellsDisplayed;
+}
+
+
+Board* getGameBoardPtr() {
+	return &gameBoard;
+}
+
+
+Board* getSolutionBoardPtr() {
+	return &solutionBoard;
+}

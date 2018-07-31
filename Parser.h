@@ -41,4 +41,4 @@ int				toInt(char*);
  * char*			input		-	User input.
  * unsigned int*	command		-	The encoded command will be stored on this array.
  */
-unsigned int	interpretCommand (char* ,unsigned int*);
+unsigned int	interpretCommand (char* , int*);

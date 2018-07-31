@@ -1,5 +1,7 @@
-void			startNewGame();
+void			initGame();
 
+
+void startNewGame(unsigned int, unsigned int, unsigned int);
 
 /*
  * Given an interpreted command from the user - executes it and prints the result of the execution.
@@ -7,4 +9,4 @@ void			startNewGame();
  *
  * unsigned int*	command		-	The already encoded user command (after interpretation).
  */
-unsigned int	executeCommand (unsigned int*);
+unsigned int	executeCommand (int*);
