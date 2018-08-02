@@ -13,20 +13,15 @@
  *
  * Gets seed used for pseudo-randomization as an argument from command line.
  */
-int main(int argc, char* argv[]) {
+int main() {
 	unsigned int    isValidCommand;
-	char            input[1024] = {'\0'};
+	char            input[MAX_INPUT_LENGTH] = {'\0'};
 	int				command[4] = { 0 };
-	unsigned int    seed;
+	char			path[MAX_INPUT_LENGTH];
 
 	SP_BUFF_SET()
-	if(argc > 1) { /* Get seed entered in command line */
-		seed = toInt(argv[1]); 	/* Convert seed to integer - assuming valid input */
-		srand(seed);
-	}
-	else {						/* No seed given. get seed from current time */
-		srand(time(NULL));
-	}
+
+	srand(time(NULL));
 
 	initGame();
 
@@ -34,11 +29,11 @@ int main(int argc, char* argv[]) {
 
 	/* Ask user for commands and execute them until user enters "exit". */
 	while(command[0] != 15) { /* While command is not "exit". */
-		printf("Enter your command:\n");
-		getUserInput(input); /* Wait for user input */
-		isValidCommand = interpretCommand(input,command); /* Determine if input is valid, and if it is - store it in command array. */
+		getUserInput(input); /* Ask and Wait for user input */
+		path[0] = '\0'; /* Nullify path */
+		isValidCommand = interpretCommand(input,command,path); /* Determine if input is valid, and if it is - store it in command array. */
 		if(isValidCommand) {
-			if(!executeCommand(command)) { /* Try to execute command. If not executed print error message */
+			if(!executeCommand(command,path)) { /* Try to execute command. If not executed print error message */
 				printf("ERROR: invalid command\n");
 			}
 		}

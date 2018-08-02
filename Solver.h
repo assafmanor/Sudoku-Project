@@ -8,6 +8,9 @@
 void			generateBoard(Board*, Board*, unsigned int);
 
 
+void updateSolBoard(Board*, Board*);
+
+
 /*
  * Checks if the current configuration of the game board is solvable.
  * If solvable and some cells' val field != sol_val - update relevant sol_val's.

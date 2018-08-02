@@ -4,7 +4,7 @@
 #include "Parser.h"
 #include "Game.h"
 
-#define	INVALID	(-1)
+#define	INVALID				(-1)
 
 /* TRUE,FALSE, N, BLOCK_ROWS, and BLOCK_COLS are defined in Game.h. */
 
@@ -44,13 +44,26 @@ unsigned int isEmptyInput(char* str) {
  * char*	str		-	user input will be stored on this string (assumes memory was already allocated).
  */
 void getUserInput(char* str) {
+	unsigned int	i = 0;
+	char			ch;
 	do {
-		if(fgets(str,1024,stdin) == FALSE) { /* Reached EOF */
-			printf("Exiting...\n");
-			exit(0);
+		printf("Enter your command:\n");
+		while((ch=fgetc(stdin)) != '\n' && ch != EOF) {
+			if(i > MAX_INPUT_LENGTH) { /* Treat as invalid input */
+				str[0] = '\0';
+				while((ch = fgetc(stdin)) != '\n' && ch != EOF); /* Flush buffer */
+				if(ferror(stdin)) {
+					printf("Error: fgetc has failed\n");
+					exit(1);
+				}
+				return;
+			}
+			str[i] = ch;
+			i++;
 		}
-		if(str == NULL) {
-			printf("Error: fgets has failed\n");
+		str[i] = '\0';
+		if(ferror(stdin)) {
+			printf("Error: fgetc has failed\n");
 			exit(1);
 		}
 	}
@@ -150,31 +163,40 @@ int toInt(char* str) {
  * char*			input		-	User input.
  * unsigned int*	command		-	The encoded command will be stored on this array.
  */
-unsigned int interpretCommand (char* input, int* command) {
+unsigned int interpretCommand (char* input, int* command, char* path) {
 	unsigned int 	i1,i2,i3;
 	unsigned int	i;
 	char*			strArr[4] = {'\0'};
 	unsigned int 	isValidCommand = TRUE;
+
+	/* Empty input */
+	if(input[0] == '\0') {
+		return FALSE;
+	}
+
 	commandToArray(input,strArr); /* insert each one of the first four words of input into the array strArr */
 	i1 = toInt(strArr[1]);
 	i2 = toInt(strArr[2]);
 	i3 = toInt(strArr[3]);
 	if (stringsEqual(strArr[0],"solve")) {
+		/* Copy given path to the string path */
+		if(strArr[1] != NULL) {
+		strcpy(path,strArr[1]);
+		}
 		command[0] = 1;
 		/*command[1] =*/
 	}
-/*	else if (stringsEqual(strArr[0],"restart")) {
-			command[0] = 2;
-	}*/
 	else if (stringsEqual(strArr[0],"edit")) {
 		command[0] = 2;
 
-		/* //// Temporary ////
-		 * For convenience only!
-		 */
+		/*////////////Temporary - for convenience only ////////// */
 		command[1] = i1;
 		command[2] = i2;
 		command[3] = i3;
+		/* Copy given path to the string path */
+		if(strArr[1] != NULL) {
+		strcpy(path,strArr[1]);
+		}
 	}
 	else if (stringsEqual(strArr[0],"mark_errors")) {
 		command[0] = 3;
@@ -205,6 +227,10 @@ unsigned int interpretCommand (char* input, int* command) {
 	}
 	else if (stringsEqual(strArr[0],"save")) {
 		command[0] = 10;
+		/* Copy given path to the string path */
+		if(strArr[1] != NULL) {
+		strcpy(path,strArr[1]);
+		}
 	}
 	else if (stringsEqual(strArr[0],"hint")) {
 		command[0] = 11;
@@ -223,9 +249,13 @@ unsigned int interpretCommand (char* input, int* command) {
 	else if (stringsEqual(strArr[0],"exit")) {
 		command[0] = 15;
 	}
-	/* TEMPORARY COMMAND!!!!! FOR TESTING */
-	else if (stringsEqual(strArr[0],"game_mode")) {
+	/*///////////////////// TEMPORARY COMMAND!!!!! FOR TESTING ONLY ////////////////// */
+	else if (stringsEqual(strArr[0],"create")) {
 		command[0] = 16;
+		command[1] = i1;
+		command[2] = i2;
+		command[3] = i3;
+
 	}
 	else {
 		isValidCommand = FALSE;

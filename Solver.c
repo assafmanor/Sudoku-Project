@@ -301,7 +301,7 @@ unsigned int detBacktracking(Board* boardPtr){
 	}
 
 	/* Free allocated temporary board */
-	freeBoard(tempBoard);
+	freeBoard(&tempBoard);
 	return solvable;
 }
 
@@ -309,7 +309,7 @@ unsigned int detBacktracking(Board* boardPtr){
 
 
 /*
- * Solve an empty board, and then update for each cell: val<-sug_val.
+ * Solve an empty board, and reveal numOfHints cells.
  *
  * unsigned int	numOfHints	-	The number of cells with the solution value revealed (given from user input).
  */
@@ -344,6 +344,21 @@ void generateBoard(Board* gameBoardPtr, Board* solutionBoardPtr, unsigned int nu
 		numOfHints--;
 	}
 
+}
+
+
+void updateSolBoard(Board* gameBoardPtr, Board* solutionBoardPtr) {
+	Board 			tempBoard = {'\0'};		/* This board will be a copy of board, and will be solved instead of it. */
+	unsigned int	m = gameBoardPtr->m, n = gameBoardPtr->n;
+	initializeBoard(&tempBoard,m,n);
+
+	copyBoard(gameBoardPtr, &tempBoard);
+
+	/* Solve game board using randomly chosen values (random backtracking) */
+	randomSolve(gameBoardPtr, &tempBoard, 0, 0);
+
+	/* Update solution board */
+	copyBoard(&tempBoard, solutionBoardPtr);
 }
 
 

@@ -6,7 +6,6 @@
 
 Board			gameBoard;			/* a board storing the game values (the ones shown) */
 Board			solutionBoard;		/* a board storing the solved values */
-unsigned int	cellsDisplayed;		/* number of cells  displayed on the board - used for game over */
 unsigned int	gameMode;			/* current game mode (init / solve / edit). */
 
 
@@ -16,6 +15,9 @@ unsigned int	gameMode;			/* current game mode (init / solve / edit). */
 void initializeBoard(Board* boardPtr, unsigned int m, unsigned int n) {
 	unsigned int i, j, k;
 	unsigned int N = m*n;
+
+	/* Free previously allocated space */
+	freeBoard(boardPtr);
 
 	boardPtr->m = m;
 	boardPtr->n = n;
@@ -59,31 +61,37 @@ void initializeBoard(Board* boardPtr, unsigned int m, unsigned int n) {
 /*
  * Initializes a new empty game board and a solution board.
  */
-void newGame(Board* gBoard, Board* sBoard, unsigned int m, unsigned int n) {
+void initializeGame(Board* gBoard, Board* sBoard, unsigned int m, unsigned int n) {
 	gameBoard = (*gBoard);
 	solutionBoard = (*sBoard);
 
 	initializeBoard(&gameBoard,m,n);
 	initializeBoard(&solutionBoard,m,n);
-	cellsDisplayed = 0;
 }
 
 
 /* Frees allocated space used by a board */
-void freeBoard(Board board) {
+void freeBoard(Board* boardPtr) {
 	unsigned int i, j;
-	unsigned int N = board.m*board.n;
+	unsigned int N;
+
+	N = boardPtr->m*boardPtr->n;
 	/* free allocated possible_vals for each cell, and free rows */
 	for(i = 0; i < N; i++) {
 		for(j = 0; j < N; j++) {
-	        free(board.board[i][j].possible_vals);
+			if(boardPtr->board[i][j].possible_vals != NULL) {
+				free(boardPtr->board[i][j].possible_vals);
+			}
 		}
 		/* free allocated row */
-		free(board.board[i]);
+		if(boardPtr->board[i] != NULL) {
+			free(boardPtr->board[i]);
+		}
 	}
-
 	/* free the board itself */
-	free(board.board);
+	if(boardPtr->board != NULL) {
+		free(boardPtr->board);
+	}
 }
 
 
@@ -115,8 +123,8 @@ unsigned int getHint(unsigned int col, unsigned int row) {
  * unsigned int	col		-	Column number (between 1 and N).
  * unsigned int row		-	Row number (between 1 and N).
  */
-unsigned int isCellFixed(unsigned int col, unsigned int row) {
-	return gameBoard.board[row-1][col-1].fixed;
+unsigned int isCellFixed(Board* boardPtr, unsigned int col, unsigned int row) {
+	return getCell(boardPtr,row,col)->fixed;
 }
 
 
@@ -169,7 +177,6 @@ void updatePossibleValues(Board* boardPtr, unsigned int row, unsigned int col, u
 		}
 
 	}
-
 
 	/* Column */
 	for(i = 0; i < N; i++) {
@@ -241,9 +248,8 @@ unsigned int getGameMode() {
  * Copies the contents of the original board to the copied board.
  * Assumes both boards are of equal sizes.
  *
- * Cell**	original	-	Original board.
- * Cell**	copied		-	Copied board.
- * char*	N			-	Number of rows/columns in both boards.
+ * Board*	original	-	Original board pointer.
+ * Board*	copied		-	Copied board pointer.
  */
 void copyBoard(Board* original, Board* copy) {
 	unsigned int	m = original->m, n = original->n;

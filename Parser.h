@@ -1,3 +1,5 @@
+#define MAX_INPUT_LENGTH	256
+
 /*
  * Use this whenever you want to get the user's input and ignore an input of whitespaces.
  *
@@ -41,4 +43,4 @@ int				toInt(char*);
  * char*			input		-	User input.
  * unsigned int*	command		-	The encoded command will be stored on this array.
  */
-unsigned int	interpretCommand (char* , int*);
+unsigned int	interpretCommand (char* , int*, char*);

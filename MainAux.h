@@ -9,4 +9,4 @@ void startNewGame(unsigned int, unsigned int, unsigned int);
  *
  * unsigned int*	command		-	The already encoded user command (after interpretation).
  */
-unsigned int	executeCommand (int*);
+unsigned int	executeCommand (int*, char*);

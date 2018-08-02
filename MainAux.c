@@ -1,13 +1,37 @@
+/* declarations */
 #include <stdio.h>
 #include <stdlib.h>
 #include "MainAux.h"
 /*#include "Game.h"*/
 #include "Parser.h"
 #include "Solver.h"
+#include "FileManager.h"
 
 
 
-/*TODO: Change to solveBoard and editBoard such that edit has no fixed cells. */
+/******************************************/
+/* Private method declarations */
+/* 1 */ unsigned int executeSolve(char*);
+/* 2 */ unsigned int executeEdit(char*);
+/* 3 */ unsigned int executeMarkErrors();
+/* 4 */ unsigned int executePrintBoard();
+/* 5 */ unsigned int executeSet(int*);
+/* 6 */ unsigned int executeValidate();
+/* 7 */ unsigned int executeGenerate();
+/* 8 */ unsigned int executeUndo();
+/* 9 */ unsigned int executeRedo();
+/* 10*/ unsigned int executeSave(char*);
+/* 11*/ unsigned int executeHint(int*);
+/* 12*/ unsigned int executeNumSolutions();
+/* 13*/ unsigned int executeAutofill();
+/* 14*/ unsigned int executeReset();
+/* 15*/ unsigned int executeExit();
+
+/*//////////// TEMPORARY ///////////*/
+/*16*/ unsigned int executeCreate(int*);
+
+/******************************************/
+
 Board			gameBoard;
 Board			solutionBoard;
 
@@ -20,16 +44,15 @@ void initGame() {
 	setGameMode(INIT);
 }
 
+
+/*////////////////////// TEMPORARY //////////////////////*/
 void startNewGame(unsigned int m, unsigned int n, unsigned int numOfHints) {
 
-	/* Free gameBoard and solutionBoard (they may have been allocated space before) */
-	freeBoard(gameBoard);
-	freeBoard(solutionBoard);
+	/* initialize gameBoard and solutionBoard */
+	initializeGame(&gameBoard, &solutionBoard, m, n);
 
-	newGame(&gameBoard, &solutionBoard, m, n);
 	generateBoard(&gameBoard, &solutionBoard, numOfHints);
 	printBoard(gameBoard);
-
 }
 
 
@@ -40,117 +63,42 @@ void startNewGame(unsigned int m, unsigned int n, unsigned int numOfHints) {
  *
  * unsigned int*	command		-	The already encoded user command (after interpretation).
  */
-unsigned int executeCommand (int* command){
-	unsigned int	m = gameBoard.m, n = gameBoard.n;
-/*	unsigned int	gameOver = isBoardComplete();*/
-	unsigned int	gameMode = getGameMode();
-	unsigned int 	N = m*n;
-
+unsigned int executeCommand (int* command, char* path){
 	switch(command[0]) {
 	case 1:		/*  SOLVE   */
-/*		if(gameOver) return FALSE;*/
-		setGameMode(SOLVE);
-		printf("Solve mode activated\n"); /* TEMPORARY PRINT */
-		/* in the future - we should also get file path and open it */
-		return TRUE;
+		return executeSolve(path);
 	case 2:		/* EDIT		*/
-/*		if(gameOver) return FALSE;*/
-		setGameMode(EDIT);
-		printf("Edit mode activated\n"); /* TEMPORARY PRINT */
-		/*  ///////////////////////// TEMPORARY IF ///////////////////////// */
-		if(command[1] <= 0 || command[1] > 5 ||
-		   command[2] <= 0 || command[2] > 5 ||
-		   command[3] < 0 || command[3] > (command[1]*command[2])*(command[1]*command[2])) {
-			printf("Invalid board parameters.\nPlease try again.\n\tCommand format: \"edit X Y Z\"; where X = m, Y = n, Z = numOfHints.\n");
-		}
-		else {
-			startNewGame(command[1],command[2],command[3]);
-		}
-		return TRUE;
+		return executeEdit(path);
 	case 3:		/* MARK ERRORS */
-		if(gameMode != SOLVE) return FALSE;
-		printf("Will mark errors,\n"); /* TEMPORARY PRINT */
-		return TRUE;
+		return executeMarkErrors();
 	case 4:		/* PRINT BOARD */
-		if(gameMode == INIT) return FALSE;
-		printBoard(gameBoard);
-		return TRUE;
+		return executePrintBoard();
 	case 5:		/*	SET		*/
-		if(gameMode == INIT) return FALSE;
-		if(command[1] < 0 || command[2] < 0 || command[3] < 0 ||
-		   command[1] > (int)N || command[2] > (int)N || command[3] > (int)N) {
-			printf("Error: value not in range 0-%d\n",N);
-		}
-		else if(isCellFixed(command[1],command[2])) {
-			printf("Error: cell is fixed\n");
-		}
-		else {
-			if(!isSetValid(command[1],command[2],command[3])) {
-				/* TODO: Mark cell as erroneous */
-			}
-			setCellVal(&gameBoard, command[1], command[2], command[3]);
-			printBoard(gameBoard);
-			if(isBoardComplete(gameBoard) && gameMode == SOLVE) {
-				printf("Puzzle solved successfully\n");
-			}
-		}
-		return TRUE;
+		return executeSet(command);
 	case 6: 	/* VALIDATE	*/
-		if(gameMode == INIT) return FALSE;
-		if(validate(&gameBoard)) {
-			printf("Validation passed: board is solvable\n");
-		}
-		else {
-			printf("Validation failed: board is unsolvable\n");
-		}
-		return TRUE;
+		return executeValidate();
 	case 7:		/* GENERATE */
-		if(gameMode != EDIT) return FALSE;
-		printf("Will generate a new board.\n"); /* TEMPORARY PRINT */
-		return TRUE;
+		return executeGenerate();
 	case 8:		/* UNDO */
-		if(gameMode == INIT) return FALSE;
-		printf("Will undo move.\n"); /* TEMPORARY PRINT */
-		return TRUE;
+		return executeUndo();
 	case 9:		/* REDO */
-		if(gameMode == INIT) return FALSE;
-		printf("Will redo move.\n"); /* TEMPORARY PRINT */
-		return TRUE;
+		return executeRedo();
 	case 10:	/* SAVE */
-		if(gameMode == INIT) return FALSE;
-		printf("Will save current game.\n"); /* TEMPORARY PRINT */
-		return TRUE;
+		return executeSave(path);
 	case 11: 	/*	HINT	*/
-		if(gameMode != SOLVE) return FALSE;
-		if(command[1] < 1 || command[2] < 1 ||
-		   command[1] > (int)N || command[2] > (int)N) {
-			printf("Error: value not in range 1-%d\n",N);
-			return TRUE;
-		}
-		printf("Hint: set cell to %d\n",getHint(command[1],command[2]));
-		return TRUE;
+		return executeHint(command);
 	case 12:	/* NUM SOLUTIONS */
-		if(gameMode == INIT) return FALSE;
-		printf("Will display the number of possible Solutions.\n"); /* TEMPORARY PRINT */
-		return TRUE;
+		return executeNumSolutions();
 	case 13:	/* AUTOFILL */
-		if(gameMode != SOLVE) return FALSE;
-		/*autofill();*/
-		printf("You asked for an autofill.\n"); /* TEMPORARY PRINT */
-		return TRUE;
+		return executeAutofill();
 	case 14:	/* RESET */
-		if(gameMode == INIT) return FALSE;
-		printf("You asked to reset game.\n"); /* TEMPORARY PRINT */
-		return TRUE;
+		return executeReset();
 	case 15: 	/*	EXIT	*/
-		freeBoard(gameBoard);
-		freeBoard(solutionBoard);
-		return TRUE;
+		return executeExit();
 
 	/* /////////// TEMPORARY /////////////// */
-	case 16: 	/*	GAME MOD;	*/
-		printf("Game mode: %s.\n",getGameMode()==INIT ? "INIT":(getGameMode()==SOLVE ? "SOLVE":"EDIT"));
-		return TRUE;
+	case 16:		/* CREATE		*/
+		return executeCreate(command);
 	default: /* shouldn't get here */
 		return FALSE;
 	}/*switch-end*/
@@ -238,3 +186,206 @@ void printBoard(Board board) {
 
 	free(separatorRow);
 }
+
+
+
+unsigned int executeSolve(char* path) {
+	setGameMode(SOLVE);
+	if(path[0] == '\0') { /* No path given */
+		return FALSE;
+	}
+
+	/* Try to load board from file path, if failed to load - print error. */
+	if(loadBoard(&gameBoard, path, SOLVE)) {
+		freeBoard(&solutionBoard);
+		initializeBoard(&solutionBoard, gameBoard.m, gameBoard.n);
+		updateSolBoard(&gameBoard, &solutionBoard);
+		printBoard(gameBoard);
+	}
+	else {
+		printf("Error: File doesn't exist or cannot be opened\n");
+	}
+	return TRUE;
+
+}
+
+
+unsigned int executeEdit(char* path) {
+	setGameMode(EDIT);
+	if(path[0] == '\0') { /* No path given. Generate an empty m=3 n=3 board. */
+		startNewGame(3,3,0);
+	}
+	else {
+		if(loadBoard(&gameBoard, path, EDIT)) {
+			printBoard(gameBoard);
+			initializeBoard(&solutionBoard, gameBoard.m, gameBoard.n);
+		}
+		else {
+			printf("Error: File cannot be opened\n");
+		}
+	}
+	return TRUE;
+}
+
+
+unsigned int executeMarkErrors() {
+	unsigned int	gameMode = getGameMode();
+	if(gameMode != SOLVE) return FALSE;
+	printf("Will mark errors,\n"); /* TEMPORARY PRINT */
+	return TRUE;
+}
+
+
+unsigned int executePrintBoard() {
+
+	if(getGameMode() == INIT) return FALSE;
+	printBoard(gameBoard);
+	return TRUE;
+}
+
+
+unsigned int executeSet(int* command) {
+	unsigned int	m = gameBoard.m, n = gameBoard.n;
+	unsigned int	gameMode = getGameMode();
+	unsigned int 	N = m*n;
+
+	if(gameMode == INIT) return FALSE;
+	if(command[1] < 0 || command[2] < 0 || command[3] < 0 ||
+	   command[1] > (int)N || command[2] > (int)N || command[3] > (int)N) {
+		printf("Error: value not in range 0-%d\n",N);
+	}
+	else if(isCellFixed(&gameBoard, command[1]-1,command[2]-1)) {
+		printf("Error: cell is fixed\n");
+	}
+	else {
+		if(!isSetValid(command[1],command[2],command[3])) {
+			/* TODO: Mark cell as erroneous */
+		}
+		setCellVal(&gameBoard, command[1], command[2], command[3]);
+		printBoard(gameBoard);
+		if(isBoardComplete(gameBoard) && gameMode == SOLVE) {
+			printf("Puzzle solved successfully\n");
+			/* Set game mode to INIT */
+			setGameMode(INIT);
+		}
+	}
+	return TRUE;
+}
+
+
+unsigned int executeValidate() {
+	if(getGameMode() == INIT) return FALSE;
+	if(validate(&gameBoard)) {
+		printf("Validation passed: board is solvable\n");
+	}
+	else {
+		printf("Validation failed: board is unsolvable\n");
+	}
+	return TRUE;
+}
+
+
+unsigned int executeGenerate() {
+	if(getGameMode() != EDIT) return FALSE;
+	printf("Will generate a new board.\n"); /* TEMPORARY PRINT */
+	return TRUE;
+}
+
+
+unsigned int executeUndo() {
+	if(getGameMode() == INIT) return FALSE;
+	printf("Will undo move.\n"); /* TEMPORARY PRINT */
+	return TRUE;
+}
+
+
+unsigned int executeRedo() {
+	if(getGameMode() == INIT) return FALSE;
+	printf("Will redo move.\n"); /* TEMPORARY PRINT */
+	return TRUE;
+}
+
+
+unsigned int executeSave(char* path) {
+	unsigned int gameMode = getGameMode();
+	if(gameMode == INIT) return FALSE;
+	/*	TODO: /////// hasErrors(...) not yet implemented ////////
+	 *  if(hasErrors(gameBoard)) {
+	 * 	printf("Error: board contains erroneous values\n");
+	 * }
+	 * else
+	 */
+	if(path[0] == '\0') { /* No path given */
+		return FALSE;
+	}
+	if(gameMode == EDIT && !validate(&gameBoard)) {
+		printf("Error: board validation failed\n");
+		return TRUE;
+	}
+	saveBoard(gameBoard, path, gameMode);
+	printf("Saved to: %s\n", path);
+	return TRUE;
+}
+
+
+unsigned int executeHint(int* command) {
+	unsigned int	m = gameBoard.m, n = gameBoard.n;
+	unsigned int	gameMode = getGameMode();
+	unsigned int 	N = m*n;
+
+	if(gameMode != SOLVE) return FALSE;
+	if(command[1] < 1 || command[2] < 1 ||
+	   command[1] > (int)N || command[2] > (int)N) {
+		printf("Error: value not in range 1-%d\n",N);
+		return TRUE;
+	}
+	printf("Hint: set cell to %d\n",getHint(command[1],command[2]));
+	return TRUE;
+
+}
+
+
+unsigned int executeNumSolutions() {
+	if(getGameMode() == INIT) return FALSE;
+	printf("Will display the number of possible Solutions.\n"); /* TEMPORARY PRINT */
+	return TRUE;
+}
+
+
+unsigned int executeAutofill() {
+	if(getGameMode() != SOLVE) return FALSE;
+	/*autofill();*/
+	printf("You asked for an autofill.\n"); /* TEMPORARY PRINT */
+	return TRUE;
+}
+
+
+unsigned int executeReset() {
+	if(getGameMode() == INIT) return FALSE;
+	printf("You asked to reset game.\n"); /* TEMPORARY PRINT */
+	return TRUE;
+}
+
+
+unsigned int executeExit() {
+	freeBoard(&gameBoard);
+	freeBoard(&solutionBoard);
+	return TRUE;
+}
+
+
+unsigned int executeCreate(int* command) {
+	setGameMode(EDIT);
+	/*  ///////////////////////// TEMPORARY IF ///////////////////////// */
+	if(command[1] <= 0 || command[1] > 5 ||
+	   command[2] <= 0 || command[2] > 5 ||
+	   command[3] < 0 || command[3] > (command[1]*command[2])*(command[1]*command[2])) {
+		printf("Invalid board parameters.\nPlease try again.\n\tCommand format: \"create X Y Z\"; where X = m, Y = n, Z = numOfHints.\n");
+		printf("\tcommand[1]=%d\n\tcommand[2]=%d\n\tcommand[3]=%d\n",command[1],command[2],command[3]);
+	}
+	else {
+		startNewGame(command[1],command[2],command[3]);
+	}
+	return TRUE;
+}
+

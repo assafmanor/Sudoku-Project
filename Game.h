@@ -10,6 +10,8 @@
 /*
  * Cell structure. The Sudoku board consists of N*N Cell's.
  */
+#ifndef CELL_H
+#define CELL_H
 typedef struct cell_t {
 	unsigned int value;				/* Cell value*/
 	unsigned int fixed;				/* TRUE or FALSE */
@@ -18,22 +20,25 @@ typedef struct cell_t {
 									 * possible_vals[val-1] = 1
 									 */
 } Cell;
+#endif
 
+#ifndef BOARD_H
+#define BOARD_H
 typedef struct board_t {
 	Cell**	board;
 	unsigned int cellsDisplayed;
 	unsigned int m;
 	unsigned int n;
 } Board;
-
+#endif
 
 void initializeBoard(Board*, unsigned int m, unsigned int n);
 
 
-void newGame(Board*, Board*, unsigned int, unsigned int);
+void initializeGame(Board*, Board*, unsigned int, unsigned int);
 
 
-void freeBoard(Board);
+void freeBoard(Board*);
 
 
 /*
@@ -60,7 +65,7 @@ unsigned int	getHint(unsigned int, unsigned int);
  * unsigned int	col		-	Column number (between 1 and N).
  * unsigned int row		-	Row number (between 1 and N).
  */
-unsigned int	isCellFixed(unsigned int, unsigned int);
+unsigned int	isCellFixed(Board*, unsigned int, unsigned int);
 
 
 /*
