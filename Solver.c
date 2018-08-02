@@ -6,10 +6,97 @@
 #define FALSE	0
 
 
+
+/********** Private method declarations **********/
+/* Includes *some* of the private methods in this module */
+
+int randomSolve(Board*, Board*, unsigned int, unsigned int);
+
+/******* End of private method declarations ******/
+
+
+
+/************************* Public methods *************************/
+
+/*
+ * Solve an empty board, and reveal numOfHints cells.
+ *
+ * Board*	gameBoardPtr		-	A pointer to the game board.
+ * Board*	solutionBoardPtr	-	A pointer to the solution board.
+ * unsigned int	numOfHints	-	The number of cells with the solution value revealed (given from user input).
+ */
+void generateBoard(Board* gameBoardPtr, Board* solutionBoardPtr, unsigned int numOfHints) {
+	Cell*			cell;
+	Board 			tempBoard = {'\0'};		/* This board will be a copy of board, and will be solved instead of it. */
+	unsigned int	row, col;
+	unsigned int	m = gameBoardPtr->m, n = gameBoardPtr->n;
+	unsigned int 	N = m*n;
+	unsigned int	value;
+	initializeBoard(&tempBoard,m,n);
+
+	copyBoard(gameBoardPtr, &tempBoard);
+
+	/* Solve game board using randomly chosen values (random backtracking) */
+	randomSolve(gameBoardPtr, &tempBoard, 0, 0);
+
+	/* Update solution board */
+	copyBoard(&tempBoard, solutionBoardPtr);
+
+	/* Randomly choose which cells to reveal to the user and set as fixed */
+	while(numOfHints > 0){
+		col = rand()%N;
+		row = rand()%N;
+		cell = getCell(gameBoardPtr,row,col);
+		value = getCell(&tempBoard, row, col)->value;
+		if(cell->fixed){
+			continue;
+		}
+		setCellVal(gameBoardPtr, col+1,row+1,value);
+		cell->fixed = TRUE;
+		numOfHints--;
+	}
+	if(getGameMode() == EDIT) { /* Un-fix all cells */
+		for(row = 0; row < N; row++) {
+			for(col = 0; col < N; col++) {
+				getCell(gameBoardPtr,row,col)->fixed = FALSE;
+			}
+		}
+	}
+
+}
+
+
+/*
+ * Updates the solutionBoardPtr->board according to gameBoardPtr->board.
+ *
+ * Board*	gameBoardPtr		-	A pointer to the game board.
+ * Board*	solutionBoardPtr	-	A pointer to the solution board.
+ */
+void updateSolBoard(Board* gameBoardPtr, Board* solutionBoardPtr) {
+	Board 			tempBoard = {'\0'};		/* This board will be a copy of board, and will be solved instead of it. */
+	unsigned int	m = gameBoardPtr->m, n = gameBoardPtr->n;
+	initializeBoard(&tempBoard,m,n);
+
+	/* First, copy the game board to a temporary board */
+	copyBoard(gameBoardPtr, &tempBoard);
+
+	/* Then solve the game board using randomly chosen values (random backtracking) */
+	randomSolve(gameBoardPtr, &tempBoard, 0, 0);
+
+	/* And finally update solution board */
+	copyBoard(&tempBoard, solutionBoardPtr);
+}
+
+/********************** End of public methods *********************/
+
+
+
+/************************* Private methods *************************/
+
 /*
  * Calculate all the legal values for cell[row,col], and update the "possible" array.
  *
- * Cell** 			board		-	A game board.
+ * Board* 			board		-	A pointer to a game board.
  * unsigned int		m			-	Number of rows of cells in each block.
  * unsigned int		n			-	Number of columns of cells in each block.
  * unsigned int		row			-	Row number (between 0 and N-1).
@@ -123,14 +210,14 @@ void calcNextCell(unsigned int N, unsigned int row, unsigned int col, unsigned i
  * If possible, updates the field sug_val for each cell on the board, otherwise - leaves it as 0.
  * Returns TRUE iff board is solvable.
  *
- * Cell** 			original	-	Original game board.
- * Cell** 			temp		-	Copied game board.
+ * Board* 			original	-	A pointer to the original game board.
+ * Board* 			copy		-	A pointer to the copied game board.
  * unsigned int		m			-	Number of rows of cells in each block.
  * unsigned int		n			-	Number of columns of cells in each block.
  * unsigned int		row			-	Row number (between 0 and N-1).
  * unsigned int 	col			-	Column number (between 0 and N-1).
  */
-int detSolve(Board* original, Board* temp, unsigned int row, unsigned int col) {
+int detSolve(Board* original, Board* copy, unsigned int row, unsigned int col) {
 	unsigned int	m = original->m, n = original->n;
 	unsigned int	N = m*n;
 	unsigned int* 	possible;
@@ -146,11 +233,11 @@ int detSolve(Board* original, Board* temp, unsigned int row, unsigned int col) {
 		exit(1);
 	}
 
-	possibleVals(temp, row, col, possible);	/* Calculate all the possible values for current cell and save in possible */
+	possibleVals(copy, row, col, possible);	/* Calculate all the possible values for current cell and save in possible */
 	posValsCount = possible[N];		/* Number of possible values */
 
 	orig_cell = getCell(original, row, col);
-	sug_cell  = getCell(temp, row, col);
+	sug_cell  = getCell(copy, row, col);
 
 	/* If we're on an empty cell and there are no possible values left - unsolvable */
 	if(posValsCount == 0 && orig_cell->value == 0) {
@@ -180,13 +267,13 @@ int detSolve(Board* original, Board* temp, unsigned int row, unsigned int col) {
 	calcNextCell(N, row, col, &nextRow, &nextCol);	/* Calculate next cell */
 
 	/* Case 1: cell is already filled */
-	if(orig_cell->value != 0 ) return detSolve(original, temp, nextRow,nextCol);
+	if(orig_cell->value != 0 ) return detSolve(original, copy, nextRow,nextCol);
 
 	/* ---- Case 2: cell is empty----- */
 		for(i = 0; i < N; i++){ 			/* for all N values for this cell:*/
 			if(possible[i]) {				/* if a possible value:*/
 				sug_cell->value = i+1;							/* Assign next possible value and try to solve board */
-				if(detSolve(original, temp, nextRow,nextCol)) { /* Case 2.1: Board is solvable*/
+				if(detSolve(original, copy, nextRow,nextCol)) { /* Case 2.1: Board is solvable*/
 					free(possible);
 					return TRUE;
 				}
@@ -204,14 +291,14 @@ int detSolve(Board* original, Board* temp, unsigned int row, unsigned int col) {
  * If possible, updates the field sug_val for each cell on the board, otherwise - leaves it as 0.
  * Returns TRUE iff board is solvable.
  *
- * Cell** 			original	-	Original game board.
- * Cell** 			temp		-	Copied game board.
+ * Board* 			original	-	A pointer to the original game board.
+ * Cell** 			copy		-	A pointer to the copied game board.
  * unsigned int		m			-	Number of rows of cells in each block.
  * unsigned int		n			-	Number of columns of cells in each block.
  * unsigned int		row			-	Row number (between 0 and N-1).
  * unsigned int 	col			-	Column number (between 0 and N-1).
  */
-int randomSolve(Board* original, Board* temp, unsigned int row, unsigned int col){
+int randomSolve(Board* original, Board* copy, unsigned int row, unsigned int col){
 	unsigned int	m = original->m, n = original->n;
 	const unsigned int N = m*n;
 	Cell*			orig_cell;
@@ -229,9 +316,9 @@ int randomSolve(Board* original, Board* temp, unsigned int row, unsigned int col
 	}
 
 	orig_cell = getCell(original, row, col);
-	sug_cell = getCell(temp, row, col);
+	sug_cell = getCell(copy, row, col);
 
-	possibleVals(temp, row, col, possible);	/* Calculate all the possible values for current cell and save in possible */
+	possibleVals(copy, row, col, possible);	/* Calculate all the possible values for current cell and save in possible */
 	posValsCount = possible[N];		/* Number of possible values */
 
 	/* If we're on an empty cell and there are no possible values left - unsolvable */
@@ -258,7 +345,7 @@ int randomSolve(Board* original, Board* temp, unsigned int row, unsigned int col
 
 	/* ---- Case 1: cell is already filled ---- */
 	if(sug_cell->value != 0 ) {
-		result = randomSolve(original, temp, nextRow,nextCol);
+		result = randomSolve(original, copy, nextRow,nextCol);
 		free(possible);
 		return result;
 	}
@@ -269,7 +356,7 @@ int randomSolve(Board* original, Board* temp, unsigned int row, unsigned int col
 		sug_cell->value = val;				/* Assign next random possible value and try to solve board  */
 		possible[val-1] = FALSE;	/* Make this value no longer possible so it won't be used next time */
 		posValsCount--;
-		if(randomSolve(original, temp, nextRow,nextCol)) {	/* Case 2.1: Board is solvable */
+		if(randomSolve(original, copy, nextRow,nextCol)) {	/* Case 2.1: Board is solvable */
 			free(possible);
 			return TRUE;
 		}
@@ -284,6 +371,8 @@ int randomSolve(Board* original, Board* temp, unsigned int row, unsigned int col
  * Copy board state and try to solve it using the deterministic backtracking solver.
  * If solvable - update solution board, restore sug_val to zero for all cells on the board.
  * Returns TRUE iff board is solvable.
+ *
+ * Board*	boardPtr	-	A pointer to a game board.
  */
 unsigned int detBacktracking(Board* boardPtr){
 	unsigned int	solvable;
@@ -307,74 +396,17 @@ unsigned int detBacktracking(Board* boardPtr){
 
 
 
-
-/*
- * Solve an empty board, and reveal numOfHints cells.
- *
- * unsigned int	numOfHints	-	The number of cells with the solution value revealed (given from user input).
- */
-void generateBoard(Board* gameBoardPtr, Board* solutionBoardPtr, unsigned int numOfHints) {
-	Cell*			cell;
-	Board 			tempBoard = {'\0'};		/* This board will be a copy of board, and will be solved instead of it. */
-	unsigned int	row, col;
-	unsigned int	m = gameBoardPtr->m, n = gameBoardPtr->n;
-	unsigned int 	N = m*n;
-	unsigned int	value;
-	initializeBoard(&tempBoard,m,n);
-
-	copyBoard(gameBoardPtr, &tempBoard);
-
-	/* Solve game board using randomly chosen values (random backtracking) */
-	randomSolve(gameBoardPtr, &tempBoard, 0, 0);
-
-	/* Update solution board */
-	copyBoard(&tempBoard, solutionBoardPtr);
-
-	/* Randomly choose which cells to reveal to the user and set as fixed */
-	while(numOfHints > 0){
-		col = rand()%N;
-		row = rand()%N;
-		cell = getCell(gameBoardPtr,row,col);
-		value = getCell(&tempBoard, row, col)->value;
-		if(cell->fixed){
-			continue;
-		}
-		setCellVal(gameBoardPtr, col+1,row+1,value);
-		cell->fixed = TRUE;
-		numOfHints--;
-	}
-
-}
-
-
-void updateSolBoard(Board* gameBoardPtr, Board* solutionBoardPtr) {
-	Board 			tempBoard = {'\0'};		/* This board will be a copy of board, and will be solved instead of it. */
-	unsigned int	m = gameBoardPtr->m, n = gameBoardPtr->n;
-	initializeBoard(&tempBoard,m,n);
-
-	copyBoard(gameBoardPtr, &tempBoard);
-
-	/* Solve game board using randomly chosen values (random backtracking) */
-	randomSolve(gameBoardPtr, &tempBoard, 0, 0);
-
-	/* Update solution board */
-	copyBoard(&tempBoard, solutionBoardPtr);
-}
-
-
 /*
  * Checks if the current configuration of the game board is solvable.
  * If solvable and some cells' val field != sol_val - update relevant sol_val's.
  * Returns TRUE iff current configuration of game board is solvable.
+ *
+ * Board*	boardPtr		-	A pointer a game board.
  */
 unsigned int validate(Board* boardPtr) {
 	return 	detBacktracking(boardPtr);
 }
 /*---------------------------- ron update ---------------------------*/
-unsigned int checkerrounous(){
-	 /*to be implemented*/
-	return TRUE;
-}
 
 
  /*fill cells which contain a single legal value
@@ -389,9 +421,9 @@ void autofill(Board* boardPtr){
 	Cell* 			cell;
 
 	/* c - check if there are errounous cells*/
-	errounous = checkerrounous(); /*if there are errors --> errounous = TRUE*/
+	errounous = hasErrors(boardPtr); /*if there are errors --> errounous = TRUE*/
 	if (errounous){
-		printf("Error:board contains erroneous values\n");
+		printf("Error: board contains erroneous values\n");
 	}
 
 	/* allocate array of possibilities */
@@ -429,8 +461,6 @@ void autofill(Board* boardPtr){
 			}}
 	}}
 
-	/* g - print the new board */
-	printBoard(*boardPtr);
 
 	free(possible);
 	freeBoard(&constBoard);
@@ -508,3 +538,8 @@ int main()
     return 0;
 }
 */
+
+
+
+/********************** End of private methods *********************/
+

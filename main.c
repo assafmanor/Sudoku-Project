@@ -7,11 +7,8 @@
 #include "Parser.h"
 #include "Game.h"
 
-/* ITS WORKING!!!*/
 /*
  * The main function.
- *
- * Gets seed used for pseudo-randomization as an argument from command line.
  */
 int main() {
 	unsigned int    isValidCommand;
@@ -23,7 +20,7 @@ int main() {
 
 	srand(time(NULL));
 
-	initGame();
+	setGameMode(INIT);
 
 	printf("Sudoku\n------\n");
 

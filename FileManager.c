@@ -1,23 +1,24 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <ctype.h>
-#ifndef FiLEMANAGER_H
-#define FILEMANAGER_H
-#include "FileManager.h"
-#endif
 #include "Parser.h"
+#include "FileManager.h"
+#include "Game.h"
 
 
 
 /*
  * Saves board to given path path.
+ *
+ * Board		board		-	A game board.
+ * char*		path		-	The path to which the file will be saved to (including file name and extension).
+ * unsigned int	gameMode	-	The current game mode.
  */
 void saveBoard(Board board, char* path, unsigned int gameMode) {
-	unsigned int row, col;
-	unsigned int N;
-	unsigned int value;
-	FILE *ofp;
+	unsigned int	row, col;
+	unsigned int	N;
+	unsigned int	value;
+	FILE 			*ofp;
 
 	ofp = fopen(path, "w");
 	if(ofp == NULL) {
@@ -52,6 +53,10 @@ void saveBoard(Board board, char* path, unsigned int gameMode) {
 /*
  * Loads board to *boardPtr from path.
  * Assumes the file contains valid data and is correctly formatted (as instructed).
+ *
+ * Board		board		-	A game board.
+ * char*		path		-	The path to which the file will be saved to (including file name and extension).
+ * unsigned int	gameMode	-	The current game mode.
  */
 int loadBoard(Board* boardPtr, char* path, unsigned int gameMode) {
 	unsigned int	row, col;
@@ -114,5 +119,13 @@ int loadBoard(Board* boardPtr, char* path, unsigned int gameMode) {
 			}
 		}
 	}
+
+	/* Check for erroneous cells */
+	for(row = 0; row < N; row++) {
+		for(col = 0; col < N; col++) {
+			getCell(boardPtr,row,col)->isErroneous = isErroneous(boardPtr,row,col);
+		}
+	}
+
 	return TRUE;
 }

@@ -4,39 +4,20 @@
 #include "Parser.h"
 #include "Game.h"
 
-#define	INVALID				(-1)
-
-/* TRUE,FALSE, N, BLOCK_ROWS, and BLOCK_COLS are defined in Game.h. */
 
 
-/*
- * Returns TRUE iff str1 and str2 contain exactly the same chars.
- *
- * char*	str1	-	First string to compare.
- * char*	str2	-	Second string to compare.
- */
-unsigned int stringsEqual(char* str1, char* str2) {
-	return strcmp(str1,str2) == 0;
-}
+/********** Private method declarations **********/
+/* Includes *some* of the private methods in this module */
+
+unsigned int isEmptyInput(char*);
+void commandToArray(char*, char**);
+unsigned int stringsEqual(char*, char*);
+
+/******* End of private method declarations ******/
 
 
-/* Determines whether a string consists only of empty spaces.
- *
- * char*	str		-	Said string.
- */
-unsigned int isEmptyInput(char* str) {
-	unsigned int	i;
 
-	if(strlen(str) == 0) {
-		return TRUE;
-	}
-	for(i = 0; i < strlen(str); i++) {
-		if(str[i] != '\n' && str[i] != '\t' && str[i] != ' ' && str[i] != '\r') {
-			return FALSE;
-		}
-	}
-	return TRUE;
-}
+/************************* Public methods *************************/
 
 /*
  * Use this whenever you want to get the user's input and ignore an input of whitespaces.
@@ -72,29 +53,6 @@ void getUserInput(char* str) {
 
 
 /*
- * Splits each word of user input to a separate cell of an array of strings.
- *
- * char*	input	-	User input.
- * char**	output	-	An empty array of strings. Will store each individual word on separate cells of the array.
- */
-void commandToArray(char* input, char** output) {
-	unsigned int	i = 0;
-	char*			tok;
-
-	tok = strtok(input," \t\r\n");
-	while(i < 4 && tok != NULL) {
-		output[i] = (char*) calloc(strlen(tok)+1,sizeof(char));
-		if(output[i] == NULL) {
-			printf("Error: calloc has failed\n");
-			exit(1);
-		}
-		strcpy(output[i],tok); /* copy current word to output[i] */
-		tok = strtok(NULL," \t\r\n");  /* go to next word */
-		i++;
-	}
-}
-
-/*
  * Converts a string to the integer it represents if it does represent an integer
  * and returns it (only non-negatives). otherwise - returns INVALID.
  *
@@ -127,6 +85,7 @@ int toInt(char* str) {
 
 
 /*
+ * @@@@@@@@@@NEEDS MORE DESCRIPTION (WILL BE ADDED LATER)@@@@@@@
  * -Reads user command and returns if valid or not.
  *
  * -updates array command such that:
@@ -267,3 +226,64 @@ unsigned int interpretCommand (char* input, int* command, char* path) {
 
 	return isValidCommand;
 }
+
+/********************** End of public methods *********************/
+
+
+
+/************************* Private methods *************************/
+
+/*
+ * Returns TRUE iff str1 and str2 contain exactly the same chars.
+ *
+ * char*	str1	-	First string to compare.
+ * char*	str2	-	Second string to compare.
+ */
+unsigned int stringsEqual(char* str1, char* str2) {
+	return strcmp(str1,str2) == 0;
+}
+
+
+/* Determines whether a string consists only of empty spaces.
+ *
+ * char*	str		-	Said string.
+ */
+unsigned int isEmptyInput(char* str) {
+	unsigned int	i;
+
+	if(strlen(str) == 0) {
+		return TRUE;
+	}
+	for(i = 0; i < strlen(str); i++) {
+		if(str[i] != '\n' && str[i] != '\t' && str[i] != ' ' && str[i] != '\r') {
+			return FALSE;
+		}
+	}
+	return TRUE;
+}
+
+
+/*
+ * Splits each word of user input to a separate cell of an array of strings.
+ *
+ * char*	input	-	User input.
+ * char**	output	-	An empty array of strings. Will store each individual word on separate cells of the array.
+ */
+void commandToArray(char* input, char** output) {
+	unsigned int	i = 0;
+	char*			tok;
+
+	tok = strtok(input," \t\r\n");
+	while(i < 4 && tok != NULL) {
+		output[i] = (char*) calloc(strlen(tok)+1,sizeof(char));
+		if(output[i] == NULL) {
+			printf("Error: calloc has failed\n");
+			exit(1);
+		}
+		strcpy(output[i],tok); /* copy current word to output[i] */
+		tok = strtok(NULL," \t\r\n");  /* go to next word */
+		i++;
+	}
+}
+
+/********************** End of private methods *********************/

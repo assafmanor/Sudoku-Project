@@ -9,8 +9,15 @@
 
 
 
-/******************************************/
-/* Private method declarations */
+Board			gameBoard;
+Board			solutionBoard;
+
+
+
+/********** Private method declarations **********/
+/* Includes *some* of the private methods in this module */
+void printBoard(Board*);
+
 /* 1 */ unsigned int executeSolve(char*);
 /* 2 */ unsigned int executeEdit(char*);
 /* 3 */ unsigned int executeMarkErrors();
@@ -30,20 +37,10 @@
 /*//////////// TEMPORARY ///////////*/
 /*16*/ unsigned int executeCreate(int*);
 
-/******************************************/
-
-Board			gameBoard;
-Board			solutionBoard;
+/******* End of private method declarations ******/
 
 
-/*
- * Asks user for the number of cells to filled and repeats until user enters a valid input,
- * then generates a new board and prints it.
- */
-void initGame() {
-	setGameMode(INIT);
-}
-
+/************************* Public methods *************************/
 
 /*////////////////////// TEMPORARY //////////////////////*/
 void startNewGame(unsigned int m, unsigned int n, unsigned int numOfHints) {
@@ -52,9 +49,8 @@ void startNewGame(unsigned int m, unsigned int n, unsigned int numOfHints) {
 	initializeGame(&gameBoard, &solutionBoard, m, n);
 
 	generateBoard(&gameBoard, &solutionBoard, numOfHints);
-	printBoard(gameBoard);
+	printBoard(&gameBoard);
 }
-
 
 
 /*
@@ -62,6 +58,7 @@ void startNewGame(unsigned int m, unsigned int n, unsigned int numOfHints) {
  * returns TRUE iff command executed successfully.
  *
  * unsigned int*	command		-	The already encoded user command (after interpretation).
+ * char*			path		-	An file path (used by edit, solve, and save commands).
  */
 unsigned int executeCommand (int* command, char* path){
 	switch(command[0]) {
@@ -104,6 +101,11 @@ unsigned int executeCommand (int* command, char* path){
 	}/*switch-end*/
 }
 
+/********************** End of public methods *********************/
+
+
+
+/************************* Private methods *************************/
 
 /*
  * Repeats the character c n times in string out.
@@ -123,24 +125,35 @@ void repeatChar(char c, unsigned int n, char* out) {
 }
 
 
-void printCellRow(Board board, unsigned int row) {
-	unsigned int m = board.m, n = board.n;
-	unsigned int col;
-	unsigned int block;
+/*
+ * Prints a specific row of boardPtr->board.
+ *
+ * Board*		boardPtr	-	A pointer to a game board.
+ * unsigned int row			-	The row to be printed.
+ */
+void printCellRow(Board* boardPtr, unsigned int row) {
+	unsigned int	m = boardPtr->m, n = boardPtr->n;
+	unsigned int	col;
+	unsigned int	block;
+	Cell*			cell;
 	printf("|");
 	/* For each block row */
 	for(block = 0; block < m; block++) {
 		/* For each block column: */
 		for(col = block*n; col < block*n + n; col++) {
+			cell = getCell(boardPtr,row,col);
 			printf(" ");
-			if(gameBoard.board[row][col].value == 0){
+			if(cell->value == 0){
 				printf("  ");
 			}
 			else {
-				printf("%2d", gameBoard.board[row][col].value);
+				printf("%2d", cell->value);
 			}
-			if(gameBoard.board[row][col].fixed) {
+			if(cell->fixed) {
 				printf(".");
+			}
+			else if((getGameMode() == EDIT || getMarkErrors()) && cell->isErroneous) {
+				printf("*");
 			}
 			/* else if(markErrors == TRUE && gameBoard[row][col].error) {
 			 * 	printf("*");
@@ -157,9 +170,11 @@ void printCellRow(Board board, unsigned int row) {
 
 /*
  * Prints the game board.
+ *
+ * Board*	boardPtr	-	A pointer to a game board.
  */
-void printBoard(Board board) {
-	unsigned int		m = board.m, n = board.n;
+void printBoard(Board* boardPtr) {
+	unsigned int		m = boardPtr->m, n = boardPtr->n;
 	unsigned int		N = m*n;
 	char*				separatorRow;
 	unsigned int		i,j;
@@ -179,7 +194,7 @@ void printBoard(Board board) {
 
 	for(i = 0; i < n; i++) {
 		for(j = 0; j < m; j++) {
-			printCellRow(board, i*m+j);
+			printCellRow(boardPtr, i*m+j);
 		}
 		printf("%s",separatorRow);
 	}
@@ -198,8 +213,10 @@ unsigned int executeSolve(char* path) {
 	/* Try to load board from file path, if failed to load - print error. */
 	if(loadBoard(&gameBoard, path, SOLVE)) {
 		initializeBoard(&solutionBoard, gameBoard.m, gameBoard.n);
-		updateSolBoard(&gameBoard, &solutionBoard);
-		printBoard(gameBoard);
+		if(!hasErrors(&gameBoard)) { /* If board has erroneous values, then the board has no valid solution */
+			updateSolBoard(&gameBoard, &solutionBoard);
+		}
+		printBoard(&gameBoard);
 	}
 	else {
 		printf("Error: File doesn't exist or cannot be opened\n");
@@ -216,7 +233,7 @@ unsigned int executeEdit(char* path) {
 	}
 	else {
 		if(loadBoard(&gameBoard, path, EDIT)) {
-			printBoard(gameBoard);
+			printBoard(&gameBoard);
 			initializeBoard(&solutionBoard, gameBoard.m, gameBoard.n);
 		}
 		else {
@@ -227,10 +244,14 @@ unsigned int executeEdit(char* path) {
 }
 
 
-unsigned int executeMarkErrors() {
+unsigned int executeMarkErrors(int* command) {
 	unsigned int	gameMode = getGameMode();
 	if(gameMode != SOLVE) return FALSE;
-	printf("Will mark errors,\n"); /* TEMPORARY PRINT */
+	if(command[1] != 0 && command[1] != 1) {
+		printf("Error: the value should be 0 or 1\n");
+		return TRUE;
+	}
+	setMarkErrors(command[1]);
 	return TRUE;
 }
 
@@ -238,7 +259,7 @@ unsigned int executeMarkErrors() {
 unsigned int executePrintBoard() {
 
 	if(getGameMode() == INIT) return FALSE;
-	printBoard(gameBoard);
+	printBoard(&gameBoard);
 	return TRUE;
 }
 
@@ -247,6 +268,7 @@ unsigned int executeSet(int* command) {
 	unsigned int	m = gameBoard.m, n = gameBoard.n;
 	unsigned int	gameMode = getGameMode();
 	unsigned int 	N = m*n;
+	unsigned int	lastVal;
 
 	if(gameMode == INIT) return FALSE;
 	if(command[1] < 0 || command[2] < 0 || command[3] < 0 ||
@@ -257,12 +279,11 @@ unsigned int executeSet(int* command) {
 		printf("Error: cell is fixed\n");
 	}
 	else {
-		if(!isSetValid(command[1],command[2],command[3])) {
-			/* TODO: Mark cell as erroneous */
-		}
+		lastVal = getCell(&gameBoard, command[2]-1, command[1]-1)->value;
 		setCellVal(&gameBoard, command[1], command[2], command[3]);
-		printBoard(gameBoard);
-		if(isBoardComplete(gameBoard) && gameMode == SOLVE) {
+		updateErroneous(&gameBoard,command[2]-1,command[1]-1, lastVal);
+		printBoard(&gameBoard);
+		if(!hasErrors(&gameBoard) && isBoardComplete(gameBoard) && gameMode == SOLVE) {
 			printf("Puzzle solved successfully\n");
 			/* Set game mode to INIT */
 			setGameMode(INIT);
@@ -274,6 +295,10 @@ unsigned int executeSet(int* command) {
 
 unsigned int executeValidate() {
 	if(getGameMode() == INIT) return FALSE;
+	if(hasErrors(&gameBoard)) {
+		printf("Error: board contains erroneous values\n");
+		return TRUE;
+	}
 	if(validate(&gameBoard)) {
 		printf("Validation passed: board is solvable\n");
 	}
@@ -308,12 +333,10 @@ unsigned int executeRedo() {
 unsigned int executeSave(char* path) {
 	unsigned int gameMode = getGameMode();
 	if(gameMode == INIT) return FALSE;
-	/*	TODO: /////// hasErrors(...) not yet implemented ////////
-	 *  if(hasErrors(gameBoard)) {
-	 * 	printf("Error: board contains erroneous values\n");
-	 * }
-	 * else
-	 */
+	if(gameMode == EDIT && hasErrors(&gameBoard)) {
+		printf("Error: board contains erroneous values\n");
+		return TRUE;
+	}
 	if(path[0] == '\0') { /* No path given */
 		return FALSE;
 	}
@@ -338,6 +361,13 @@ unsigned int executeHint(int* command) {
 		printf("Error: value not in range 1-%d\n",N);
 		return TRUE;
 	}
+	if(hasErrors(&gameBoard)) {
+		printf("Error: board contains erroneous values\n");
+		return TRUE;
+	}
+	if(getHint(command[1],command[2]) == 0) { /* solutionBoard not solved */
+		updateSolBoard(&gameBoard, &solutionBoard);
+	}
 	printf("Hint: set cell to %d\n",getHint(command[1],command[2]));
 	return TRUE;
 
@@ -353,7 +383,7 @@ unsigned int executeNumSolutions() {
 
 unsigned int executeAutofill() {
 	if(getGameMode() != SOLVE) return FALSE;
-	/*autofill();*/
+	autofill();
 	printf("You asked for an autofill.\n"); /* TEMPORARY PRINT */
 	return TRUE;
 }
@@ -387,4 +417,7 @@ unsigned int executeCreate(int* command) {
 	}
 	return TRUE;
 }
+
+
+/********************** End of private methods *********************/
 

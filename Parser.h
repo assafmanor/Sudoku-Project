@@ -1,10 +1,12 @@
 #define MAX_INPUT_LENGTH	256
+#define	INVALID				(-1)
+/* TRUE and FALSE are defined in Game.h. */
 
 /*
  * Use this whenever you want to get the user's input and ignore an input of whitespaces.
  *
  * char*	str		-	user input will be stored on this string (assumes memory was already allocated).
-*/
+ */
 void			getUserInput(char*);
 
 
@@ -18,18 +20,30 @@ int				toInt(char*);
 
 
 /*
+ * @@@@@@@@@@NEEDS MORE DESCRIPTION (WILL BE ADDED LATER)@@@@@@@
  * -Reads user command and returns if valid or not.
  *
  * -updates array command such that:
  *
  * 	command[0] = :
- * 		1 - validate
- * 		2 - restart
- * 		3 - exit
- * 		4 - hint
+ * 		1 - solve
+ * 		2 - edit
+ * 		3 - mark_errors
+ * 		4 - print_board
  * 		5 - set
+ * 		6 - validate
+ * 		7 - generate
+ * 		8 - undo
+ * 		9 - redo
+ * 		10 - save
+ * 		11 - hint
+ * 		12 - num_solutions
+ * 		13 - autofill
+ * 		14 - reset
+ * 		15 - exit
  *
- *	 if command[0] == 4 (hint):
+ *
+ *	 if command[0] == 11 (hint):
  * 		command[1] = column number (1-9)
  * 		command[2] = row number (1-9)
  *
