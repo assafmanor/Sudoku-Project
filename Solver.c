@@ -433,7 +433,7 @@ void autofill(Board* boardPtr){
 	printBoard(*boardPtr);
 
 	free(possible);
-	freeBoard(constBoard);
+	freeBoard(&constBoard);
 }
 
 

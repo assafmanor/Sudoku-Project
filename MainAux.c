@@ -197,7 +197,6 @@ unsigned int executeSolve(char* path) {
 
 	/* Try to load board from file path, if failed to load - print error. */
 	if(loadBoard(&gameBoard, path, SOLVE)) {
-		freeBoard(&solutionBoard);
 		initializeBoard(&solutionBoard, gameBoard.m, gameBoard.n);
 		updateSolBoard(&gameBoard, &solutionBoard);
 		printBoard(gameBoard);
