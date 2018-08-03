@@ -20,7 +20,7 @@ void printBoard(Board*);
 
 /* 1 */ unsigned int executeSolve(char*);
 /* 2 */ unsigned int executeEdit(char*);
-/* 3 */ unsigned int executeMarkErrors();
+/* 3 */ unsigned int executeMarkErrors(int*);
 /* 4 */ unsigned int executePrintBoard();
 /* 5 */ unsigned int executeSet(int*);
 /* 6 */ unsigned int executeValidate();
@@ -67,7 +67,7 @@ unsigned int executeCommand (int* command, char* path){
 	case 2:		/* EDIT		*/
 		return executeEdit(path);
 	case 3:		/* MARK ERRORS */
-		return executeMarkErrors();
+		return executeMarkErrors(command);
 	case 4:		/* PRINT BOARD */
 		return executePrintBoard();
 	case 5:		/*	SET		*/
