@@ -112,6 +112,7 @@ void possibleVals(Board* boardPtr, unsigned int row, unsigned int col, unsigned 
 	for(i = 0; i < N; i++) {
 		possible[i] = TRUE;
 	}
+	possible[N] = 0;
 
 	/* Row */
 	for(j = 0; j < N; j++) {
@@ -149,7 +150,6 @@ void possibleVals(Board* boardPtr, unsigned int row, unsigned int col, unsigned 
 			possible[N] ++;
 		}
 	}
-
 }
 
 
@@ -455,8 +455,8 @@ void autofill(Board* boardPtr){
 			 /*there is only one choice-->find it*/
 			for(k=0; k<N; k++){
 				if(possible[k]){
-					setCellVal(boardPtr,i+1,j+1,k+1);
-					printf("Cell<%d,%d> set to %d\n",i+1,j+1,k+1);
+					setCellVal(boardPtr,j+1,i+1,k+1);
+					printf("Cell<%d,%d> set to %d\n",j+1,i+1,k+1);
 					break;
 			}}
 	}}

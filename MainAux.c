@@ -385,7 +385,12 @@ unsigned int executeNumSolutions() {
 unsigned int executeAutofill() {
 	if(getGameMode() != SOLVE) return FALSE;
 	autofill(&gameBoard);
-	printf("You asked for an autofill.\n"); /* TEMPORARY PRINT */
+	printBoard(&gameBoard);
+	if(isBoardComplete(gameBoard)) {
+		printf("Puzzle solved successfully\n");
+		/* Set game mode to INIT */
+		setGameMode(INIT);
+	}
 	return TRUE;
 }
 
