@@ -467,7 +467,7 @@ void autofill(Board* boardPtr){
 }
 
 
-/*------------------- Ron stack example-----------------------------*/
+/*------------------- Ron stack structure-----------------------------*/
 /* C program for linked list implementation of stack */
 
 
@@ -475,16 +475,20 @@ void autofill(Board* boardPtr){
 /* A structure to represent a stack*/
 struct StackNode
 {
-    int data;
+	unsigned int* 	possible;
+	unsigned int	posValsCount;
+	unsigned int	counter;
     struct StackNode* next;
 };
 
-struct StackNode* newNode(int data)
+struct StackNode* newNode(unsigned int* possible,unsigned int posValsCount,unsigned int counter )
 {
     struct StackNode* stackNode =
               (struct StackNode*) malloc(sizeof(struct StackNode));
-    stackNode->data = data;
-    stackNode->next = NULL;
+    stackNode->possible		= possible;
+    stackNode->posValsCount = posValsCount;
+	stackNode->counter 		= counter;
+    stackNode->next 		= NULL;
     return stackNode;
 }
 
@@ -493,34 +497,24 @@ int isEmpty(struct StackNode *root)
     return !root;
 }
 
-void push(struct StackNode** root, int data)
+void push(struct StackNode** root, unsigned int* possible,unsigned int posValsCount,unsigned int counter)
 {
-    struct StackNode* stackNode = newNode(data);
+    struct StackNode* stackNode = newNode(possible,posValsCount,counter);
     stackNode->next = *root;
     *root = stackNode;
-    printf("%d pushed to stack\n", data);
+    /*printf("%d pushed to stack\n", data);*/
 }
 
-int pop(struct StackNode** root)
+struct StackNode* pop(struct StackNode** root)
 {
-	int popped;
-	struct StackNode* temp;
-    if (isEmpty(*root))
-        return INT_MIN;
-    temp = *root;
+	struct StackNode* top;
+   /* if (isEmpty(*root))
+        return INT_MIN;*/
+    top = *root;
     *root = (*root)->next;
-    popped = temp->data;
-    free(temp);
-
-    return popped;
+    return top;
 }
 
-int peek(struct StackNode* root)
-{
-    if (isEmpty(root))
-        return INT_MIN;
-    return root->data;
-}
 
 /*
 int main()
@@ -538,8 +532,103 @@ int main()
     return 0;
 }
 */
+/*------------------- Ron 2 functions-----------------------------*/
+/* I didn't used the stack,yet. */
 
 
+int exhaustive_backtracking(Board* original, Board* temp, unsigned int row, unsigned int col) {
+	/* varibels definitions and adjusments */
+	unsigned int	m = original->m, n = original->n;
+	unsigned int	N = m*n;
+	unsigned int	nextRow, nextCol;
+	unsigned int	i = 0;
 
-/********************** End of private methods *********************/
+	unsigned int* 	possible;
+	unsigned int	posValsCount;
+	unsigned int	counter=0;
+
+	Cell*			orig_cell;
+	Cell*			sug_cell;
+
+	possible = (unsigned int*)calloc(N+1, sizeof(unsigned int));
+	if(possible == NULL) {
+		printf("Error: calloc has failed\n");
+		exit(1);
+	}
+
+	possibleVals(temp, row, col, possible);	/* Calculate all the possible values for current cell and save in possible */
+	posValsCount = possible[N];		/* Number of possible values */
+
+	orig_cell = getCell(original, row, col);
+	sug_cell  = getCell(temp, row, col);
+	/*--Logic:--*/
+
+	/* If Last cell */
+	if(row == N-1 && col == N-1) {
+		/* If cell is already filled- any board who lead
+		 * to this cell is solvable with one solution.
+		 * Else, cell is empty. any board who lead
+		 * to this cell is solvable with posValsCount solutions.
+		 * (the special case of unsolvable board will return 0) */
+		if(orig_cell->value != 0 )
+			counter = 1;
+		else
+			counter = posValsCount;
+		free(possible);
+		return counter;
+	}
+
+	/* Not the last cell */
+	calcNextCell(N, row, col, &nextRow, &nextCol);	/* Calculate next cell */
+
+	/* Case 1: cell is already filled  - for each legal board that will be
+	 * Accepted by filling the next cells, there will be 1 solution */
+	if(orig_cell->value != 0 ) {
+		free(possible);
+		return exhaustive_backtracking(original, temp, nextRow,nextCol);
+	}
+
+	/* Case 2: cell is empty */
+	for(i = 0; i < N; i++){ 			/* for all N values for this cell:*/
+		if(possible[i]) {				/* if a possible value:*/
+			sug_cell->value = i+1;		/* Assign next possible value and try to solve board */
+			counter += exhaustive_backtracking(original, temp, nextRow,nextCol);
+		}
+	}
+	free(possible);
+	return counter;	/* the special case of unsolvable board will return 0 */
+}
+
+
+/*return the number of solutions.
+ * pre: assume we are in Edit or Solve mode*/
+unsigned int num_solutions(Board* boardPtr){
+	unsigned int	 errounous;
+	unsigned int	 counter = 0;
+	Board 			 tempBoard = {'\0'};
+
+	/* c - check if there are errounous cells*/
+	errounous = hasErrors(boardPtr); /*if there are errors --> errounous = TRUE*/
+	if (errounous){
+		printf("Error: board contains erroneous values\n");
+	}
+
+	/* preapere temp board -
+	 * This board will be a copy of board, and will be solved instead of it.*/
+	initializeBoard(&tempBoard, boardPtr->m, boardPtr->n);
+	copyBoard(boardPtr, &tempBoard);
+	/*------------*/
+
+	/*try to solve the board */
+	counter =  exhaustive_backtracking (boardPtr, &tempBoard, 0, 0);
+
+	/* Free allocated temporary board */
+	freeBoard(&tempBoard);
+
+	/* print result*/
+	printf("Number of solutions: %d\n",counter);
+	if(counter==1){ printf("This is a good board!\n");}
+	if(counter> 1){ printf("The puzzle has more than 1 solution, try to edit it further\n");}
+	return counter;
+}
 
