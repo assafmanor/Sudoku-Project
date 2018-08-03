@@ -376,6 +376,7 @@ unsigned int executeHint(int* command) {
 
 unsigned int executeNumSolutions() {
 	if(getGameMode() == INIT) return FALSE;
+	num_solutions(&gameBoard);
 	printf("Will display the number of possible Solutions.\n"); /* TEMPORARY PRINT */
 	return TRUE;
 }
@@ -383,7 +384,7 @@ unsigned int executeNumSolutions() {
 
 unsigned int executeAutofill() {
 	if(getGameMode() != SOLVE) return FALSE;
-	autofill();
+	autofill(&gameBoard);
 	printf("You asked for an autofill.\n"); /* TEMPORARY PRINT */
 	return TRUE;
 }

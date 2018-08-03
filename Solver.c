@@ -536,7 +536,7 @@ int main()
 /* I didn't used the stack,yet. */
 
 
-int fSolve(Board* original, Board* temp, unsigned int row, unsigned int col) {
+int exhaustive_backtracking(Board* original, Board* temp, unsigned int row, unsigned int col) {
 	/* varibels definitions and adjusments */
 	unsigned int	m = original->m, n = original->n;
 	unsigned int	N = m*n;
@@ -585,14 +585,14 @@ int fSolve(Board* original, Board* temp, unsigned int row, unsigned int col) {
 	 * Accepted by filling the next cells, there will be 1 solution */
 	if(orig_cell->value != 0 ) {
 		free(possible);
-		return fSolve(original, temp, nextRow,nextCol);
+		return exhaustive_backtracking(original, temp, nextRow,nextCol);
 	}
 
 	/* Case 2: cell is empty */
 	for(i = 0; i < N; i++){ 			/* for all N values for this cell:*/
 		if(possible[i]) {				/* if a possible value:*/
 			sug_cell->value = i+1;		/* Assign next possible value and try to solve board */
-			counter += fSolve(original, temp, nextRow,nextCol);
+			counter += exhaustive_backtracking(original, temp, nextRow,nextCol);
 		}
 	}
 	free(possible);
@@ -600,24 +600,35 @@ int fSolve(Board* original, Board* temp, unsigned int row, unsigned int col) {
 }
 
 
-unsigned int fBacktracking(Board* boardPtr){
+/*return the number of solutions.
+ * pre: assume we are in Edit or Solve mode*/
+unsigned int num_solutions(Board* boardPtr){
+	unsigned int	 errounous;
 	unsigned int	 counter = 0;
+	Board 			 tempBoard = {'\0'};
+
+	/* c - check if there are errounous cells*/
+	errounous = hasErrors(boardPtr); /*if there are errors --> errounous = TRUE*/
+	if (errounous){
+		printf("Error: board contains erroneous values\n");
+	}
 
 	/* preapere temp board -
 	 * This board will be a copy of board, and will be solved instead of it.*/
-	Board 			 tempBoard = {'\0'};
 	initializeBoard(&tempBoard, boardPtr->m, boardPtr->n);
 	copyBoard(boardPtr, &tempBoard);
 	/*------------*/
 
 	/*try to solve the board */
-	counter =  fSolve(boardPtr, &tempBoard, 0, 0);
+	counter =  exhaustive_backtracking (boardPtr, &tempBoard, 0, 0);
 
 	/* Free allocated temporary board */
 	freeBoard(&tempBoard);
-	/*------------------*/
-	if(counter==1){ printf("Goodboard");}
-	if(counter> 1){ printf("try harder");}
+
+	/* print result*/
+	printf("Number of solutions: %d\n",counter);
+	if(counter==1){ printf("This is a good board!\n");}
+	if(counter> 1){ printf("The puzzle has more than 1 solution, try to edit it further\n");}
 	return counter;
 }
 
