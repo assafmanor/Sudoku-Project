@@ -8,5 +8,6 @@ void startNewGame(unsigned int, unsigned int, unsigned int);
  * returns TRUE iff command executed successfully.
  *
  * unsigned int*	command		-	The already encoded user command (after interpretation).
+ * char*			path		-	An file path (used by edit, solve, and save commands).
  */
 unsigned int	executeCommand (int*, char*);
