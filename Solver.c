@@ -5,7 +5,7 @@
 #define	TRUE	1
 #define FALSE	0
 
-
+int line=0; /* helps debug num_solutions function */
 
 /********** Private method declarations **********/
 /* Includes *some* of the private methods in this module */
@@ -561,6 +561,8 @@ int exhaustive_backtracking(Board* original, Board* temp, unsigned int row, unsi
 
 	orig_cell = getCell(original, row, col);
 	sug_cell  = getCell(temp, row, col);
+	line++;
+	printf("%d. cell (%d,%d), has %d possible values.\n",line,row+1,col+1,posValsCount);
 	/*--Logic:--*/
 
 	/* If Last cell */
@@ -575,6 +577,7 @@ int exhaustive_backtracking(Board* original, Board* temp, unsigned int row, unsi
 		else
 			counter = posValsCount;
 		free(possible);
+		printf("LastCell counter %d\n",counter);
 		return counter;
 	}
 
@@ -590,12 +593,15 @@ int exhaustive_backtracking(Board* original, Board* temp, unsigned int row, unsi
 
 	/* Case 2: cell is empty */
 	for(i = 0; i < N; i++){ 			/* for all N values for this cell:*/
+
 		if(possible[i]) {				/* if a possible value:*/
 			sug_cell->value = i+1;		/* Assign next possible value and try to solve board */
+			printf("cell (%d,%d)= %d \n",row+1,col+1,i+1);
 			counter += exhaustive_backtracking(original, temp, nextRow,nextCol);
 		}
 	}
 	free(possible);
+	sug_cell->value = orig_cell->value;
 	return counter;	/* the special case of unsolvable board will return 0 */
 }
 
