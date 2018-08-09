@@ -123,7 +123,7 @@ int toInt(char* str) {
  * unsigned int*	command		-	The encoded command will be stored on this array.
  */
 unsigned int interpretCommand (char* input, int* command, char* path) {
-	unsigned int 	i1,i2,i3;
+	int 	i1,i2,i3;
 	unsigned int	i;
 	char*			strArr[4] = {'\0'};
 	unsigned int 	isValidCommand = TRUE;
@@ -147,7 +147,6 @@ unsigned int interpretCommand (char* input, int* command, char* path) {
 		}
 		strcpy(path,strArr[1]);
 		command[0] = 1;
-		/*command[1] =*/
 	}
 	else if (stringsEqual(strArr[0],"edit")) {
 		command[0] = 2;

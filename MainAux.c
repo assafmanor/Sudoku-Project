@@ -271,7 +271,7 @@ unsigned int executeSet(int* command) {
 	unsigned int	lastVal;
 
 	if(gameMode == INIT) return FALSE;
-	if(command[1] < 0 || command[2] < 0 || command[3] < 0 ||
+	if(command[1] <= 0 || command[2] <= 0 || command[3] < 0 ||
 	   command[1] > (int)N || command[2] > (int)N || command[3] > (int)N) {
 		printf("Error: value not in range 0-%d\n",N);
 	}
@@ -377,7 +377,6 @@ unsigned int executeHint(int* command) {
 unsigned int executeNumSolutions() {
 	if(getGameMode() == INIT) return FALSE;
 	num_solutions(&gameBoard);
-	printf("Will display the number of possible Solutions.\n"); /* TEMPORARY PRINT */
 	return TRUE;
 }
 
