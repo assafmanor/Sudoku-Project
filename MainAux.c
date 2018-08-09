@@ -377,7 +377,6 @@ unsigned int executeHint(int* command) {
 unsigned int executeNumSolutions() {
 	if(getGameMode() == INIT) return FALSE;
 	num_solutions(&gameBoard);
-	printf("Will display the number of possible Solutions.\n"); /* TEMPORARY PRINT */
 	return TRUE;
 }
 

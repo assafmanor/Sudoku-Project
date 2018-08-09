@@ -487,7 +487,8 @@ void getNextCellCordinates(info** cd, unsigned int N){
 
 /* init default cell settings for every new cell we check*/
 void init_cell (Board* original, Board* temp, info** def, unsigned int N){
-	/* Allocate memory for possible values */
+	/* Allocate memory for possible values.
+	 * we free this memory at the while loop */
 	(*def)->possible  = (unsigned int*)calloc(N+1, sizeof(unsigned int));
 	if((*def)->possible == NULL)  {printf("Error: calloc has failed\n");exit(1);}
 
@@ -507,10 +508,12 @@ void init_cell (Board* original, Board* temp, info** def, unsigned int N){
 int exhaustive_backtracking(Board* original, Board* temp) {
 	/* Variables */
 	unsigned int	  N         = (original->m * original->n);
+	unsigned int	  res_counter;
 	struct StackNode* root 		= NULL;		/* beautiful stack who mimic recursion */
 	info* cd = NULL; 						/* data of current cell */
 
-	cd 	= (info*) malloc(sizeof(info));  /* allocate memory safely */
+
+	cd 	= (info*) malloc(sizeof(info));  /* allocate memory safely (freed after while loop) */
 	if(cd == NULL) {printf("Error: malloc has failed\n");exit(1);}
 
 	/* ---adjust 1st cell data --- */
@@ -575,7 +578,9 @@ int exhaustive_backtracking(Board* original, Board* temp) {
 			nextCell: continue;
 	}
 	while(1);
-	return cd->counter;
+	res_counter = cd->counter;
+	free (cd);
+	return res_counter;
 }
 
 
@@ -590,6 +595,7 @@ unsigned int num_solutions(Board* boardPtr){
 	errounous = hasErrors(boardPtr); /*if there are errors --> errounous = TRUE*/
 	if (errounous){
 		printf("Error: board contains erroneous values\n");
+		return FALSE;
 	}
 
 	/* preapere temp board -
