@@ -2,10 +2,9 @@
 #include <stdlib.h>
 /*#include "Game.h"*/
 #include "Solver.h"
+#include "Stack.h"
 #define	TRUE	1
 #define FALSE	0
-
-int line=0; /* helps debug num_solutions function */
 
 /********** Private method declarations **********/
 /* Includes *some* of the private methods in this module */
@@ -406,7 +405,6 @@ unsigned int detBacktracking(Board* boardPtr){
 unsigned int validate(Board* boardPtr) {
 	return 	detBacktracking(boardPtr);
 }
-/*---------------------------- ron update ---------------------------*/
 
 
  /*fill cells which contain a single legal value
@@ -467,142 +465,117 @@ void autofill(Board* boardPtr){
 }
 
 
-/*------------------- Ron stack structure-----------------------------*/
-/* C program for linked list implementation of stack */
 
 
+/*------------------- num_solutions() helpful functions-----------------------------*/
 
-/* A structure to represent a stack*/
-struct StackNode
-{
-	unsigned int* 	possible;
-	unsigned int	posValsCount;
-	unsigned int	counter;
-    struct StackNode* next;
-};
 
-struct StackNode* newNode(unsigned int* possible,unsigned int posValsCount,unsigned int counter )
-{
-    struct StackNode* stackNode =
-              (struct StackNode*) malloc(sizeof(struct StackNode));
-    stackNode->possible		= possible;
-    stackNode->posValsCount = posValsCount;
-	stackNode->counter 		= counter;
-    stackNode->next 		= NULL;
-    return stackNode;
-}
+/* calculates the next cell to be checked, and
+ * init only the relevant variables, so next while loop iteration
+ * will work on the (new) next cell. */
+void getNextCellCordinates(info** cd, unsigned int N){
+	unsigned int nextRow, nextCol;
 
-int isEmpty(struct StackNode *root)
-{
-    return !root;
-}
+	/* Calculate and set next cell */
+	calcNextCell(N, (*cd)->row, (*cd)->col, &nextRow, &nextCol);
+	(*cd)->row 			= nextRow;
+	(*cd)->col 			= nextCol;
+	(*cd)->first_time 	= TRUE;
 
-void push(struct StackNode** root, unsigned int* possible,unsigned int posValsCount,unsigned int counter)
-{
-    struct StackNode* stackNode = newNode(possible,posValsCount,counter);
-    stackNode->next = *root;
-    *root = stackNode;
-    /*printf("%d pushed to stack\n", data);*/
-}
-
-struct StackNode* pop(struct StackNode** root)
-{
-	struct StackNode* top;
-   /* if (isEmpty(*root))
-        return INT_MIN;*/
-    top = *root;
-    *root = (*root)->next;
-    return top;
 }
 
 
-/*
-int main()
-{
-    struct StackNode* root = NULL;
+/* init default cell settings for every new cell we check*/
+void init_cell (Board* original, Board* temp, info** def, unsigned int N){
+	/* Allocate memory for possible values */
+	(*def)->possible  = (unsigned int*)calloc(N+1, sizeof(unsigned int));
+	if((*def)->possible == NULL)  {printf("Error: calloc has failed\n");exit(1);}
 
-    push(&root, 10);
-    push(&root, 20);
-    push(&root, 30);
+	/* Adjustments*/
+	(*def)->k			 = 0;
+	(*def)->counter 	 = 0;
+	(*def)->orig_cell 	 = getCell(original, (*def)->row, (*def)->col);
+	(*def)->sug_cell     = getCell(temp    , (*def)->row, (*def)->col);
 
-    printf("%d popped from stack\n", pop(&root));
-
-    printf("Top element is %d\n", peek(root));
-
-    return 0;
+	possibleVals(temp, (*def)->row, (*def)->col, (*def)->possible);	/* Calculate all the possible values for current cell and save in possible */
+	(*def)->posValsCount = (*def)->possible[N];					    /* Number of possible values */
+	if((*def)->orig_cell->value !=0 ) {(*def)->posValsCount = 1;}   /* fixed cell has only 1 legal value */
 }
-*/
-/*------------------- Ron 2 functions-----------------------------*/
-/* I didn't used the stack,yet. */
 
 
-int exhaustive_backtracking(Board* original, Board* temp, unsigned int row, unsigned int col) {
-	/* varibels definitions and adjusments */
-	unsigned int	m = original->m, n = original->n;
-	unsigned int	N = m*n;
-	unsigned int	nextRow, nextCol;
-	unsigned int	i = 0;
 
-	unsigned int* 	possible;
-	unsigned int	posValsCount;
-	unsigned int	counter=0;
+int exhaustive_backtracking(Board* original, Board* temp) {
+	/* Variables */
+	unsigned int	  N         = (original->m * original->n);
+	struct StackNode* root 		= NULL;		/* beautiful stack who mimic recursion */
+	info* cd = NULL; 						/* data of current cell */
 
-	Cell*			orig_cell;
-	Cell*			sug_cell;
+	cd 	= (info*) malloc(sizeof(info));  /* allocate memory safely */
+	if(cd == NULL) {printf("Error: malloc has failed\n");exit(1);}
 
-	possible = (unsigned int*)calloc(N+1, sizeof(unsigned int));
-	if(possible == NULL) {
-		printf("Error: calloc has failed\n");
-		exit(1);
+	/* ---adjust 1st cell data --- */
+	cd->row	= 0;cd->col	= 0;
+	cd->first_time	= TRUE;
+	/*--For each cell:--*/
+	do{
+			if(cd->first_time){  /* first time we meet a cell-->init cell */
+				init_cell (original,temp, &cd, N);
+			}
+
+			/* If Last cell */
+			if(cd-> row == N-1 && cd->col == N-1) {
+				/* If cell is already filled- any board who lead
+				 * to this cell is solvable with one solution.
+				 * Else, cell is empty. any board who lead
+				 * to this cell is solvable with posValsCount solutions.
+				 * (the special case of unsolvable board will return 0) */
+				if(cd->orig_cell->value != 0 )
+					cd->counter = 1;
+				else
+					cd->counter = cd->posValsCount;
+				/* return to cell's father by popping */
+				free(cd->possible);
+				cd->possible = NULL;
+				if(isEmpty(root)) break;
+				pop(&root,&cd);
+				continue;
+			}
+
+			/* Not the last cell- 2 cases: */
+
+			/* Case 1: if cell is already filled  - for each legal board that will be
+			 * Accepted by filling the next cells, there will be 1 solution */
+			if(cd->orig_cell->value != 0 ) {
+				if(cd->first_time){ /*1st time we meet this cell--> push it */
+					push(&root,&cd);
+					getNextCellCordinates(&cd,N);
+				}
+				else{				/* 2st time we meet the cell--> pop it */
+					free(cd->possible);
+					cd->possible = NULL;
+					if(isEmpty(root)) break;
+					pop(&root,&cd);
+				}
+				continue;
+			}
+
+			/* Case 2: cell is empty */
+			for(; cd->k < N; (cd->k)++){ 			/* for all N values for this cell:*/
+				if(cd->possible[cd->k]) {			/* if a possible value:  */
+					cd->sug_cell->value = (cd->k)+1;/* assign it */
+					push(&root,&cd);				/* Try to solve the rest of the board by calling next cell*/
+					getNextCellCordinates(&cd,N);
+					goto nextCell; 					/* label who lead to the next cell*/
+				}
+			}
+			free(cd->possible);
+			cd->possible = NULL;
+			if(isEmpty(root)) break;
+			pop(&root,&cd);
+			nextCell: continue;
 	}
-
-	possibleVals(temp, row, col, possible);	/* Calculate all the possible values for current cell and save in possible */
-	posValsCount = possible[N];		/* Number of possible values */
-
-	orig_cell = getCell(original, row, col);
-	sug_cell  = getCell(temp, row, col);
-	line++;
-/*	printf("%d. cell (%d,%d), has %d possible values.\n",line,row+1,col+1,posValsCount);*/
-	/*--Logic:--*/
-
-	/* If Last cell */
-	if(row == N-1 && col == N-1) {
-		/* If cell is already filled- any board who lead
-		 * to this cell is solvable with one solution.
-		 * Else, cell is empty. any board who lead
-		 * to this cell is solvable with posValsCount solutions.
-		 * (the special case of unsolvable board will return 0) */
-		if(orig_cell->value != 0 )
-			counter = 1;
-		else
-			counter = posValsCount;
-		free(possible);
-/*		printf("LastCell counter %d\n",counter);*/
-		return counter;
-	}
-
-	/* Not the last cell */
-	calcNextCell(N, row, col, &nextRow, &nextCol);	/* Calculate next cell */
-
-	/* Case 1: cell is already filled  - for each legal board that will be
-	 * Accepted by filling the next cells, there will be 1 solution */
-	if(orig_cell->value != 0 ) {
-		free(possible);
-		return exhaustive_backtracking(original, temp, nextRow,nextCol);
-	}
-
-	/* Case 2: cell is empty */
-	for(i = 0; i < N; i++){ 			/* for all N values for this cell:*/
-
-		if(possible[i]) {				/* if a possible value:*/
-			sug_cell->value = i+1;		/* Assign next possible value and try to solve board */
-/*			printf("cell (%d,%d)= %d \n",row+1,col+1,i+1);*/
-			counter += exhaustive_backtracking(original, temp, nextRow,nextCol);
-		}
-	}
-	free(possible);
-	sug_cell->value = orig_cell->value;
-	return counter;	/* the special case of unsolvable board will return 0 */
+	while(1);
+	return cd->counter;
 }
 
 
@@ -623,10 +596,9 @@ unsigned int num_solutions(Board* boardPtr){
 	 * This board will be a copy of board, and will be solved instead of it.*/
 	initializeBoard(&tempBoard, boardPtr->m, boardPtr->n);
 	copyBoard(boardPtr, &tempBoard);
-	/*------------*/
 
 	/*try to solve the board */
-	counter =  exhaustive_backtracking (boardPtr, &tempBoard, 0, 0);
+	counter =  exhaustive_backtracking (boardPtr, &tempBoard);
 
 	/* Free allocated temporary board */
 	freeBoard(&tempBoard);
@@ -637,4 +609,3 @@ unsigned int num_solutions(Board* boardPtr){
 	if(counter> 1){ printf("The puzzle has more than 1 solution, try to edit it further\n");}
 	return counter;
 }
-
