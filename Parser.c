@@ -29,7 +29,7 @@ void getUserInput(char* str) {
 	char			ch;
 	do {
 		printf("Enter your command:\n");
-		while((ch=fgetc(stdin)) != '\n' && ch != EOF) {
+		while((ch=fgetc(stdin)) != '\n') {
 			if(i > MAX_INPUT_LENGTH) { /* Treat as invalid input */
 				str[0] = '\0';
 				while((ch = fgetc(stdin)) != '\n' && ch != EOF); /* Flush buffer */
@@ -37,6 +37,10 @@ void getUserInput(char* str) {
 					printf("Error: fgetc has failed\n");
 					exit(1);
 				}
+				return;
+			}
+			if(ch == EOF) { /* done reading input from file. exit program */
+				str[0] = '\0';
 				return;
 			}
 			str[i] = ch;

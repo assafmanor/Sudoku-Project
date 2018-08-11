@@ -16,7 +16,7 @@ int main() {
 	int				command[4] = { 0 };
 	char			path[MAX_INPUT_LENGTH];
 
-	SP_BUFF_SET()
+	/*SP_BUFF_SET()*/
 
 	srand(time(NULL));
 
@@ -28,7 +28,13 @@ int main() {
 	while(command[0] != 15) { /* While command is not "exit". */
 		getUserInput(input); /* Ask and Wait for user input */
 		path[0] = '\0'; /* Nullify path */
-		isValidCommand = interpretCommand(input,command,path); /* Determine if input is valid, and if it is - store it in command array. */
+		if(input[0]== '\0') {
+			command[0] = 15;
+			isValidCommand = TRUE;
+		}
+		else {
+			isValidCommand = interpretCommand(input,command,path); /* Determine if input is valid, and if it is - store it in command array. */
+		}
 		if(isValidCommand) {
 			if(!executeCommand(command,path)) { /* Try to execute command. If not executed print error message */
 				printf("ERROR: invalid command\n");

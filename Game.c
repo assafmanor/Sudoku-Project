@@ -4,10 +4,12 @@
 
 
 
-Board			gameBoard;			/* a board storing the game values (the ones shown) */
-Board			solutionBoard;		/* a board storing the solved values */
-unsigned int	gameMode;			/* current game mode (init / solve / edit). */
-unsigned int	markErrors = TRUE;	/* a binary variable indicating that the player wants to mark erroneous cells (with an asterisk). */
+Board				gameBoard;					/* a board storing the game values (the ones shown) */
+Board				solutionBoard;				/* a board storing the solved values */
+DoublyLinkedList	*moveList;					/* a doubly linked list containing all moves done by the user that are still relevant for undos and redos */
+DoublyNode			*curMove;					/* a pointer to the current move the user is at */
+unsigned int		gameMode;					/* current game mode (init / solve / edit). */
+unsigned int		markErrors = TRUE;			/* a binary variable indicating that the player wants to mark erroneous cells (with an asterisk). */
 
 
 
@@ -127,11 +129,11 @@ Cell* getCell(Board* boardPtr, unsigned int row, unsigned int col) {
 /*
  * Given a column and row of a cell - returns the solution value of the cell.
  *
- * unsigned int	col		-	Column number (between 1 and N).
- * unsigned int row		-	Row number (between 1 and N).
+ * unsigned int	col		-	Column number (between 0 and N-1).
+ * unsigned int row		-	Row number (between 0 and N-1).
  */
-unsigned int getHint(unsigned int col, unsigned int row) {
-	return solutionBoard.board[row-1][col-1].value;
+unsigned int getHint(unsigned int row, unsigned int col) {
+	return solutionBoard.board[row][col].value;
 }
 
 
@@ -139,10 +141,10 @@ unsigned int getHint(unsigned int col, unsigned int row) {
  * Given a column and row of a cell - return TRUE iff cell is fixed in boardPtr->board (given as a hint in the beginning of a new game in solve mode).
  *
  * Board*	boardPtr	-	A pointer to a game board.
- * unsigned int	col		-	Column number (between 1 and N).
- * unsigned int row		-	Row number (between 1 and N).
+ * unsigned int	col		-	Column number (between 0 and N-1).
+ * unsigned int row		-	Row number (between 0 and N-1).
  */
-unsigned int isCellFixed(Board* boardPtr, unsigned int col, unsigned int row) {
+unsigned int isCellFixed(Board* boardPtr, unsigned int row, unsigned int col) {
 	return getCell(boardPtr,row,col)->fixed;
 }
 
@@ -316,21 +318,21 @@ void updatePossibleValues(Board* boardPtr, unsigned int row, unsigned int col, u
 
 
 /*
- * Assigns the value of val to cell[row-1][col-1].value (assuming value is possible),
+ * Assigns the value of val to cell[row][col]->value (assuming value is possible),
  * updates the possible values of all the cells in the row, column and block,
  *
- * Cell**		board	-	A game board.
- * unsigned int	col		-	Column number (between 1 and N).
- * unsigned int	row		-	Row number (between 1 and N).
+ * Board*	boardPtr	-	A pointer to a game board.
+ * unsigned int	col		-	Column number (between 0 and N-1).
+ * unsigned int	row		-	Row number (between 0 and N-1).
  * unsigned int	val		-	The value being assigned to the cell. (Between 0 and N).
  */
-void setCellVal(Board* boardPtr, unsigned int col, unsigned int row, unsigned int val) {
-	unsigned int	lastVal = boardPtr->board[row-1][col-1].value;	/* remember the last value */
+void setCellVal(Board* boardPtr, unsigned int row, unsigned int col, unsigned int val) {
+	unsigned int	lastVal = boardPtr->board[row][col].value;	/* remember the last value */
 	if(val == lastVal) { /* if you want to change the value to be the same as before - there's nothing to do */
 		return;
 	}
-	updatePossibleValues(boardPtr, row-1, col-1, val);
-	getCell(boardPtr,row-1,col-1)->value = val;
+	updatePossibleValues(boardPtr, row, col, val);
+	getCell(boardPtr,row,col)->value = val;
 
 	/* update the number of cells displayed (used for checking if game over) */
 	if(val > 0 && lastVal == 0) {
@@ -436,4 +438,124 @@ unsigned int hasErrors(Board* boardPtr) {
 	}
 	/* no erroneous cells found */
 	return FALSE;
+}
+
+
+/*
+ * Clears all allocated memory used by the field moveList.
+ */
+void clearMoveList() {
+	doubly_clear(moveList);
+}
+
+
+
+/*
+ * Initializes a new empty move list (sets and autofills).
+ */
+void initializeMoveList() {
+	if(moveList != NULL) {
+		clearMoveList();
+	}
+	moveList = createNewDoublyLinkedList();
+	curMove = NULL;
+}
+
+
+/*
+ * Adds move to the move list.
+ *
+ * SinglyLinkedList		*move	-	Said move (a list of set(s)).
+ */
+void addMove(SinglyLinkedList* move) {
+	doubly_removeAfter(moveList,curMove);
+	doubly_addLast(moveList,move);
+	curMove = doubly_getLastNode(moveList);
+}
+
+
+/*
+ * Set the current move pointer to the previous move and update the board accordingly.
+ * returns TRUE iff successful.
+ *
+ * unsigned int	toPrint	-	if TRUE, prints "Undo: X,Y: from Z1 to Z2\n".
+ */
+unsigned int undoMove(unsigned int toPrint) {
+	unsigned int row, col, val, lastVal;
+	SinglyLinkedList	*move;
+	SinglyNode			*node;
+	if(curMove == NULL) { /* No moves to undo */
+		return FALSE;
+	}
+	move = curMove->data;
+	curMove = curMove->prev;
+
+	node = move->head;
+	while(node != NULL) {
+		row = node->data[0];
+		col = node->data[1];
+		val = node->data[2];
+		lastVal = node->data[3];
+		if(toPrint) {
+			printf("Undo %d,%d: from %c to %c\n",col+1,row+1,val==0? '_':val+'0',lastVal==0? '_':lastVal+'0');
+		}
+		setCellVal(&gameBoard,row,col,lastVal);
+		updateErroneous(&gameBoard, row, col, lastVal);
+		node = node->next;
+	}
+	return TRUE;
+}
+
+
+/*
+ * Set the current move pointer to the next move and update the board accordingly.
+ * returns TRUE iff successful.
+ */
+unsigned int redoMove() {
+	unsigned int row, col, val, lastVal;
+	SinglyLinkedList	*move;
+	SinglyNode			*node;
+	if(curMove == NULL) {
+		if(moveList != NULL && moveList->head != NULL) {
+			curMove = moveList->head;
+		}
+		else { /* no moves to redo */
+			return FALSE;
+		}
+	}
+	else if(curMove->next == NULL) { /* no moves to redo */
+		return FALSE;
+	}
+	else {
+		curMove = curMove->next;
+	}
+	move = curMove->data;
+
+	node = move->head;
+	while(node != NULL) {
+		row = node->data[0];
+		col = node->data[1];
+		val = node->data[2];
+		lastVal = node->data[3];
+		printf("Redo %d,%d: from %c to %c\n",col+1,row+1,lastVal==0? '_':lastVal+'0',val==0? '_':val+'0');
+		setCellVal(&gameBoard,row,col,val);
+		updateErroneous(&gameBoard, row, col, val);
+		node = node->next;
+	}
+	return TRUE;
+}
+
+
+/*
+ * Undo all moves, reverting the board to its original loaded state.
+ */
+void resetGame() {
+	/* undo while undos are available */
+	while(undoMove(FALSE));
+	/* clear the move list */
+	doubly_clear(moveList);
+	/* create a new empty move list */
+	moveList = createNewDoublyLinkedList();
+	/* and set current move to NULL, as there were any moves on the cleared board yet */
+	curMove = NULL;
 }

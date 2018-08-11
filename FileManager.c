@@ -3,8 +3,6 @@
 #include <ctype.h>
 #include "Parser.h"
 #include "FileManager.h"
-#include "Game.h"
-
 
 
 /*
@@ -27,7 +25,7 @@ void saveBoard(Board board, char* path, unsigned int gameMode) {
 	}
 
 	/* First line: m n (block size) */
-	fprintf(ofp, "%d %d\n", board.m, board.n);
+	fprintf(ofp, "%d %d\n", board.n, board.m);
 
 	N = board.m * board.n;
 	/* The board itself */
@@ -75,11 +73,11 @@ int loadBoard(Board* boardPtr, char* path, unsigned int gameMode) {
 	}
 
 	/* First, get m and n */
-	if(!fscanf(ifp,"%d",&m)) {
+	if(!fscanf(ifp,"%d",&n)) {
 		printf("Error: fscanf has failed\n");
 		exit(1);
 	}
-	if(!fscanf(ifp,"%d",&n)) {
+	if(!fscanf(ifp,"%d",&m)) {
 		printf("Error: fscanf has failed\n");
 		exit(1);
 	}
@@ -127,5 +125,6 @@ int loadBoard(Board* boardPtr, char* path, unsigned int gameMode) {
 		}
 	}
 
+	fclose(ifp);
 	return TRUE;
 }

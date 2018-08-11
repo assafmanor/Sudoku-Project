@@ -1,3 +1,5 @@
+#include "LinkedList.h"
+
 #define	FALSE		0
 #define	TRUE		1
 
@@ -205,3 +207,44 @@ unsigned int getMarkErrors();
  * Board*	boardPtr	-	A pointer to a game board.
  */
 unsigned int hasErrors(Board*);
+
+
+/*
+ * Clears all allocated memory used by the field moveList.
+ */
+void clearMoveList();
+
+
+
+/*
+ * Initializes a new empty move list (sets and autofills).
+ */
+void initializeMoveList();
+
+
+/*
+ * Adds move to the move list.
+ *
+ * SinglyLinkedList		*move	-	Said move (a list of set(s)).
+ */
+void addMove(SinglyLinkedList*);
+
+
+/*
+ * Set the current move pointer to the previous move and update the board accordingly.
+ * returns TRUE iff successful.
+ */
+unsigned int undoMove(unsigned int);
+
+
+/*
+ * Set the current move pointer to the next move and update the board accordingly.
+ * returns TRUE iff successful.
+ */
+unsigned int redoMove();
+
+
+/*
+ * Undo all moves, reverting the board to its original loaded state.
+ */
+void resetGame();

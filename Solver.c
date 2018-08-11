@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-/*#include "Game.h"*/
 #include "Solver.h"
 #include "Stack.h"
 #define	TRUE	1
@@ -50,7 +49,7 @@ void generateBoard(Board* gameBoardPtr, Board* solutionBoardPtr, unsigned int nu
 		if(cell->fixed){
 			continue;
 		}
-		setCellVal(gameBoardPtr, col+1,row+1,value);
+		setCellVal(gameBoardPtr, row, col, value);
 		cell->fixed = TRUE;
 		numOfHints--;
 	}
@@ -61,7 +60,8 @@ void generateBoard(Board* gameBoardPtr, Board* solutionBoardPtr, unsigned int nu
 			}
 		}
 	}
-
+	/* Free allocated space used by tempBoard */
+	freeBoard(&tempBoard);
 }
 
 
@@ -82,8 +82,11 @@ void updateSolBoard(Board* gameBoardPtr, Board* solutionBoardPtr) {
 	/* Then solve the game board using randomly chosen values (random backtracking) */
 	randomSolve(gameBoardPtr, &tempBoard, 0, 0);
 
-	/* And finally update solution board */
+	/*update solution board */
 	copyBoard(&tempBoard, solutionBoardPtr);
+
+	/* Free tempBoard */
+	freeBoard(&tempBoard);
 }
 
 /********************** End of public methods *********************/
@@ -410,13 +413,15 @@ unsigned int validate(Board* boardPtr) {
  /*fill cells which contain a single legal value
   * pre: assume we are in Solve mode*/
 void autofill(Board* boardPtr){
-	Board 			constBoard = {'\0'};		/* This board will be a copy of board, and won't change*/
-	unsigned int	m = boardPtr->m, n = boardPtr->n;
-	unsigned int 	N = m*n;
-	unsigned int 	errounous, i , j, k;
-	unsigned int* 	possible;
-	unsigned int	posValsCount;
-	Cell* 			cell;
+	Board 				constBoard = {'\0'};		/* This board will be a copy of board, and won't change*/
+	unsigned int		m = boardPtr->m, n = boardPtr->n;
+	unsigned int 		N = m*n;
+	unsigned int 		errounous, i , j, k;
+	unsigned int* 		possible;
+	unsigned int		posValsCount;
+	unsigned int		lastVal;
+	Cell* 				cell;
+	SinglyLinkedList*	move;
 
 	/* c - check if there are errounous cells*/
 	errounous = hasErrors(boardPtr); /*if there are errors --> errounous = TRUE*/
@@ -440,7 +445,7 @@ void autofill(Board* boardPtr){
 	/* d2 - update the board with new values.
 	 * cell->sug_value is not changing , while cell->value
 	 * can be changed in the nested for loop*/
-
+	move = createNewSinglyLinkedList();
 	for(i = 0; i < N; i++) {
 		for(j = 0; j < N; j++) {
 			cell = getCell(&constBoard,i,j);
@@ -450,14 +455,25 @@ void autofill(Board* boardPtr){
 			posValsCount = possible[N];  /*Number of possible values*/
 			/* if there are a few choices- ignore this cell:*/
 			if(posValsCount != 1)continue;
-			 /*there is only one choice-->find it*/
+			/*there is only one choice-->find it*/
 			for(k=0; k<N; k++){
 				if(possible[k]){
-					setCellVal(boardPtr,j+1,i+1,k+1);
 					printf("Cell<%d,%d> set to %d\n",j+1,i+1,k+1);
+					lastVal = cell->value;
+					setCellVal(boardPtr,i,j,k+1);
+					singly_addLast(move,i,j,k+1,lastVal);
 					break;
-			}}
-	}}
+				}
+			}
+		}
+	}
+
+	if(move->size > 0) {
+		addMove(move);
+	}
+	else { /* No moves to add */
+		singly_clear(move);
+	}
 
 
 	free(possible);
@@ -509,6 +525,7 @@ int exhaustive_backtracking(Board* original, Board* temp) {
 	unsigned int	  N         = (original->m * original->n);
 	struct StackNode* root 		= NULL;		/* beautiful stack who mimic recursion */
 	info* cd = NULL; 						/* data of current cell */
+	unsigned int counter;
 
 	cd 	= (info*) malloc(sizeof(info));  /* allocate memory safely */
 	if(cd == NULL) {printf("Error: malloc has failed\n");exit(1);}
@@ -575,7 +592,9 @@ int exhaustive_backtracking(Board* original, Board* temp) {
 			nextCell: continue;
 	}
 	while(1);
-	return cd->counter;
+	counter = cd->counter;
+	free(cd);
+	return counter;
 }
 
 
@@ -590,6 +609,7 @@ unsigned int num_solutions(Board* boardPtr){
 	errounous = hasErrors(boardPtr); /*if there are errors --> errounous = TRUE*/
 	if (errounous){
 		printf("Error: board contains erroneous values\n");
+		return TRUE;
 	}
 
 	/* preapere temp board -

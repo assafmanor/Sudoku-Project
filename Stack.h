@@ -1,3 +1,7 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include "Game.h"
+
 #ifndef STACK_H_
 #define STACK_H_
 #define	TRUE	1

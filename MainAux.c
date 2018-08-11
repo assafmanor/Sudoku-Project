@@ -6,6 +6,7 @@
 #include "Parser.h"
 #include "Solver.h"
 #include "FileManager.h"
+#include "LinkedList.h"
 
 
 
@@ -47,7 +48,7 @@ void startNewGame(unsigned int m, unsigned int n, unsigned int numOfHints) {
 
 	/* initialize gameBoard and solutionBoard */
 	initializeGame(&gameBoard, &solutionBoard, m, n);
-
+	initializeMoveList();
 	generateBoard(&gameBoard, &solutionBoard, numOfHints);
 	printBoard(&gameBoard);
 }
@@ -212,6 +213,7 @@ unsigned int executeSolve(char* path) {
 
 	/* Try to load board from file path, if failed to load - print error. */
 	if(loadBoard(&gameBoard, path, SOLVE)) {
+		initializeMoveList();
 		initializeBoard(&solutionBoard, gameBoard.m, gameBoard.n);
 		if(!hasErrors(&gameBoard)) { /* If board has erroneous values, then the board has no valid solution */
 			updateSolBoard(&gameBoard, &solutionBoard);
@@ -230,11 +232,13 @@ unsigned int executeEdit(char* path) {
 	setGameMode(EDIT);
 	if(path[0] == '\0') { /* No path given. Generate an empty m=3 n=3 board. */
 		startNewGame(3,3,0);
+		initializeMoveList();
 	}
 	else {
 		if(loadBoard(&gameBoard, path, EDIT)) {
 			printBoard(&gameBoard);
 			initializeBoard(&solutionBoard, gameBoard.m, gameBoard.n);
+			initializeMoveList();
 		}
 		else {
 			printf("Error: File cannot be opened\n");
@@ -265,23 +269,36 @@ unsigned int executePrintBoard() {
 
 
 unsigned int executeSet(int* command) {
-	unsigned int	m = gameBoard.m, n = gameBoard.n;
-	unsigned int	gameMode = getGameMode();
-	unsigned int 	N = m*n;
-	unsigned int	lastVal;
+	unsigned int		m = gameBoard.m, n = gameBoard.n;
+	unsigned int		gameMode = getGameMode();
+	unsigned int 		N = m*n;
+	unsigned int		lastVal;
+	int					row, col, val;
+
+	SinglyLinkedList 	*move;
+
+	col = command[1]-1;
+	row = command[2]-1;
+	val = command[3];
 
 	if(gameMode == INIT) return FALSE;
-	if(command[1] <= 0 || command[2] <= 0 || command[3] < 0 ||
-	   command[1] > (int)N || command[2] > (int)N || command[3] > (int)N) {
+	if(row < 0 || col < 0 || val < 0 ||
+	   row >= (int)N || col >= (int)N || val > (int)N) {
 		printf("Error: value not in range 0-%d\n",N);
 	}
-	else if(isCellFixed(&gameBoard, command[1]-1,command[2]-1)) {
+	else if(isCellFixed(&gameBoard, row, col)) {
 		printf("Error: cell is fixed\n");
 	}
 	else {
-		lastVal = getCell(&gameBoard, command[2]-1, command[1]-1)->value;
-		setCellVal(&gameBoard, command[1], command[2], command[3]);
-		updateErroneous(&gameBoard,command[2]-1,command[1]-1, lastVal);
+		lastVal = getCell(&gameBoard, row, col)->value;
+
+		/* Add move to list (for undo/redo) */
+		move = createNewSinglyLinkedList();
+		singly_addLast(move,row,col,val,lastVal);
+		addMove(move);
+
+		setCellVal(&gameBoard, row, col, val);
+		updateErroneous(&gameBoard, row, col, lastVal);
 		printBoard(&gameBoard);
 		if(!hasErrors(&gameBoard) && isBoardComplete(gameBoard) && gameMode == SOLVE) {
 			printf("Puzzle solved successfully\n");
@@ -317,15 +334,23 @@ unsigned int executeGenerate() {
 
 
 unsigned int executeUndo() {
+	unsigned int successful;
 	if(getGameMode() == INIT) return FALSE;
-	printf("Will undo move.\n"); /* TEMPORARY PRINT */
+	successful = undoMove(TRUE);
+	if(!successful) {
+		printf("Error: no moves to undo\n");
+	}
 	return TRUE;
 }
 
 
 unsigned int executeRedo() {
+	unsigned int successful;
 	if(getGameMode() == INIT) return FALSE;
-	printf("Will redo move.\n"); /* TEMPORARY PRINT */
+	successful = redoMove();
+	if(!successful) {
+		printf("Error: no moves to redo\n");
+	}
 	return TRUE;
 }
 
@@ -354,10 +379,14 @@ unsigned int executeHint(int* command) {
 	unsigned int	m = gameBoard.m, n = gameBoard.n;
 	unsigned int	gameMode = getGameMode();
 	unsigned int 	N = m*n;
+	int				row, col;
+
+	col = command[1]-1;
+	row = command[2]-1;
 
 	if(gameMode != SOLVE) return FALSE;
-	if(command[1] < 1 || command[2] < 1 ||
-	   command[1] > (int)N || command[2] > (int)N) {
+	if(row < 0 || col < 0 ||
+	   row >= (int)N || col >= (int)N) {
 		printf("Error: value not in range 1-%d\n",N);
 		return TRUE;
 	}
@@ -365,10 +394,10 @@ unsigned int executeHint(int* command) {
 		printf("Error: board contains erroneous values\n");
 		return TRUE;
 	}
-	if(getHint(command[1],command[2]) == 0) { /* solutionBoard not solved */
+	if(getHint(row,col) == 0) { /* solutionBoard not solved */
 		updateSolBoard(&gameBoard, &solutionBoard);
 	}
-	printf("Hint: set cell to %d\n",getHint(command[1],command[2]));
+	printf("Hint: set cell to %d\n",getHint(row,col));
 	return TRUE;
 
 }
@@ -396,7 +425,8 @@ unsigned int executeAutofill() {
 
 unsigned int executeReset() {
 	if(getGameMode() == INIT) return FALSE;
-	printf("You asked to reset game.\n"); /* TEMPORARY PRINT */
+	resetGame();
+	printf("Board reset\n");
 	return TRUE;
 }
 
@@ -404,6 +434,7 @@ unsigned int executeReset() {
 unsigned int executeExit() {
 	freeBoard(&gameBoard);
 	freeBoard(&solutionBoard);
+	clearMoveList();
 	return TRUE;
 }
 
