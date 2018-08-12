@@ -35,7 +35,7 @@ int singly_isEmpty(SinglyLinkedList*);
  * unsigned int			row		-	Row number (between 0 and N-1).
  * unsigned int 		col		-	Column number (between 0 and N-1).
  * unsigned int			val		-	The value being assigned to the cell. (Between 0 and N).
- *
+ * unsigned int			lastVal	-	The last value that cell had.
  */
 void singly_addLast(SinglyLinkedList*, unsigned int, unsigned int, unsigned int, unsigned int);
 
