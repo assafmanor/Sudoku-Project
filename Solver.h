@@ -31,4 +31,4 @@ void autofill(Board*);
 
 unsigned int num_solutions(Board*);
 
-
+void generate(Board* ,int, int);

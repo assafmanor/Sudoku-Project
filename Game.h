@@ -109,6 +109,14 @@ unsigned int	isBoardComplete(Board);
 
 
 /*
+ * Returns TRUE iff all cells are empty on a game board.
+ *
+ * Board	board	-	A game board.
+ */
+unsigned int	isBoardEmpty(Board);
+
+
+/*
  * Checks if cell[row][col] of boardPtr->board contains an erroneous value.
  *
  * Board*	boardPtr	-	A pointer to a game board.

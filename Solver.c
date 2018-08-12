@@ -636,59 +636,96 @@ unsigned int num_solutions(Board* boardPtr){
 	return counter;
 }
 
-/*---------------------------------------------------------------------------------------------------*/
-/* pre: we are in EDIT mode */
+/*-------------------------generate() helpful functions--------------------------------*/
+
+/* ------to be replaced------ */
+unsigned int ilpBacktracking(Board* boardPtr){
+	return detBacktracking(boardPtr);/* to be replaced by ILP */
+}
 
 
-/*void generate(Board* gameBoardPtr, Board* solutionBoardPtr, char* str_x, char* str_y ) {
-	unsigned int	x,y;
-	unsigned int	N = (gameBoardPtr->m * gameBoardPtr->n);
-	const char *errstr_x,*errstr_y;
+/* try to generate x cells at gameBoardPtr board.
+ * try to solve with ilp(result at "solution_board" so we copy it to gameBoardPtr board).
+ * finally deleting cells values until only y values left
 
+ * pre: we are in EDIT mode			(Checked in MainAux.c)
+ * pre: x, y to are int 			(Checked in MainAux.c)
+ * pre :x, y have legal coordinates (Checked in MainAux.c) */
+void generate(Board* gameBoardPtr,int x, int y ) {
+	unsigned int	x_values_successfully, ilp_Successfully;
+	unsigned int	rand_row, rand_col, rand_val, posValsCount;
+	unsigned int	m = gameBoardPtr->m, n = gameBoardPtr->n;
+	int	N = m*n;
+	int i,try;
+	Cell* cur_cell;
 
-	 check x, y to be legal values:
-	x = strtonum(str_x, 0, (N*N), &errstr_x);
-	y = strtonum(str_y, 0, (N*N), &errstr_y);
-	if ((errstr_x != NULL)||(errstr_y != NULL)){
-		printf("Error:value not in range 0-%d\n",(N*N));
+	/* board must be empty */
+	if (!isBoardEmpty(*gameBoardPtr)){
+		printf("Error:board is not empty\n");
 	    return;
 	}
 
-
-	Cell*			cell;
-	Board 			tempBoard = {'\0'};		 This board will be a copy of board, and will be solved instead of it.
-	unsigned int	row, col;
-	unsigned int	m = gameBoardPtr->m, n = gameBoardPtr->n;
-	unsigned int 	N = m*n;
-	unsigned int	value;
-	initializeBoard(&tempBoard,m,n);
-
-	copyBoard(gameBoardPtr, &tempBoard);
-
-	 Solve game board using randomly chosen values (random backtracking)
-	randomSolve(gameBoardPtr, &tempBoard, 0, 0);
-
-	 Update solution board
-	copyBoard(&tempBoard, solutionBoardPtr);
-
-	 Randomly choose which cells to reveal to the user and set as fixed
-	while(numOfHints > 0){
-		col = rand()%N;
-		row = rand()%N;
-		cell = getCell(gameBoardPtr,row,col);
-		value = getCell(&tempBoard, row, col)->value;
-		if(cell->fixed){
-			continue;
-		}
-		setCellVal(gameBoardPtr, col+1,row+1,value);
-		cell->fixed = TRUE;
-		numOfHints--;
-	}
-	if(getGameMode() == EDIT) {  Un-fix all cells
-		for(row = 0; row < N; row++) {
-			for(col = 0; col < N; col++) {
-				getCell(gameBoardPtr,row,col)->fixed = FALSE;
+	/* try 1000 times(max) to fill x cells */
+	for(try=0; try<1000;try++){
+		x_values_successfully = TRUE;
+		ilp_Successfully = FALSE;
+		for (i=0; i<x; i++){ /* find x good values */
+			/* choose random cell */
+			rand_col = rand()%N;/* +1?? */
+			rand_row = rand()%N;/* +1?? */
+			cur_cell = getCell(gameBoardPtr, rand_row, rand_col);
+			/* if cell already has value-> choose another cell instead */
+			if(cur_cell->value != 0){
+				i--;
+				continue;
 			}
+			/* Calculate all the possible values for current cell. */
+			possibleVals(gameBoardPtr, rand_row, rand_col, cur_cell->possible_vals);
+			posValsCount = cur_cell->possible_vals[N];		/* Number of possible values */
+			/* Choose a random value for the cell*/
+			if(posValsCount == 0){ /* Each value for this cell will be illegal */
+				initializeBoard(gameBoardPtr,m,n);
+				x_values_successfully = FALSE;
+				break; /* next try */
+			}
+			else{/* we can fill this cell legally with a value */
+				rand_val =  chooseRandVal(cur_cell->possible_vals, posValsCount);
+				setCellVal(gameBoardPtr,rand_row,rand_col,rand_val);
+			}
+		}/* finished current board building, maybe with illegal board */
+
+		if(x_values_successfully){
+			ilp_Successfully = ilpBacktracking(gameBoardPtr);
 		}
+
+		if(ilp_Successfully) break;
+		else{
+				initializeBoard(gameBoardPtr,m,n);
+				continue;
+		}
+
 	}
-}*/
+
+	if(!ilp_Successfully){	/* Failed to generate the board */
+		printf("Error: puzzle generator failed\n");
+		initializeBoard(gameBoardPtr,m,n);
+	    return;
+	}
+	/* board generated successfully. */
+	/* now, copy the board that ILP solved to be our board */
+	copyBoard(getSolutionBoardPtr(), gameBoardPtr);
+
+	/* keep only y cells */
+	gameBoardPtr->cellsDisplayed = N*N;
+	while(gameBoardPtr->cellsDisplayed > (unsigned int)y  ){
+		/* choose random cell */
+		rand_col = rand()%N ;
+		rand_row = rand()%N ;
+		cur_cell = getCell(gameBoardPtr,    rand_row, rand_col);
+
+		if(cur_cell->value != 0)
+			setCellVal(gameBoardPtr,rand_row,rand_col,0);
+	}
+	/* Board printing in MainAux.c */
+}
+

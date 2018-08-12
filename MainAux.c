@@ -25,7 +25,7 @@ void printBoard(Board*);
 /* 4 */ unsigned int executePrintBoard();
 /* 5 */ unsigned int executeSet(int*);
 /* 6 */ unsigned int executeValidate();
-/* 7 */ unsigned int executeGenerate();
+/* 7 */ unsigned int executeGenerate(int*);
 /* 8 */ unsigned int executeUndo();
 /* 9 */ unsigned int executeRedo();
 /* 10*/ unsigned int executeSave(char*);
@@ -76,7 +76,7 @@ unsigned int executeCommand (int* command, char* path){
 	case 6: 	/* VALIDATE	*/
 		return executeValidate();
 	case 7:		/* GENERATE */
-		return executeGenerate();
+		return executeGenerate(command);
 	case 8:		/* UNDO */
 		return executeUndo();
 	case 9:		/* REDO */
@@ -326,12 +326,20 @@ unsigned int executeValidate() {
 }
 
 
-unsigned int executeGenerate() {
+unsigned int executeGenerate(int* command) {
+	int N = gameBoard.m * gameBoard.n;
+
 	if(getGameMode() != EDIT) return FALSE;
-	printf("Will generate a new board.\n"); /* TEMPORARY PRINT */
+	/* check x, y to have legal coordinates:
+	 * command[1] is x, command[2] is y */
+	if ((command[1] < 0)||(command[2] < 0)||(command[1] > (N*N))||(command[2] > (N*N))){
+		printf("Error:value not in range 0-%d\n",(N*N));
+	    return TRUE;
+	}
+	generate(&gameBoard, (command[1]), (command[2]));
+	printBoard(&gameBoard);
 	return TRUE;
 }
-
 
 unsigned int executeUndo() {
 	unsigned int successful;

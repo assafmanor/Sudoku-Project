@@ -16,7 +16,7 @@ int main() {
 	int				command[4] = { 0 };
 	char			path[MAX_INPUT_LENGTH];
 
-	/*SP_BUFF_SET()*/
+	SP_BUFF_SET()
 
 	srand(time(NULL));
 

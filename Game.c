@@ -160,6 +160,10 @@ unsigned int isBoardComplete(Board board) {
 }
 
 
+unsigned int	isBoardEmpty(Board board){
+	return board.cellsDisplayed == 0;
+}
+
 /*
  * Checks if cell[row][col] of boardPtr->board contains an erroneous value.
  *
@@ -327,13 +331,13 @@ void updatePossibleValues(Board* boardPtr, unsigned int row, unsigned int col, u
  * unsigned int	val		-	The value being assigned to the cell. (Between 0 and N).
  */
 void setCellVal(Board* boardPtr, unsigned int row, unsigned int col, unsigned int val) {
-	unsigned int	lastVal = boardPtr->board[row][col].value;	/* remember the last value */
+	unsigned int	lastVal;
+	lastVal = boardPtr->board[row][col].value;	/* remember the last value */
 	if(val == lastVal) { /* if you want to change the value to be the same as before - there's nothing to do */
 		return;
 	}
 	updatePossibleValues(boardPtr, row, col, val);
 	getCell(boardPtr,row,col)->value = val;
-
 	/* update the number of cells displayed (used for checking if game over) */
 	if(val > 0 && lastVal == 0) {
 		boardPtr->cellsDisplayed++;
