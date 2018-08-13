@@ -7,7 +7,7 @@
  * char*		path		-	The path to which the file will be saved to (including file name and extension).
  * unsigned int	gameMode	-	The current game mode.
  */
-void saveBoard(Board, char*, unsigned int);
+unsigned int saveBoard(Board, char*, unsigned int);
 
 
 /*

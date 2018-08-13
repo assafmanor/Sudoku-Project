@@ -12,7 +12,7 @@
  * char*		path		-	The path to which the file will be saved to (including file name and extension).
  * unsigned int	gameMode	-	The current game mode.
  */
-void saveBoard(Board board, char* path, unsigned int gameMode) {
+unsigned int saveBoard(Board board, char* path, unsigned int gameMode) {
 	unsigned int	row, col;
 	unsigned int	N;
 	unsigned int	value;
@@ -20,8 +20,8 @@ void saveBoard(Board board, char* path, unsigned int gameMode) {
 
 	ofp = fopen(path, "w");
 	if(ofp == NULL) {
-		printf("Error: File doesn't exist or cannot be opened\n");
-		return;
+		printf("Error: File cannot be created or modified\n");
+		return FALSE;
 	}
 
 	/* First line: m n (block size) */
@@ -43,7 +43,7 @@ void saveBoard(Board board, char* path, unsigned int gameMode) {
 		}
 	}
 	fclose(ofp);
-	return;
+	return TRUE;
 }
 
 

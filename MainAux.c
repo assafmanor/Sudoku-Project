@@ -50,7 +50,7 @@ void startNewGame(unsigned int m, unsigned int n, unsigned int numOfHints) {
 	initializeGame(&gameBoard, &solutionBoard, m, n);
 	initializeMoveList();
 	generateBoard(&gameBoard, &solutionBoard, numOfHints);
-	printBoard(&gameBoard);
+/*	printBoard(&gameBoard);*/
 }
 
 
@@ -218,7 +218,7 @@ unsigned int executeSolve(char* path) {
 		if(!hasErrors(&gameBoard)) { /* If board has erroneous values, then the board has no valid solution */
 			updateSolBoard(&gameBoard, &solutionBoard);
 		}
-		printBoard(&gameBoard);
+/*		printBoard(&gameBoard);*/
 	}
 	else {
 		printf("Error: File doesn't exist or cannot be opened\n");
@@ -236,7 +236,7 @@ unsigned int executeEdit(char* path) {
 	}
 	else {
 		if(loadBoard(&gameBoard, path, EDIT)) {
-			printBoard(&gameBoard);
+/*			printBoard(&gameBoard);*/
 			initializeBoard(&solutionBoard, gameBoard.m, gameBoard.n);
 			initializeMoveList();
 		}
@@ -341,6 +341,7 @@ unsigned int executeGenerate(int* command) {
 	return TRUE;
 }
 
+
 unsigned int executeUndo() {
 	unsigned int successful;
 	if(getGameMode() == INIT) return FALSE;
@@ -377,8 +378,9 @@ unsigned int executeSave(char* path) {
 		printf("Error: board validation failed\n");
 		return TRUE;
 	}
-	saveBoard(gameBoard, path, gameMode);
-	printf("Saved to: %s\n", path);
+	if(saveBoard(gameBoard, path, gameMode)) { /* Try to board to path, and print message if successful */
+		printf("Saved to: %s\n", path);
+	}
 	return TRUE;
 }
 

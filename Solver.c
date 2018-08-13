@@ -661,7 +661,7 @@ void generate(Board* gameBoardPtr,int x, int y ) {
 
 	/* board must be empty */
 	if (!isBoardEmpty(*gameBoardPtr)){
-		printf("Error:board is not empty\n");
+		printf("Error: board is not empty\n");
 	    return;
 	}
 

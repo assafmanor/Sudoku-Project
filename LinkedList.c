@@ -189,41 +189,6 @@ void doubly_addLast(DoublyLinkedList *list, SinglyLinkedList *data) {
 
 
 /*
- * Removes the first node and returns a pointer to its data (a singly linked list).
- * if the list is empty, returns a null pointer.
- * NOTE: Remember to always free $ret after you're done with it.
- *
- * DoublyLinkedList*	list	-	Said doubly linked list.
- */
-/*SinglyLinkedList* doubly_removeFirst(DoublyLinkedList *list) {
-    SinglyLinkedList *data;
-    DoublyNode *head = list->head;
-    DoublyNode *next;
-
-	if(doubly_isEmpty(list)) {
-		return NULL;
-	}
-	next = head->next;
-	data = list->head->data;
-	list->head = next;
-	if(next != NULL) {  has next
-		next->prev = NULL;
-	}
-
-	 Free allocated memory
-	singly_clear(head->data);
-	free(head);
-
-	list->size--;	 decrement list size by one
-	if(list->size <= 1) {  list is empty or only head node
-		list->tail = NULL;
-	}
-	return data;  remember to free data after you're done with it
-}*/
-
-
-
-/*
  * Removes the last node in a doubly linked list.
  * if the list is empty, does nothing.
  *
