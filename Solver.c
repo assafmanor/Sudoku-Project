@@ -423,6 +423,7 @@ void autofill(Board* boardPtr){
 	Cell* 				cell;
 	SinglyLinkedList*	move;
 
+
 	/* c - check if there are errounous cells*/
 	errounous = hasErrors(boardPtr); /*if there are errors --> errounous = TRUE*/
 	if (errounous){
@@ -652,11 +653,12 @@ unsigned int ilpBacktracking(Board* boardPtr){
  * pre: x, y to are int 			(Checked in MainAux.c)
  * pre :x, y have legal coordinates (Checked in MainAux.c) */
 void generate(Board* gameBoardPtr,int x, int y ) {
+	SinglyLinkedList*	move;
 	unsigned int	x_values_successfully, ilp_Successfully;
 	unsigned int	rand_row, rand_col, rand_val, posValsCount;
 	unsigned int	m = gameBoardPtr->m, n = gameBoardPtr->n;
 	int	N = m*n;
-	int i,try;
+	int i,j,try;
 	Cell* cur_cell;
 
 	/* board must be empty */
@@ -704,7 +706,7 @@ void generate(Board* gameBoardPtr,int x, int y ) {
 				continue;
 		}
 
-	}
+	}/* Outer for loop was ended */
 
 	if(!ilp_Successfully){	/* Failed to generate the board */
 		printf("Error: puzzle generator failed\n");
@@ -723,9 +725,29 @@ void generate(Board* gameBoardPtr,int x, int y ) {
 		rand_row = rand()%N ;
 		cur_cell = getCell(gameBoardPtr,    rand_row, rand_col);
 
+		/* delete it's content */
 		if(cur_cell->value != 0)
 			setCellVal(gameBoardPtr,rand_row,rand_col,0);
 	}
+
+	/* Add move to undo/redo list:
+	 * scan the board for changes: */
+	move = createNewSinglyLinkedList();
+	for(i=0; i<N; i++){
+		for(j=0; j<N; j++){
+			cur_cell = getCell(gameBoardPtr, i, j);
+			if(cur_cell->value != 0) /* if cell has changed --> save move in list */
+				singly_addLast(move, i, j, cur_cell->value, 0);
+		}
+	}
+	if(move->size > 0) {
+		addMove(move);
+	}
+	else { /* No moves to add */
+		singly_clear(move);
+	}
+
+
 	/* Board printing in MainAux.c */
 }
 
