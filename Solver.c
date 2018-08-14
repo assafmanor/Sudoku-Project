@@ -412,7 +412,7 @@ unsigned int validate(Board* boardPtr) {
 
  /*fill cells which contain a single legal value
   * pre: assume we are in Solve mode*/
-void autofill(Board* boardPtr){
+unsigned int autofill(Board* boardPtr){
 	Board 				constBoard = {'\0'};		/* This board will be a copy of board, and won't change*/
 	unsigned int		m = boardPtr->m, n = boardPtr->n;
 	unsigned int 		N = m*n;
@@ -428,6 +428,7 @@ void autofill(Board* boardPtr){
 	errounous = hasErrors(boardPtr); /*if there are errors --> errounous = TRUE*/
 	if (errounous){
 		printf("Error: board contains erroneous values\n");
+		return FALSE;
 	}
 
 	/* allocate array of possibilities */
@@ -476,9 +477,9 @@ void autofill(Board* boardPtr){
 		singly_clear(move);
 	}
 
-
 	free(possible);
 	freeBoard(&constBoard);
+	return TRUE;
 }
 
 
@@ -652,7 +653,7 @@ unsigned int ilpBacktracking(Board* boardPtr){
  * pre: we are in EDIT mode			(Checked in MainAux.c)
  * pre: x, y to are int 			(Checked in MainAux.c)
  * pre :x, y have legal coordinates (Checked in MainAux.c) */
-void generate(Board* gameBoardPtr,int x, int y ) {
+unsigned int generate(Board* gameBoardPtr,int x, int y ) {
 	SinglyLinkedList*	move;
 	unsigned int	x_values_successfully, ilp_Successfully;
 	unsigned int	rand_row, rand_col, rand_val, posValsCount;
@@ -664,7 +665,7 @@ void generate(Board* gameBoardPtr,int x, int y ) {
 	/* board must be empty */
 	if (!isBoardEmpty(*gameBoardPtr)){
 		printf("Error: board is not empty\n");
-	    return;
+	    return FALSE;
 	}
 
 	/* try 1000 times(max) to fill x cells */
@@ -711,7 +712,7 @@ void generate(Board* gameBoardPtr,int x, int y ) {
 	if(!ilp_Successfully){	/* Failed to generate the board */
 		printf("Error: puzzle generator failed\n");
 		initializeBoard(gameBoardPtr,m,n);
-	    return;
+	    return FALSE;
 	}
 	/* board generated successfully. */
 	/* now, copy the board that ILP solved to be our board */
@@ -747,7 +748,7 @@ void generate(Board* gameBoardPtr,int x, int y ) {
 		singly_clear(move);
 	}
 
-
+	return TRUE;
 	/* Board printing in MainAux.c */
 }
 

@@ -27,8 +27,8 @@ void updateSolBoard(Board*, Board*);
 unsigned int	validate(Board*);
 
 
-void autofill(Board*);
+unsigned int autofill(Board*);
 
 unsigned int num_solutions(Board*);
 
-void generate(Board* ,int, int);
+unsigned int generate(Board* ,int, int);

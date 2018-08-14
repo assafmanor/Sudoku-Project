@@ -156,9 +156,6 @@ void printCellRow(Board* boardPtr, unsigned int row) {
 			else if((getGameMode() == EDIT || getMarkErrors()) && cell->isErroneous) {
 				printf("*");
 			}
-			/* else if(markErrors == TRUE && gameBoard[row][col].error) {
-			 * 	printf("*");
-			 * } */
 			else {
 				printf(" ");
 			}
@@ -336,8 +333,9 @@ unsigned int executeGenerate(int* command) {
 		printf("Error:value not in range 0-%d\n",(N*N));
 	    return TRUE;
 	}
-	generate(&gameBoard, (command[1]), (command[2]));
-	printBoard(&gameBoard);
+	if(generate(&gameBoard, (command[1]), (command[2]))) {
+		printBoard(&gameBoard);
+	}
 	return TRUE;
 }
 
@@ -422,8 +420,9 @@ unsigned int executeNumSolutions() {
 
 unsigned int executeAutofill() {
 	if(getGameMode() != SOLVE) return FALSE;
-	autofill(&gameBoard);
-	printBoard(&gameBoard);
+	if(autofill(&gameBoard)) {
+		printBoard(&gameBoard);
+	}
 	if(isBoardComplete(gameBoard)) {
 		printf("Puzzle solved successfully\n");
 		/* Set game mode to INIT */

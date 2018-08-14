@@ -138,7 +138,7 @@ unsigned int interpretCommand (char* input, int* command, char* path) {
 	}
 
 	commandToArray(input,strArr); /* insert each one of the first four words of input into the array strArr */
-/*	for(i = 0; i < 4; i++) {
+	/*	for(i = 0; i < 4; i++) {
 		printf("strArr[%d] = %s\n",i,strArr[i]);
 	}*/
 	i1 = toInt(strArr[1]);
@@ -147,24 +147,28 @@ unsigned int interpretCommand (char* input, int* command, char* path) {
 	if (stringsEqual(strArr[0],"solve")) {
 		/* Copy given path to the string path */
 		if(strArr[1] == NULL) {
-			return FALSE;
+			isValidCommand = FALSE;
 		}
-		strcpy(path,strArr[1]);
-		command[0] = 1;
+		else {
+			strcpy(path,strArr[1]);
+			command[0] = 1;
+		}
 	}
 	else if (stringsEqual(strArr[0],"edit")) {
 		command[0] = 2;
 		/* Copy given path to the string path */
 		if(strArr[1] != NULL) {
-		strcpy(path,strArr[1]);
+			strcpy(path,strArr[1]);
 		}
 	}
 	else if (stringsEqual(strArr[0],"mark_errors")) {
 		command[0] = 3;
 		if(strArr[1] == NULL) {
-			return FALSE;
+			isValidCommand = FALSE;
 		}
-		command[1] = i1;
+		else {
+			command[1] = i1;
+		}
 	}
 	else if (stringsEqual(strArr[0],"print_board")) {
 		command[0] = 4;
@@ -172,11 +176,13 @@ unsigned int interpretCommand (char* input, int* command, char* path) {
 	else if (stringsEqual(strArr[0],"set")) {
 		command[0] = 5;
 		if(strArr[1] == NULL || strArr[2] == NULL || strArr[3] == NULL) {
-			return FALSE;
+			isValidCommand = FALSE;
 		}
-		command[1] = i1;
-		command[2] = i2;
-		command[3] = i3;
+		else {
+			command[1] = i1;
+			command[2] = i2;
+			command[3] = i3;
+		}
 	}
 	else if (stringsEqual(strArr[0],"validate")) {
 		command[0] = 6;
@@ -184,10 +190,12 @@ unsigned int interpretCommand (char* input, int* command, char* path) {
 	else if (stringsEqual(strArr[0],"generate")) {
 		command[0] = 7;
 		if(strArr[1] == NULL || strArr[2] == NULL) {
-			return FALSE;
+			isValidCommand = FALSE;
 		}
-		command[1] = i1;
-		command[2] = i2;
+		else {
+			command[1] = i1;
+			command[2] = i2;
+		}
 	}
 	else if (stringsEqual(strArr[0],"undo")) {
 		command[0] = 8;
@@ -199,17 +207,21 @@ unsigned int interpretCommand (char* input, int* command, char* path) {
 		command[0] = 10;
 		/* Copy given path to the string path */
 		if(strArr[1] == NULL) {
-			return FALSE;
+			isValidCommand = FALSE;
 		}
-		strcpy(path,strArr[1]);
+		else {
+			strcpy(path,strArr[1]);
+		}
 	}
 	else if (stringsEqual(strArr[0],"hint")) {
 		command[0] = 11;
 		if(strArr[1] == NULL || strArr[2] == NULL) {
-			return FALSE;
+			isValidCommand = FALSE;
 		}
-		command[1] = i1;
-		command[2] = i2;
+		else {
+			command[1] = i1;
+			command[2] = i2;
+		}
 	}
 	else if (stringsEqual(strArr[0],"num_solutions")) {
 		command[0] = 12;
@@ -227,12 +239,13 @@ unsigned int interpretCommand (char* input, int* command, char* path) {
 	else if (stringsEqual(strArr[0],"create")) {
 		command[0] = 16;
 		if(strArr[1] == NULL || strArr[2] == NULL || strArr[3] == NULL) {
-			return FALSE;
+			isValidCommand = FALSE;
 		}
-		command[1] = i1;
-		command[2] = i2;
-		command[3] = i3;
-
+		else {
+			command[1] = i1;
+			command[2] = i2;
+			command[3] = i3;
+		}
 	}
 	else {
 		isValidCommand = FALSE;
