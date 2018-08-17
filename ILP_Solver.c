@@ -4,8 +4,13 @@
 #include "gurobi_c.h"
 
 
+unsigned int get_index(unsigned int N, unsigned int r, unsigned int c, unsigned int v){
+	unsigned int res = (r*N*N) + (c*N) + v;
+	return res;
+}
 
-void setValues(Board* boardPtr, unsigned int*** valuesArr) {
+
+void setValues(Board* boardPtr, unsigned int* valuesArr) {
 	unsigned int row;
 	unsigned int col;
 	int val;
@@ -14,45 +19,11 @@ void setValues(Board* boardPtr, unsigned int*** valuesArr) {
 		for(col = 0; col < N; col++) {
 			val = getCell(boardPtr,row,col)->value-1;
 			if(val > -1) { /* cell is not empty */
-				valuesArr[row][col][val] = 1;
+				valuesArr[get_index(N,row,col,val)] = 1;
 			}
 		}
 	}
 }
-
-
-unsigned int*** initValuesArr (unsigned int N) {
-	unsigned int***	valuesArr;
-	unsigned int 	r,c;
-
-	valuesArr = (unsigned int***)calloc(N ,sizeof(unsigned int**));
-	for(r=0; r < N; r++) {
-		valuesArr[r] = (unsigned int**)calloc(N ,sizeof(unsigned int*));
-		for(c = 0; c < N; c++) {
-			valuesArr[r][c] = (unsigned int*)calloc(N ,sizeof(unsigned int));
-		}
-	}
-	return valuesArr;
-}
-
-
-void freeValuesArr (unsigned int**** valuesArr, unsigned int N) {
-	unsigned int 	r,c;
-
-	for(r=0; r < N; r++) {
-		for(c = 0; c < N; c++) {
-			free(*valuesArr[r][c]);
-		}
-		free(*valuesArr[r]);
-	}
-	free(*valuesArr);
-}
-
-unsigned int get_index(unsigned int N, unsigned int r, unsigned int c, unsigned int v){
-	unsigned int res = (r*N*N) + (c*N) + v;
-	return res;
-}
-
 
 
 /* This example formulates and solves the following simple MIP model:
@@ -73,16 +44,17 @@ int IlpSolver(Board* boardPtr) {
   int       optimstatus;
   double    objval;
 
-  unsigned int*** valuesArr;
-  unsigned int m = boardPtr->m;
-  unsigned int n = boardPtr->n;
-  unsigned int N = m*n;
-  unsigned int N3 = N*N*N;
-  unsigned int r,c,v,index;
-  unsigned int p,q; /* for block */
+  unsigned int*	valuesArr;
+  unsigned int	m = boardPtr->m;
+  unsigned int	n = boardPtr->n;
+  unsigned int	N = m*n;
+  unsigned int	N3 = N*N*N;
+  unsigned int	r,c,v,index;
+  unsigned		block;
+  unsigned int	block_r, block_c;
 
 
-  valuesArr = initValuesArr(N); /* TODO: free at the end */
+  valuesArr = (unsigned int*)calloc(N*N*N ,sizeof(unsigned int)); /* TODO: free at the end */
   setValues(boardPtr,valuesArr);
 
 
@@ -155,13 +127,13 @@ int IlpSolver(Board* boardPtr) {
 		  for(v = 0; v < N; v++) {
 			  index = get_index(N,r,c,v);
 			  ind[v] = index;
-			  /* Add constraint:*/
-			  error = GRBaddconstr(model, N, ind, val, GRB_EQUAL, 1, NULL);
-			    if (error) {
-			  	  printf("ERROR %d GRBaddconstr(): %s\n", error, GRBgeterrormsg(env));
-			  	  return -1;
-			    }
 		  }
+		  /* Add constraint:*/
+		  error = GRBaddconstr(model, N, ind, val, GRB_EQUAL, 1, NULL);
+		    if (error) {
+		  	  printf("ERROR %d GRBaddconstr(): %s\n", error, GRBgeterrormsg(env));
+		  	  return -1;
+		    }
 	  }
   }
 
@@ -171,13 +143,13 @@ int IlpSolver(Board* boardPtr) {
 		  for(r = 0; r < N; r++) {
 			  index = get_index(N,r,c,v);
 			  ind[r] = index;
-			  /* Add constraint:*/
-			  error = GRBaddconstr(model, N, ind, val, GRB_EQUAL, 1, NULL);
-			    if (error) {
-			  	  printf("ERROR %d GRBaddconstr(): %s\n", error, GRBgeterrormsg(env));
-			  	  return -1;
-			    }
 		  }
+		  /* Add constraint:*/
+		  error = GRBaddconstr(model, N, ind, val, GRB_EQUAL, 1, NULL);
+		    if (error) {
+		  	  printf("ERROR %d GRBaddconstr(): %s\n", error, GRBgeterrormsg(env));
+		  	  return -1;
+		    }
 	  }
   }
 
@@ -187,54 +159,35 @@ int IlpSolver(Board* boardPtr) {
 		  for(c = 0; c < N; c++) {
 			  index = get_index(N,r,c,v);
 			  ind[c] = index;
-			  /* Add constraint:*/
-			  error = GRBaddconstr(model, N, ind, val, GRB_EQUAL, 1, NULL);
-			    if (error) {
-			  	  printf("ERROR %d GRBaddconstr(): %s\n", error, GRBgeterrormsg(env));
-			  	  return -1;
-			    }
 		  }
+		  /* Add constraint:*/
+		  error = GRBaddconstr(model, N, ind, val, GRB_EQUAL, 1, NULL);
+		    if (error) {
+		  	  printf("ERROR %d GRBaddconstr(): %s\n", error, GRBgeterrormsg(env));
+		  	  return -1;
+		    }
 	  }
   }
-
-
-  /*
-   * i = m*((row)/m); Index of the first row of the block
-	 j = n*((col)/n); Index of the first column of the block
-	 for(count_i = 0; count_i < m; count_i++) {
-		for(count_j = 0; count_j < n; count_j++) {
-			if(i+count_i == row && j+count_j == col) continue;
-			cell = getCell(boardPtr,i+count_i,j+count_j);
-			if(cell->value == val) {
-				return TRUE;
-			}
-		}
-	 }
-   */
 
 
   /* type D: each block has exactly one of each value contained within it. */
-  /*
   for(v = 0; v < N; v++) {
 	  for(block = 0; block < N; block++) {
-		  inside_block_index = getBlockIndex(block/N+n);
-		  index = (block * sizeofblock)
-		  index = get_index(N,block)
-	  }
-  }
-	  for(p = 0; p < m; p++) {
-		  for(q = 0; q < n; q++) {
-			  r = m*p-m+1;
-			  c = n*q-n+1;
-			  index = get_index(N,p,q,v);
-			  ind[c] = index;
-			  /* Add constraint:*/
-			  error = GRBaddconstr(model, N, ind, val, GRB_EQUAL, 1, NULL);
-			    if (error) {
-			  	  printf("ERROR %d GRBaddconstr(): %s\n", error, GRBgeterrormsg(env));
-			  	  return -1;
-			    }
+		  /* block's top-left cell's coordinations */
+		  r = (block/m)*m;
+		  c = (block%m)*n;
+		  for(block_r = 0; block_r < n; block_r++) {
+			  for(block_c = 0; block_c < m; block_c++) {
+				  index = get_index(N, r+block_r, c+block_c, v);
+				  ind[c] = index;
+			  }
 		  }
+		  /* Add constraint:*/
+		  error = GRBaddconstr(model, N, ind, val, GRB_EQUAL, 1, NULL);
+		    if (error) {
+		  	  printf("ERROR %d GRBaddconstr(): %s\n", error, GRBgeterrormsg(env));
+		  	  return -1;
+		    }
 	  }
   }
 
