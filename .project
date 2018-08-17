@@ -3,6 +3,7 @@
 	<name>Sudoku Project</name>
 	<comment></comment>
 	<projects>
+		<project>Sudoku Project</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

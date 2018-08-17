@@ -6,7 +6,6 @@
 #include "MainAux.h"
 #include "Parser.h"
 #include "Game.h"
-
 /*
  * The main function.
  */
