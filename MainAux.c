@@ -2,11 +2,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "MainAux.h"
-/*#include "Game.h"*/
 #include "Parser.h"
 #include "Solver.h"
 #include "FileManager.h"
 #include "LinkedList.h"
+#include "ILP_Solver.h"
 
 
 
@@ -44,12 +44,12 @@ void printBoard(Board*);
 /************************* Public methods *************************/
 
 /*////////////////////// TEMPORARY //////////////////////*/
-void startNewGame(unsigned int m, unsigned int n, unsigned int numOfHints) {
+void startNewGame(unsigned int m, unsigned int n, unsigned int x) {
 
 	/* initialize gameBoard and solutionBoard */
 	initializeGame(&gameBoard, &solutionBoard, m, n);
 	initializeMoveList();
-	generateBoard(&gameBoard, &solutionBoard, numOfHints);
+	generate(&gameBoard, x, x);
 /*	printBoard(&gameBoard);*/
 }
 
@@ -213,7 +213,7 @@ unsigned int executeSolve(char* path) {
 		initializeMoveList();
 		initializeBoard(&solutionBoard, gameBoard.m, gameBoard.n);
 		if(!hasErrors(&gameBoard)) { /* If board has erroneous values, then the board has no valid solution */
-			updateSolBoard(&gameBoard, &solutionBoard);
+			ilpSolver(&gameBoard, &solutionBoard);
 		}
 /*		printBoard(&gameBoard);*/
 	}
@@ -228,12 +228,12 @@ unsigned int executeSolve(char* path) {
 unsigned int executeEdit(char* path) {
 	setGameMode(EDIT);
 	if(path[0] == '\0') { /* No path given. Generate an empty m=3 n=3 board. */
-		startNewGame(3,3,0);
+		initializeBoard(&gameBoard,3,3);
+		initializeBoard(&solutionBoard, gameBoard.m, gameBoard.n);
 		initializeMoveList();
 	}
 	else {
 		if(loadBoard(&gameBoard, path, EDIT)) {
-/*			printBoard(&gameBoard);*/
 			initializeBoard(&solutionBoard, gameBoard.m, gameBoard.n);
 			initializeMoveList();
 		}
@@ -403,7 +403,7 @@ unsigned int executeHint(int* command) {
 		return TRUE;
 	}
 	if(getHint(row,col) == 0) { /* solutionBoard not solved */
-		updateSolBoard(&gameBoard, &solutionBoard);
+		ilpSolver(&gameBoard, &solutionBoard);
 	}
 	printf("Hint: set cell to %d\n",getHint(row,col));
 	return TRUE;
@@ -441,8 +441,10 @@ unsigned int executeReset() {
 
 
 unsigned int executeExit() {
-	freeBoard(&gameBoard);
-	freeBoard(&solutionBoard);
+	Board* gameBoardPtr = &gameBoard;
+	Board* solBoardPtr = &solutionBoard;
+	freeBoard(&gameBoardPtr);
+	freeBoard(&solBoardPtr);
 	clearMoveList();
 	return TRUE;
 }

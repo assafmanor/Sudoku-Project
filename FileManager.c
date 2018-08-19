@@ -65,6 +65,8 @@ int loadBoard(Board* boardPtr, char* path, unsigned int gameMode) {
 	char			str_val[3];
 	FILE			*ifp;
 
+	/*printf("Load started\n");*/
+
 	str_val[2] = '\0';
 
 	ifp = fopen(path, "r");
@@ -82,7 +84,9 @@ int loadBoard(Board* boardPtr, char* path, unsigned int gameMode) {
 		exit(1);
 	}
 	/* Then initialize board (space allocation etc.) */
+	/*printf("	initializeBoard started\n");*/
 	initializeBoard(boardPtr,m,n);
+	/*printf("	initializeBoard complete\n");*/
 	/* Scan through the rest of the file to get values of all cells */
 	N = m*n;
 	for(row = 0; row < N; row++) {
@@ -126,5 +130,6 @@ int loadBoard(Board* boardPtr, char* path, unsigned int gameMode) {
 	}
 
 	fclose(ifp);
+	/*printf("Load complete\n");*/
 	return TRUE;
 }

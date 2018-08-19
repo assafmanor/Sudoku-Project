@@ -40,6 +40,9 @@ typedef struct board_t {
 #endif
 
 
+void nullifyBoard(Board*);
+
+
 /*
  * Initializes the game board's parameters for a new game.
  *
@@ -68,7 +71,7 @@ void initializeGame(Board*, Board*, unsigned int, unsigned int);
  *
  * Board*	boardPtr	-	A pointer to a game board.
  */
-void freeBoard(Board*);
+void freeBoard(Board**);
 
 
 /*

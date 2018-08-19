@@ -13,6 +13,19 @@ unsigned int		markErrors = TRUE;			/* a binary variable indicating that the play
 
 
 
+void nullifyBoard(Board* boardPtr) {
+	unsigned int	N = boardPtr->m * boardPtr->n;
+	unsigned int	i,j,k;
+	for(i = 0; i < N; i++) {
+		for(j = 0; j < N; j++) {
+			setCellVal(boardPtr,i,j,0);
+			for(k = 0; k < N; k++) {
+				getCell(boardPtr,i,j)->possible_vals[k] = TRUE;
+			}
+		}
+	}
+}
+
 /*
  * Initializes the game board's parameters for a new game.
  *
@@ -26,18 +39,28 @@ void initializeBoard(Board* boardPtr, unsigned int m, unsigned int n) {
 	unsigned int i, j, k;
 	unsigned int N = m*n;
 
+	printf("initializeBoard\n");
 	/* Free previously allocated space */
-	freeBoard(boardPtr);
-
+	if(boardPtr != NULL && boardPtr->m == m && boardPtr->n == n) {
+		printf("free: if\n");
+		nullifyBoard(boardPtr);
+	}
+	else if(boardPtr != NULL){
+		printf("free: else\n");
+		freeBoard(&boardPtr);
+	}
+	printf("initializeBoard: free complete\n");
 	boardPtr->m = m;
 	boardPtr->n = n;
 
 	/* Allocate space */
+	printf("	1\n");
     boardPtr->board = (Cell**)malloc(N * sizeof(Cell*)); 											/* rows */
 	if(boardPtr->board == NULL) {
 		printf("Error: malloc has failed\n");
 		exit(1);
 	}
+	printf("	2\n");
     for (i = 0; i < N; i++) {
     	boardPtr->board[i] = (Cell*)malloc(N * sizeof(Cell));	 									/* Cells */
      	if(boardPtr->board[i] == NULL) {
@@ -53,6 +76,7 @@ void initializeBoard(Board* boardPtr, unsigned int m, unsigned int n) {
          }
     }
     /* set empty values */
+    printf("	3\n");
 	for(i = 0; i < N; i++) {
 		for(j = 0; j < N; j++) {
 			boardPtr->board[i][j].value = 0;
@@ -65,6 +89,7 @@ void initializeBoard(Board* boardPtr, unsigned int m, unsigned int n) {
 	}
 
 	boardPtr->cellsDisplayed = 0;
+	printf("initializeBoard - GOOD!!\n");
 }
 
 
@@ -77,11 +102,13 @@ void initializeBoard(Board* boardPtr, unsigned int m, unsigned int n) {
  * unsigned int	m		-	number of columns in each block on the board.
  */
 void initializeGame(Board* gBoard, Board* sBoard, unsigned int m, unsigned int n) {
+	printf("initializeGame\n");
 	gameBoard = (*gBoard);
 	solutionBoard = (*sBoard);
 
 	initializeBoard(&gameBoard,m,n);
 	initializeBoard(&solutionBoard,m,n);
+	printf("initializeGame - good\n");
 }
 
 
@@ -90,27 +117,44 @@ void initializeGame(Board* gBoard, Board* sBoard, unsigned int m, unsigned int n
  *
  * Board*	boardPtr	-	A pointer to a game board.
  */
-void freeBoard(Board* boardPtr) {
+void freeBoard(Board** boardPtrPtr) {
 	unsigned int i, j;
 	unsigned int N;
+	Board* boardPtr = *boardPtrPtr;
+	Cell* temp_cell;
 
+	/* Board is uninitialized */
+	printf("freeBoard - Good luck\n");
+	if(boardPtr == NULL) {
+		/*printf("boardPtr->board is NULL\n");*/
+		return;
+	}
+	printf("freeBoard - 1\n");
 	N = boardPtr->m*boardPtr->n;
 	/* free allocated possible_vals for each cell, and free rows */
 	for(i = 0; i < N; i++) {
 		for(j = 0; j < N; j++) {
 			if(boardPtr->board[i][j].possible_vals != NULL) {
-				free(boardPtr->board[i][j].possible_vals);
+				printf("			free %d,%d\n",i,j);
+				printf("possible_vals[0] == %d\n",boardPtr->board[i][j].possible_vals[0]);
+				temp_cell = getCell(boardPtr,i,j);
+				free(temp_cell->possible_vals);
 			}
 		}
 		/* free allocated row */
 		if(boardPtr->board[i] != NULL) {
 			free(boardPtr->board[i]);
+			printf("	free row %d\n",i);
 		}
 	}
+	printf("freeBoard - 2\n");
 	/* free the board itself */
 	if(boardPtr->board != NULL) {
+
 		free(boardPtr->board);
 	}
+
+	boardPtr = NULL;
 }
 
 

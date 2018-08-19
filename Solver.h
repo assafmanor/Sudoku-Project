@@ -5,7 +5,7 @@
  *
  * unsigned int	numOfHints	-	The number of cells with the solution value revealed (given from user input).
  */
-void			generateBoard(Board*, Board*, unsigned int);
+/*void			generateBoard(Board*, Board*, unsigned int);*/
 
 
 /*
