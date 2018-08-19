@@ -334,6 +334,7 @@ int ilpSolver(Board* boardPtr, Board* solBoardPtr) {
 
 	/* solution found */
 	if (optimstatus == GRB_OPTIMAL) {
+		ret = TRUE;
 		for(r = 0; r < N; r++) {
 			for(c = 0; c < N; c++) {
 				for(v = 0; v < N; v++) {
@@ -341,22 +342,12 @@ int ilpSolver(Board* boardPtr, Board* solBoardPtr) {
 					if(sol[index] == 1) {
 						setCellVal(solBoardPtr,r,c,v+1);
 						break;
-						/*					  has_value = TRUE;
-					  printf("%d ", v+1);
-					  break;*/
 					}
 				}
-				/*			  if(!has_value)
-				  printf("0 ");
-			  has_value = FALSE;*/
 			}
-			/*		  printf("\n");*/
 		}
-		ret = TRUE;
 	}
-
-	/* no solution found */
-	else {
+	else { /* no solution found */
 		ret = FALSE;
 	}
 

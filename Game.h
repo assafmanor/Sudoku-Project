@@ -71,7 +71,7 @@ void initializeGame(Board*, Board*, unsigned int, unsigned int);
  *
  * Board*	boardPtr	-	A pointer to a game board.
  */
-void freeBoard(Board**);
+void freeBoard(Board*);
 
 
 /*

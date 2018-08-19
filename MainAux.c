@@ -443,8 +443,8 @@ unsigned int executeReset() {
 unsigned int executeExit() {
 	Board* gameBoardPtr = &gameBoard;
 	Board* solBoardPtr = &solutionBoard;
-	freeBoard(&gameBoardPtr);
-	freeBoard(&solBoardPtr);
+	freeBoard(gameBoardPtr);
+	freeBoard(solBoardPtr);
 	clearMoveList();
 	return TRUE;
 }

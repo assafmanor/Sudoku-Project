@@ -217,8 +217,8 @@ void calcNextCell(unsigned int N, unsigned int row, unsigned int col, unsigned i
  * Board*	boardPtr		-	A pointer a game board.
  */
 unsigned int validate(Board* boardPtr) {
-	return ilpSolver(boardPtr,getSolutionBoardPtr());
-	/*return 	detBacktracking(boardPtr);*/
+	unsigned int isSolvable = ilpSolver(boardPtr,getSolutionBoardPtr()); /* try to solve the board and update the sol board if solvable. */
+	return isSolvable;
 }
 
 
@@ -234,7 +234,6 @@ unsigned int autofill(Board* boardPtr){
 	unsigned int		lastVal;
 	Cell* 				cell;
 	SinglyLinkedList*	move;
-	Board*				constBoardPtr;
 
 
 	/* c - check if there are errounous cells*/
@@ -291,8 +290,7 @@ unsigned int autofill(Board* boardPtr){
 	}
 
 	free(possible);
-	constBoardPtr = &constBoard;
-	freeBoard(&constBoardPtr);
+	freeBoard(&constBoard);
 	return TRUE;
 }
 
@@ -353,7 +351,7 @@ int exhaustive_backtracking(Board* original, Board* temp) {
 	cd->row	= 0;cd->col	= 0;
 	cd->first_time	= TRUE;
 	/*--For each cell:--*/
-	do{
+	do {
 			if(cd->first_time){  /* first time we meet a cell-->init cell */
 				init_cell (original,temp, &cd, N);
 			}
@@ -410,7 +408,7 @@ int exhaustive_backtracking(Board* original, Board* temp) {
 			pop(&root,&cd);
 			nextCell: continue;
 	}
-	while(1);
+	while(TRUE);
 	counter = cd->counter;
 	free(cd);
 	return counter;
@@ -425,7 +423,10 @@ int exhaustive_backtracking(Board* original, Board* temp) {
 unsigned int num_solutions(Board* boardPtr){
 	unsigned int	 errounous;
 	unsigned int	 counter = 0;
-	Board* 			 tempBoardPtr = {'\0'};
+	Board* 			 tempBoardPtr = (Board*)malloc(sizeof(Board));
+	if(tempBoardPtr == NULL) {
+		printf("Error: malloc has failed\n");
+	}
 
 	/* c - check if there are errounous cells*/
 	errounous = hasErrors(boardPtr); /*if there are errors --> errounous = TRUE*/
@@ -438,12 +439,13 @@ unsigned int num_solutions(Board* boardPtr){
 	 * This board will be a copy of board, and will be solved instead of it.*/
 	initializeBoard(tempBoardPtr, boardPtr->m, boardPtr->n);
 	copyBoard(boardPtr, tempBoardPtr);
-
 	/*try to solve the board */
 	counter =  exhaustive_backtracking (boardPtr, tempBoardPtr);
 
 	/* Free allocated temporary board */
-	freeBoard(&tempBoardPtr);
+	freeBoard(tempBoardPtr);
+	free(tempBoardPtr);
+	printf("freeBoard complete\n");
 
 	/* print result*/
 	printf("Number of solutions: %d\n",counter);
@@ -463,7 +465,7 @@ unsigned int num_solutions(Board* boardPtr){
  * pre :x, y have legal coordinates (Checked in MainAux.c) */
 unsigned int generate(Board* gameBoardPtr,int x, int y ) {
 	SinglyLinkedList*	move;
-	unsigned int	x_values_successfully, ilp_Successfully;
+	unsigned int	x_values_successfully, ilp_Successful;
 	unsigned int	rand_row, rand_col, rand_val, posValsCount;
 	unsigned int	m = gameBoardPtr->m, n = gameBoardPtr->n;
 	int	N = m*n;
@@ -477,9 +479,9 @@ unsigned int generate(Board* gameBoardPtr,int x, int y ) {
 	}
 
 	/* try 1000 times(max) to fill x cells */
-	for(try=0; try<1000;try++){
+	for(try = 0; try < 1000; try++){
 		x_values_successfully = TRUE;
-		ilp_Successfully = FALSE;
+		ilp_Successful = FALSE;
 		for (i=0; i<x; i++){ /* find x good values */
 			/* choose random cell */
 			rand_col = rand()%N;/* +1?? */
@@ -506,11 +508,10 @@ unsigned int generate(Board* gameBoardPtr,int x, int y ) {
 		}/* finished current board building, maybe with illegal board */
 
 		if(x_values_successfully){ /* Try to solve board */
-			/*ilp_Successfully = detBacktracking(gameBoardPtr);*/
-			ilp_Successfully = ilpSolver(gameBoardPtr,getSolutionBoardPtr());
+			ilp_Successful = ilpSolver(gameBoardPtr,getSolutionBoardPtr());
 		}
 
-		if(ilp_Successfully) break;
+		if(ilp_Successful) break;
 		else{
 			nullifyBoard(gameBoardPtr);
 				continue;
@@ -518,7 +519,7 @@ unsigned int generate(Board* gameBoardPtr,int x, int y ) {
 
 	}/* Outer for loop was ended */
 
-	if(!ilp_Successfully){	/* Failed to generate the board */
+	if(!ilp_Successful){	/* Failed to generate the board */
 		printf("Error: puzzle generator failed\n");
 		nullifyBoard(gameBoardPtr);
 	    return FALSE;
