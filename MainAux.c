@@ -1,11 +1,11 @@
 /* declarations */
 #include <stdio.h>
 #include <stdlib.h>
-#include "MainAux.h"
-#include "Parser.h"
+/*#include "MainAux.h"*/
+/*#include "Parser.h"*/
 #include "Solver.h"
 #include "FileManager.h"
-#include "LinkedList.h"
+/*#include "LinkedList.h"*/
 #include "ILP_Solver.h"
 
 
@@ -324,10 +324,13 @@ unsigned int executeSet(int* command) {
 
 
 unsigned int executeValidate() {
+	/* return TRUE iff the command is legal */
 	if(getGameMode() == INIT) return FALSE;
+
+	/* The command is legal: */
 	if(hasErrors(&gameBoard)) {
 		printf("Error: board contains erroneous values\n");
-		return FALSE;
+		return TRUE;
 	}
 	if(validate(&gameBoard)) {
 		printf("Validation passed: board is solvable\n");
