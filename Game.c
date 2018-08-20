@@ -13,131 +13,7 @@ unsigned int		markErrors = TRUE;			/* a binary variable indicating that the play
 
 
 
-void nullifyBoard(Board* boardPtr) {
-	unsigned int	N = boardPtr->m * boardPtr->n;
-	unsigned int	i,j,k;
-	for(i = 0; i < N; i++) {
-		for(j = 0; j < N; j++) {
-			setCellVal(boardPtr,i,j,0);
-			for(k = 0; k < N; k++) {
-				getCell(boardPtr,i,j)->possible_vals[k] = TRUE;
-			}
-		}
-	}
-}
-
-/*
- * Initializes the game board's parameters for a new game.
- *
-
- * Board*		boardPtr	-	A pointer to a game board.
- * unsigned int	m			-	Number of rows in each block on the board.
- * unsigned int	m			-	Number of columns in each block on the board.
- *
- */
-void initializeBoard(Board* boardPtr, unsigned int m, unsigned int n) {
-	unsigned int i, j, k;
-	unsigned int N = m*n;
-
-	/* Free previously allocated space */
-	if(boardPtr != NULL && boardPtr->m == m && boardPtr->n == n) {
-		nullifyBoard(boardPtr);
-	}
-	else if(boardPtr != NULL){
-		freeBoard(boardPtr);
-	}
-	boardPtr->m = m;
-	boardPtr->n = n;
-
-	/* Allocate space */
-    boardPtr->board = (Cell**)malloc(N * sizeof(Cell*)); 											/* rows */
-	if(boardPtr->board == NULL) {
-		printf("Error: malloc has failed\n");
-		exit(1);
-	}
-    for (i = 0; i < N; i++) {
-    	boardPtr->board[i] = (Cell*)malloc(N * sizeof(Cell));	 									/* Cells */
-     	if(boardPtr->board[i] == NULL) {
-     		printf("Error: malloc has failed\n");
-     		exit(1);
-     	}
-         for(j = 0; j < N; j++) {
-        	 boardPtr->board[i][j].possible_vals = (unsigned int*)malloc((N+1) * sizeof(unsigned int));	/* Possible values */
-        		if(boardPtr->board[i][j].possible_vals == NULL) {
-        			printf("Error: malloc has failed\n");
-        			exit(1);
-        		}
-         }
-    }
-    /* set empty values */
-	for(i = 0; i < N; i++) {
-		for(j = 0; j < N; j++) {
-			boardPtr->board[i][j].value = 0;
-			boardPtr->board[i][j].fixed = FALSE;
-			boardPtr->board[i][j].isErroneous = FALSE;
-			for(k = 0; k < N; k++) {
-				boardPtr->board[i][j].possible_vals[k] = TRUE;
-			}
-		}
-	}
-
-	boardPtr->cellsDisplayed = 0;
-}
-
-
-/*
- * Initializes a new empty game board and a solution board, frees previously allocated space used by these boards.
- *
- * Board*		gBoard	-	A pointer to the game board.
- * Board*		sBoard	-	A pointer to the solution board.
- * unsigned int	m		-	number of rows in each block on the board.
- * unsigned int	m		-	number of columns in each block on the board.
- */
-void initializeGame(Board* gBoard, Board* sBoard, unsigned int m, unsigned int n) {
-	gameBoard = (*gBoard);					/* copy gameBoard to Game.c */
-	solutionBoard = (*sBoard);				/* copy solutionBoard to Game.c */
-	/* initialize the two boards */
-	initializeBoard(&gameBoard,m,n);
-	initializeBoard(&solutionBoard,m,n);
-}
-
-
-/*
- * Frees all allocated space used by board
- *
- * Board*	boardPtr	-	A pointer to a game board.
- */
-void freeBoard(Board* boardPtr) {
-	unsigned int i, j;
-	unsigned int N;
-	Cell* temp_cell;
-
-	/* Board is uninitialized */
-	if(boardPtr == NULL) {
-		return;
-	}
-	N = boardPtr->m*boardPtr->n;
-	/* free allocated possible_vals for each cell, and free rows */
-	for(i = 0; i < N; i++) {
-		for(j = 0; j < N; j++) {
-			if(boardPtr->board[i][j].possible_vals != NULL) {
-				temp_cell = getCell(boardPtr,i,j);
-				free(temp_cell->possible_vals);
-			}
-		}
-		/* free allocated row */
-		if(boardPtr->board[i] != NULL) {
-			free(boardPtr->board[i]);
-		}
-	}
-	/* free the board itself */
-	if(boardPtr->board != NULL) {
-
-		free(boardPtr->board);
-	}
-
-	boardPtr = NULL;
-}
+/* --------------- Cell functions --------------- */
 
 
 /*
@@ -174,21 +50,6 @@ unsigned int isCellFixed(Board* boardPtr, unsigned int row, unsigned int col) {
 	return getCell(boardPtr,row,col)->fixed;
 }
 
-
-/*
- * Returns TRUE iff all cells are filled on a game board.
- *
- * Board	board	-	A game board.
- */
-unsigned int isBoardComplete(Board board) {
-	unsigned int N = board.m*board.n;
-	return board.cellsDisplayed == N*N;
-}
-
-
-unsigned int	isBoardEmpty(Board board){
-	return board.cellsDisplayed == 0;
-}
 
 /*
  * Checks if cell[row][col] of boardPtr->board contains an erroneous value.
@@ -239,55 +100,6 @@ unsigned int isErroneous(Board* boardPtr, unsigned int row, unsigned int col) {
 		}
 	}
 	return FALSE;
-}
-
-
-
-/*
- * Updates all cells that may have changed from erroneous to not erroneous or the other way around,
- * given that cell[row][col] of boardPtr->board has changed its value.
- *
- * Board*	boardPtr	-	A pointer to a game board.
- * unsigned int	col		-	Column number (between 0 and N-1).
- * unsigned int	row		-	Row number (between 0 and N-1).
- * unsigned int	lastVal	-	The previous value of cell[row][col] of boardPtr->board (before its value has changed)
- */
-void updateErroneous(Board* boardPtr, unsigned int row, unsigned int col, unsigned int lastVal) {
-	unsigned int i,j, count_i, count_j;
-	unsigned int m = boardPtr->m, n = boardPtr->n;
-	unsigned int N = m*n;
-	Cell* cell;
-
-	/* Row */
-	for(j = 0; j < N; j++) {
-		cell = getCell(boardPtr,row,j);
-		cell->isErroneous = isErroneous(boardPtr, row, j);
-		if(cell->value == lastVal) { /* Might have been erroneous and but now isn't now. check if erroneous. */
-			cell->isErroneous = isErroneous(boardPtr,row,j);
-		}
-	}
-
-	/* Column */
-	for(i = 0; i < N; i++) {
-		cell = getCell(boardPtr,i,col);
-		cell->isErroneous = isErroneous(boardPtr,i,col);
-		if(cell->value == lastVal) { /* Might have been erroneous and but now isn't now. check if erroneous. */
-			cell->isErroneous = isErroneous(boardPtr,i,col);
-		}
-	}
-
-	/* Block */
-	i = m*((row)/m); /* Index of the first row of the block */
-	j = n*((col)/n); /* Index of the first column of the block */
-	for(count_i = 0; count_i < m; count_i++) {
-		for(count_j = 0; count_j < n; count_j++) {
-			cell = getCell(boardPtr,i+count_i,j+count_j);
-			cell->isErroneous = isErroneous(boardPtr,i+count_i,j+count_j);
-			if(cell->value == lastVal) {
-				cell->isErroneous = isErroneous(boardPtr,i+count_i,j+count_j);
-			}
-		}
-	}
 }
 
 
@@ -374,21 +186,144 @@ void setCellVal(Board* boardPtr, unsigned int row, unsigned int col, unsigned in
 }
 
 
+/* --------------- Board functions --------------- */
+
+
 /*
- * Sets the value of gameMode to newGameMode.
+ * Initializes the game board's parameters for a new game
+ * with the same m and n.
  *
- * unsigned int	newGameMode	-	The desired game mode.
+ * Board*		boardPtr	-	A pointer to a game board.
+ *
  */
-void setGameMode(unsigned int newGameMode) {
-	gameMode = newGameMode;
+void nullifyBoard(Board* boardPtr) {
+	unsigned int	N = boardPtr->m * boardPtr->n;
+	unsigned int	i,j,k;
+	for(i = 0; i < N; i++) {
+		for(j = 0; j < N; j++) {
+			setCellVal(boardPtr,i,j,0);
+			for(k = 0; k < N; k++) {
+				getCell(boardPtr,i,j)->possible_vals[k] = TRUE;
+			}
+		}
+	}
 }
 
 
 /*
- * Returns the value of gameMode.
+ * Initializes the game board's parameters for a new game.
+ *
+ * Board*		boardPtr	-	A pointer to a game board.
+ * unsigned int	m			-	Number of rows in each block on the board.
+ * unsigned int	m			-	Number of columns in each block on the board.
+ *
  */
-unsigned int getGameMode() {
-	return gameMode;
+void initializeBoard(Board* boardPtr, unsigned int m, unsigned int n) {
+	unsigned int i, j, k;
+	unsigned int N = m*n;
+
+	/* Free previously allocated space */
+	if(boardPtr != NULL && boardPtr->m == m && boardPtr->n == n) {
+		nullifyBoard(boardPtr);
+	}
+	else if(boardPtr != NULL){
+		freeBoard(boardPtr);
+	}
+	boardPtr->m = m;
+	boardPtr->n = n;
+
+	/* Allocate space */
+    boardPtr->board = (Cell**)malloc(N * sizeof(Cell*)); 											/* rows */
+	if(boardPtr->board == NULL) {
+		printf("Error: malloc has failed\n");
+		exit(1);
+	}
+    for (i = 0; i < N; i++) {
+    	boardPtr->board[i] = (Cell*)malloc(N * sizeof(Cell));	 									/* Cells */
+     	if(boardPtr->board[i] == NULL) {
+     		printf("Error: malloc has failed\n");
+     		exit(1);
+     	}
+         for(j = 0; j < N; j++) {
+        	 boardPtr->board[i][j].possible_vals = (unsigned int*)malloc((N+1) * sizeof(unsigned int));	/* Possible values */
+        		if(boardPtr->board[i][j].possible_vals == NULL) {
+        			printf("Error: malloc has failed\n");
+        			exit(1);
+        		}
+         }
+    }
+    /* set empty values */
+	for(i = 0; i < N; i++) {
+		for(j = 0; j < N; j++) {
+			boardPtr->board[i][j].value = 0;
+			boardPtr->board[i][j].fixed = FALSE;
+			boardPtr->board[i][j].isErroneous = FALSE;
+			for(k = 0; k < N; k++) {
+				boardPtr->board[i][j].possible_vals[k] = TRUE;
+			}
+		}
+	}
+
+	boardPtr->cellsDisplayed = 0;
+}
+
+
+/*
+ * Frees all allocated space used by board
+ *
+ * Board*	boardPtr	-	A pointer to a game board.
+ */
+void freeBoard(Board* boardPtr) {
+	unsigned int i, j;
+	unsigned int N;
+	Cell* temp_cell;
+
+	/* Board is uninitialized */
+	if(boardPtr == NULL) {
+		return;
+	}
+	N = boardPtr->m*boardPtr->n;
+	/* free allocated possible_vals for each cell, and free rows */
+	for(i = 0; i < N; i++) {
+		for(j = 0; j < N; j++) {
+			if(boardPtr->board[i][j].possible_vals != NULL) {
+				temp_cell = getCell(boardPtr,i,j);
+				free(temp_cell->possible_vals);
+			}
+		}
+		/* free allocated row */
+		if(boardPtr->board[i] != NULL) {
+			free(boardPtr->board[i]);
+		}
+	}
+	/* free the board itself */
+	if(boardPtr->board != NULL) {
+
+		free(boardPtr->board);
+	}
+
+	boardPtr = NULL;
+}
+
+
+/*
+ * Returns TRUE iff all cells are filled on a game board.
+ *
+ * Board	board	-	A game board.
+ */
+unsigned int isBoardComplete(Board board) {
+	unsigned int N = board.m*board.n;
+	return board.cellsDisplayed == N*N;
+}
+
+
+/*
+ * Returns TRUE iff all cells are Empty on a game board.
+ *
+ * Board	board	-	A game board.
+ */
+unsigned int	isBoardEmpty(Board board){
+	return board.cellsDisplayed == 0;
 }
 
 
@@ -420,6 +355,7 @@ void copyBoard(Board* original, Board* copy) {
 	copy->cellsDisplayed = original->cellsDisplayed;
 }
 
+
 /*
  * Returns a pointer to gameBoard.
  */
@@ -427,27 +363,12 @@ Board* getGameBoardPtr() {
 	return &gameBoard;
 }
 
+
 /*
  * Returns a pointer to solutionBoard.
  */
 Board* getSolutionBoardPtr() {
 	return &solutionBoard;
-}
-
-/*
- * Sets the value of markErrors to mark (assumes mark is 0 or 1).
- *
- * unsigned int	mark	-	the desired value of markErrors (assumed to be 0 or 1).
- */
-void setMarkErrors(unsigned int mark) {
-	markErrors = mark;
-}
-
-/*
- * Returns the value of markErrors.
- */
-unsigned int getMarkErrors() {
-	return markErrors;
 }
 
 
@@ -471,13 +392,119 @@ unsigned int hasErrors(Board* boardPtr) {
 }
 
 
+/* --------------- Game functions --------------- */
+
+
+/*
+ * Initializes a new empty game board and a solution board, frees previously allocated space used by these boards.
+ *
+ * Board*		gBoard	-	A pointer to the game board.
+ * Board*		sBoard	-	A pointer to the solution board.
+ * unsigned int	m		-	number of rows in each block on the board.
+ * unsigned int	m		-	number of columns in each block on the board.
+ */
+void initializeGame(Board* gBoard, Board* sBoard, unsigned int m, unsigned int n) {
+	gameBoard = (*gBoard);					/* copy gameBoard to Game.c */
+	solutionBoard = (*sBoard);				/* copy solutionBoard to Game.c */
+	/* initialize the two boards */
+	initializeBoard(&gameBoard,m,n);
+	initializeBoard(&solutionBoard,m,n);
+}
+
+
+/*
+ * Updates all cells that may have changed from erroneous to not erroneous or the other way around,
+ * given that cell[row][col] of boardPtr->board has changed its value.
+ *
+ * Board*	boardPtr	-	A pointer to a game board.
+ * unsigned int	col		-	Column number (between 0 and N-1).
+ * unsigned int	row		-	Row number (between 0 and N-1).
+ * unsigned int	lastVal	-	The previous value of cell[row][col] of boardPtr->board (before its value has changed)
+ */
+void updateErroneous(Board* boardPtr, unsigned int row, unsigned int col, unsigned int lastVal) {
+	unsigned int i,j, count_i, count_j;
+	unsigned int m = boardPtr->m, n = boardPtr->n;
+	unsigned int N = m*n;
+	Cell* cell;
+
+	/* Row */
+	for(j = 0; j < N; j++) {
+		cell = getCell(boardPtr,row,j);
+		cell->isErroneous = isErroneous(boardPtr, row, j);
+		if(cell->value == lastVal) { /* Might have been erroneous and but now isn't now. check if erroneous. */
+			cell->isErroneous = isErroneous(boardPtr,row,j);
+		}
+	}
+
+	/* Column */
+	for(i = 0; i < N; i++) {
+		cell = getCell(boardPtr,i,col);
+		cell->isErroneous = isErroneous(boardPtr,i,col);
+		if(cell->value == lastVal) { /* Might have been erroneous and but now isn't now. check if erroneous. */
+			cell->isErroneous = isErroneous(boardPtr,i,col);
+		}
+	}
+
+	/* Block */
+	i = m*((row)/m); /* Index of the first row of the block */
+	j = n*((col)/n); /* Index of the first column of the block */
+	for(count_i = 0; count_i < m; count_i++) {
+		for(count_j = 0; count_j < n; count_j++) {
+			cell = getCell(boardPtr,i+count_i,j+count_j);
+			cell->isErroneous = isErroneous(boardPtr,i+count_i,j+count_j);
+			if(cell->value == lastVal) {
+				cell->isErroneous = isErroneous(boardPtr,i+count_i,j+count_j);
+			}
+		}
+	}
+}
+
+
+/*
+ * Sets the value of gameMode to newGameMode.
+ *
+ * unsigned int	newGameMode	-	The desired game mode.
+ */
+void setGameMode(unsigned int newGameMode) {
+	gameMode = newGameMode;
+}
+
+
+/*
+ * Returns the value of gameMode.
+ */
+unsigned int getGameMode() {
+	return gameMode;
+}
+
+
+/*
+ * Sets the value of markErrors to mark (assumes mark is 0 or 1).
+ *
+ * unsigned int	mark	-	the desired value of markErrors (assumed to be 0 or 1).
+ */
+void setMarkErrors(unsigned int mark) {
+	markErrors = mark;
+}
+
+
+/*
+ * Returns the value of markErrors.
+ */
+unsigned int getMarkErrors() {
+	return markErrors;
+}
+
+
+/* --------------- Move-list functions --------------- */
+
+
 /*
  * Clears all allocated memory used by the field moveList.
  */
 void clearMoveList() {
 	doubly_clear(moveList);
 }
-
 
 
 /*

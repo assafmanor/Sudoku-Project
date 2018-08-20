@@ -8,7 +8,7 @@
 #define SOLVE		1
 #define EDIT		2
 
-
+/* --------------- Structures --------------- */
 /*
  * Cell structure. The Sudoku board consists of N*N Cells.
  */
@@ -40,38 +40,7 @@ typedef struct board_t {
 #endif
 
 
-void nullifyBoard(Board*);
-
-
-/*
- * Initializes the game board's parameters for a new game.
- *
-
- * Board*		boardPtr	-	A pointer to a game board.
- * unsigned int	m			-	Number of rows in each block on the board.
- * unsigned int	m			-	Number of columns in each block on the board.
- *
- */
-void initializeBoard(Board*, unsigned int m, unsigned int n);
-
-
-/*
- * Initializes a new empty game board and a solution board, frees previously allocated space used by these boards.
- *
- * Board*		gBoard	-	A pointer to the game board.
- * Board*		sBoard	-	A pointer to the solution board.
- * unsigned int	m		-	number of rows in each block on the board.
- * unsigned int	m		-	number of columns in each block on the board.
- */
-void initializeGame(Board*, Board*, unsigned int, unsigned int);
-
-
-/*
- * Frees all allocated space used by board
- *
- * Board*	boardPtr	-	A pointer to a game board.
- */
-void freeBoard(Board*);
+/* --------------- Cell functions --------------- */
 
 
 /*
@@ -104,22 +73,6 @@ unsigned int	isCellFixed(Board*, unsigned int, unsigned int);
 
 
 /*
- * Returns TRUE iff all cells are filled on a game board.
- *
- * Board	board	-	A game board.
- */
-unsigned int	isBoardComplete(Board);
-
-
-/*
- * Returns TRUE iff all cells are empty on a game board.
- *
- * Board	board	-	A game board.
- */
-unsigned int	isBoardEmpty(Board);
-
-
-/*
  * Checks if cell[row][col] of boardPtr->board contains an erroneous value.
  *
  * Board*	boardPtr	-	A pointer to a game board.
@@ -127,18 +80,6 @@ unsigned int	isBoardEmpty(Board);
  * unsigned int	row		-	Row number (between 0 and N-1).
  */
 unsigned int isErroneous(Board*, unsigned int, unsigned int);
-
-
-/*
- * Updates all cells that may have changed from erroneous to not erroneous or the other way around,
- * given that cell[row][col] of boardPtr->board has changed its value.
- *
- * Board*	boardPtr	-	A pointer to a game board.
- * unsigned int	col		-	Column number (between 0 and N-1).
- * unsigned int	row		-	Row number (between 0 and N-1).
- * unsigned int	lastVal	-	The previous value of cell[row][col] of boardPtr->board (before its value has changed)
- */
-void updateErroneous(Board*, unsigned int, unsigned int, unsigned int);
 
 
 /*
@@ -152,7 +93,6 @@ void updateErroneous(Board*, unsigned int, unsigned int, unsigned int);
  */
 void			updatePossibleValues(Board*, unsigned int, unsigned int, unsigned int);
 
-
 /*
  * Assigns the value of val to cell[row-1][col-1].value (assuming value is possible),
  * updates the possible values of all the cells in the row, column and block,
@@ -165,17 +105,51 @@ void			updatePossibleValues(Board*, unsigned int, unsigned int, unsigned int);
 void			setCellVal(Board*, unsigned int, unsigned int, unsigned int);
 
 
-/*
- * Sets the value of gameMode to newGameMode.
- *
- * unsigned int	newGameMode	-	The desired game mode.
- */
-void			setGameMode(unsigned int);
+/* --------------- Board functions --------------- */
+
 
 /*
- * Returns the value of gameMode.
+ * Initializes the game board's parameters for a new game
+ * with the same m and n.
+ *
+ * Board*		boardPtr	-	A pointer to a game board.
+ *
  */
-unsigned int 	getGameMode();
+void nullifyBoard(Board*);
+
+/*
+ * Initializes the game board's parameters for a new game.
+ *
+
+ * Board*		boardPtr	-	A pointer to a game board.
+ * unsigned int	m			-	Number of rows in each block on the board.
+ * unsigned int	m			-	Number of columns in each block on the board.
+ *
+ */
+void initializeBoard(Board*, unsigned int m, unsigned int n);
+
+/*
+ * Frees all allocated space used by board
+ *
+ * Board*	boardPtr	-	A pointer to a game board.
+ */
+void freeBoard(Board*);
+
+
+/*
+ * Returns TRUE iff all cells are filled on a game board.
+ *
+ * Board	board	-	A game board.
+ */
+unsigned int	isBoardComplete(Board);
+
+
+/*
+ * Returns TRUE iff all cells are empty on a game board.
+ *
+ * Board	board	-	A game board.
+ */
+unsigned int	isBoardEmpty(Board);
 
 
 /*
@@ -193,11 +167,55 @@ void			copyBoard(Board*, Board*);
  */
 Board*			getGameBoardPtr();
 
+
 /*
  * Returns a pointer to solutionBoard.
  */
 Board*			getSolutionBoardPtr();
 
+/*
+ * Checks if boardPtr->board has any erroneous cells.
+ *
+ * Board*	boardPtr	-	A pointer to a game board.
+ */
+unsigned int hasErrors(Board*);
+
+
+/* --------------- Game functions --------------- */
+
+
+/*
+ * Initializes a new empty game board and a solution board, frees previously allocated space used by these boards.
+ *
+ * Board*		gBoard	-	A pointer to the game board.
+ * Board*		sBoard	-	A pointer to the solution board.
+ * unsigned int	m		-	number of rows in each block on the board.
+ * unsigned int	m		-	number of columns in each block on the board.
+ */
+void initializeGame(Board*, Board*, unsigned int, unsigned int);
+
+/*
+ * Updates all cells that may have changed from erroneous to not erroneous or the other way around,
+ * given that cell[row][col] of boardPtr->board has changed its value.
+ *
+ * Board*	boardPtr	-	A pointer to a game board.
+ * unsigned int	col		-	Column number (between 0 and N-1).
+ * unsigned int	row		-	Row number (between 0 and N-1).
+ * unsigned int	lastVal	-	The previous value of cell[row][col] of boardPtr->board (before its value has changed)
+ */
+void updateErroneous(Board*, unsigned int, unsigned int, unsigned int);
+
+/*
+ * Sets the value of gameMode to newGameMode.
+ *
+ * unsigned int	newGameMode	-	The desired game mode.
+ */
+void			setGameMode(unsigned int);
+
+/*
+ * Returns the value of gameMode.
+ */
+unsigned int 	getGameMode();
 
 /*
  * Sets the value of markErrors to mark (assumes mark is 0 or 1).
@@ -212,19 +230,13 @@ void			setMarkErrors(unsigned int);
 unsigned int getMarkErrors();
 
 
-/*
- * Checks if boardPtr->board has any erroneous cells.
- *
- * Board*	boardPtr	-	A pointer to a game board.
- */
-unsigned int hasErrors(Board*);
+/* --------------- Move-list functions --------------- */
 
 
 /*
  * Clears all allocated memory used by the field moveList.
  */
 void clearMoveList();
-
 
 
 /*

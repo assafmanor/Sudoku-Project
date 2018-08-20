@@ -463,7 +463,7 @@ void calcNextCell(unsigned int N, unsigned int row, unsigned int col, unsigned i
 
 
 
-/*------------------- num_solutions() helpful functions-----------------------------*/
+/****************** num_solutions() Private methods *******************/
 
 /*
  * Calculates the next cell to be checked, and
