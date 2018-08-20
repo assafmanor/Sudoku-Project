@@ -330,7 +330,7 @@ unsigned int executeGenerate(int* command) {
 	/* check x, y to have legal coordinates:
 	 * command[1] is x, command[2] is y */
 	if ((command[1] < 0)||(command[2] < 0)||(command[1] > (N*N))||(command[2] > (N*N))){
-		printf("Error:value not in range 0-%d\n",(N*N));
+		printf("Error: value not in range 0-%d\n",(N*N));
 	    return TRUE;
 	}
 	if(generate(&gameBoard, (command[1]), (command[2]))) {
@@ -385,27 +385,52 @@ unsigned int executeSave(char* path) {
 
 unsigned int executeHint(int* command) {
 	unsigned int	m = gameBoard.m, n = gameBoard.n;
-	unsigned int	gameMode = getGameMode();
-	unsigned int 	N = m*n;
+	unsigned int	gameMode 		= getGameMode();
+	unsigned int 	N 				= m*n;
+	unsigned int	boardIsSolvable = TRUE;
 	int				row, col;
+	Cell* 			cur_cell;
 
 	col = command[1]-1;
 	row = command[2]-1;
 
+	/*b - check gameMode */
 	if(gameMode != SOLVE) return FALSE;
+
+	/*c,d - check coordinates */
 	if(row < 0 || col < 0 ||
 	   row >= (int)N || col >= (int)N) {
 		printf("Error: value not in range 1-%d\n",N);
 		return TRUE;
 	}
+
+	/*e - check errors */
 	if(hasErrors(&gameBoard)) {
 		printf("Error: board contains erroneous values\n");
 		return TRUE;
 	}
-	if(getHint(row,col) == 0) { /* solutionBoard not solved */
-		ilpSolver(&gameBoard, &solutionBoard);
+
+	/*f - check if cell is fixed */
+	cur_cell = getCell(&gameBoard,row,col);
+	if(cur_cell->fixed){
+		printf("Error: cell is fixed\n");
+		return TRUE;
 	}
-	printf("Hint: set cell to %d\n",getHint(row,col));
+
+	/*g - check if cell already has value */
+	if(cur_cell->value != 0){
+		printf("Error: cell already contains a value\n");
+		return TRUE;
+	}
+
+	/* h - solutionBoard not solved - solve with use ilp */
+	if(getHint(row,col) == 0) {
+		boardIsSolvable = ilpSolver(&gameBoard, &solutionBoard);
+	}
+	if(boardIsSolvable)
+		printf("Hint: set cell to %d\n",getHint(row,col));
+	else
+		printf("Error: board is unsolvable %d\n",getHint(row,col));
 	return TRUE;
 
 }

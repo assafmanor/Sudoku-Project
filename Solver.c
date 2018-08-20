@@ -272,7 +272,7 @@ unsigned int autofill(Board* boardPtr){
 			/*there is only one choice-->find it*/
 			for(k=0; k<N; k++){
 				if(possible[k]){
-					printf("Cell<%d,%d> set to %d\n",j+1,i+1,k+1);
+					printf("Cell <%d,%d> set to %d\n",j+1,i+1,k+1);
 					lastVal = cell->value;
 					setCellVal(boardPtr,i,j,k+1);
 					singly_addLast(move,i,j,k+1,lastVal);
@@ -484,8 +484,8 @@ unsigned int generate(Board* gameBoardPtr,int x, int y ) {
 		ilp_Successful = FALSE;
 		for (i=0; i<x; i++){ /* find x good values */
 			/* choose random cell */
-			rand_col = rand()%N;/* +1?? */
-			rand_row = rand()%N;/* +1?? */
+			rand_col = rand()%N;
+			rand_row = rand()%N;
 			cur_cell = getCell(gameBoardPtr, rand_row, rand_col);
 			/* if cell already has value-> choose another cell instead */
 			if(cur_cell->value != 0){
