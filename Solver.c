@@ -176,6 +176,7 @@ unsigned int autofill(Board* boardPtr){
 					lastVal = cell->value;
 					setCellVal(boardPtr,i,j,k+1);
 					singly_addLast(move,i,j,k+1,lastVal);
+					updateErroneous(boardPtr, i, j, lastVal);
 					break;
 				}
 			}
@@ -191,6 +192,7 @@ unsigned int autofill(Board* boardPtr){
 
 	free(possible);
 	freeBoard(&constBoard);
+
 	return TRUE;
 }
 
