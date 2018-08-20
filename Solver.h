@@ -22,6 +22,7 @@
  * If solvable and some cells' val field != sol_val - update relevant sol_val's.
  * Returns TRUE iff current configuration of game board is solvable.
  *
+ *	Pre: board is not erroneous	(Checked in MainAux.c)
  * Board*	boardPtr		-	A pointer a game board.
  */
 unsigned int validate(Board*);

@@ -278,14 +278,21 @@ unsigned int executeSet(int* command) {
 	row = command[2]-1;
 	val = command[3];
 
+	/* b - This command is available in Edit or Solve mode only */
 	if(gameMode == INIT) return FALSE;
+
+	/* c - The values of X,Y,Z are not guaranteed to be correct */
 	if(row < 0 || col < 0 || val < 0 ||
 	   row >= (int)N || col >= (int)N || val > (int)N) {
 		printf("Error: value not in range 0-%d\n",N);
 	}
+
+	/* e - Cell is fixed */
 	else if(isCellFixed(&gameBoard, row, col)) {
 		printf("Error: cell is fixed\n");
 	}
+
+	/*  We can use set command: */
 	else {
 		lastVal = getCell(&gameBoard, row, col)->value;
 
@@ -294,13 +301,22 @@ unsigned int executeSet(int* command) {
 		singly_addLast(move,row,col,val,lastVal);
 		addMove(move);
 
+		/* update and print the board */
 		setCellVal(&gameBoard, row, col, val);
 		updateErroneous(&gameBoard, row, col, lastVal);
-		printBoard(&gameBoard);
-		if(!hasErrors(&gameBoard) && isBoardComplete(gameBoard) && gameMode == SOLVE) {
-			printf("Puzzle solved successfully\n");
-			/* Set game mode to INIT */
-			setGameMode(INIT);
+		printBoard(&gameBoard); /* h */
+
+		/* i - this is the last cell to be filled in solve mode: */
+		if(isBoardComplete(gameBoard) && gameMode == SOLVE) {
+			if(validate(&gameBoard) == TRUE){ /*solved the board correctly*/
+				printf("Puzzle solved successfully\n");
+				/* Set game mode to INIT */
+				setGameMode(INIT);
+			}
+			else{ /* solved the board un-correctly */
+				printf("Puzzle solution erroneous\n");
+			}
+
 		}
 	}
 	return TRUE;
@@ -311,7 +327,7 @@ unsigned int executeValidate() {
 	if(getGameMode() == INIT) return FALSE;
 	if(hasErrors(&gameBoard)) {
 		printf("Error: board contains erroneous values\n");
-		return TRUE;
+		return FALSE;
 	}
 	if(validate(&gameBoard)) {
 		printf("Validation passed: board is solvable\n");
