@@ -5,11 +5,13 @@
 
 
 /********** Private method declarations **********/
-unsigned int get_index(unsigned int, unsigned int, unsigned int, unsigned int);
-unsigned int createGurobiEnvModel(GRBenv*, GRBmodel**);
-unsigned int initObjectiveFunction(GRBenv*, GRBmodel**, unsigned int, char*);
-unsigned int addConstraints(GRBenv*, GRBmodel*, Board*, unsigned int, unsigned int);
-void updateSolution(Board*, double*, unsigned int);
+
+unsigned int	get_index(unsigned int, unsigned int, unsigned int, unsigned int);
+unsigned int	createGurobiEnvModel(GRBenv*, GRBmodel**);
+unsigned int	initObjectiveFunction(GRBenv*, GRBmodel**, unsigned int, char*);
+unsigned int	addConstraints(GRBenv*, GRBmodel*, Board*, unsigned int, unsigned int);
+void			updateSolution(Board*, double*, unsigned int);
+
 /******* End of private method declarations ******/
 
 
@@ -142,6 +144,7 @@ unsigned int get_index(unsigned int N, unsigned int row, unsigned int col, unsig
 /*
  * Creates a Gurobi environment and an empty model.
  * Also sets OutputFlag to 0, so there will be no prints to the console from Gurobi.
+ * Returns TRUE iff there were errors while using Gurobi.
  *
  * GRBenv* 		env			-	Gurobi envorinment.
  * GRBmodel**	modelPtr	-	A pointer to a Gurobi model.
