@@ -94,7 +94,7 @@ unsigned int executeCommand (int* command, char* path){
 	case 15: 	/*	EXIT	*/
 		return executeExit();
 
-	/* /////////// TEMPORARY /////////////// */
+	/* TODO: /////////// TEMPORARY /////////////// */
 	case 16:		/* CREATE		*/
 		return executeCreate(command);
 	default: /* shouldn't get here */
@@ -203,6 +203,7 @@ void printBoard(Board* boardPtr) {
 
 
 unsigned int executeSolve(char* path) {
+	int ilpSuccess;
 	setGameMode(SOLVE);
 	if(path[0] == '\0') { /* No path given */
 		return FALSE;
@@ -213,9 +214,11 @@ unsigned int executeSolve(char* path) {
 		initializeMoveList();
 		initializeBoard(&solutionBoard, gameBoard.m, gameBoard.n);
 		if(!hasErrors(&gameBoard)) { /* If board has erroneous values, then the board has no valid solution */
-			ilpSolver(&gameBoard, &solutionBoard);
+			ilpSuccess = ilpSolver(&gameBoard, &solutionBoard);
+			if(ilpSuccess == -1) { /* Gurobi failure */
+				printf("Error: Gurobi failure. Please try again\n");
+			}
 		}
-/*		printBoard(&gameBoard);*/
 	}
 	else {
 		printf("Error: File doesn't exist or cannot be opened\n");
@@ -324,6 +327,7 @@ unsigned int executeSet(int* command) {
 
 
 unsigned int executeValidate() {
+	int isSolvable;
 	/* return TRUE iff the command is legal */
 	if(getGameMode() == INIT) return FALSE;
 
@@ -332,7 +336,11 @@ unsigned int executeValidate() {
 		printf("Error: board contains erroneous values\n");
 		return TRUE;
 	}
-	if(validate(&gameBoard)) {
+	isSolvable = validate(&gameBoard);
+	if(isSolvable == -1) { /* Gurobi failure */
+		printf("Error: Gurobi failed to validate board. Please try again\n");
+	}
+	else if(isSolvable) {
 		printf("Validation passed: board is solvable\n");
 	}
 	else {
@@ -406,8 +414,8 @@ unsigned int executeHint(int* command) {
 	unsigned int	m = gameBoard.m, n = gameBoard.n;
 	unsigned int	gameMode 		= getGameMode();
 	unsigned int 	N 				= m*n;
-	unsigned int	boardIsSolvable = TRUE;
-	int				row, col;
+	int				isSolvable = TRUE;
+	int	row, col;
 	Cell* 			cur_cell;
 
 	col = command[1]-1;
@@ -442,14 +450,19 @@ unsigned int executeHint(int* command) {
 		return TRUE;
 	}
 
-	/* h - solutionBoard not solved - solve with use ilp */
+	/* h - solutionBoard not solved - solve with ILP */
 	if(getHint(row,col) == 0) {
-		boardIsSolvable = ilpSolver(&gameBoard, &solutionBoard);
+		isSolvable = ilpSolver(&gameBoard, &solutionBoard);
 	}
-	if(boardIsSolvable)
+	if(isSolvable == -1) { /* Gurobi failure */
+		printf("Error: Gurobi failure. Please try again\n");
+	}
+	else if(isSolvable) {
 		printf("Hint: set cell to %d\n",getHint(row,col));
-	else
+	}
+	else {
 		printf("Error: board is unsolvable %d\n",getHint(row,col));
+	}
 	return TRUE;
 
 }
@@ -494,6 +507,8 @@ unsigned int executeExit() {
 }
 
 
+
+/* TODO: remove this when comfortable enough */
 unsigned int executeCreate(int* command) {
 	setGameMode(EDIT);
 	/*  ///////////////////////// TEMPORARY IF ///////////////////////// */

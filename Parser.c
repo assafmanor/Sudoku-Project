@@ -138,9 +138,6 @@ unsigned int interpretCommand (char* input, int* command, char* path) {
 	}
 
 	commandToArray(input,strArr); /* insert each one of the first four words of input into the array strArr */
-	/*	for(i = 0; i < 4; i++) {
-		printf("strArr[%d] = %s\n",i,strArr[i]);
-	}*/
 	i1 = toInt(strArr[1]);
 	i2 = toInt(strArr[2]);
 	i3 = toInt(strArr[3]);
@@ -235,7 +232,7 @@ unsigned int interpretCommand (char* input, int* command, char* path) {
 	else if (stringsEqual(strArr[0],"exit")) {
 		command[0] = 15;
 	}
-	/*///////////////////// TEMPORARY COMMAND!!!!! FOR TESTING ONLY ////////////////// */
+	/*TODO: ///////////////////// TEMPORARY COMMAND!!!!! FOR TESTING ONLY ////////////////// */
 	else if (stringsEqual(strArr[0],"create")) {
 		command[0] = 16;
 		if(strArr[1] == NULL || strArr[2] == NULL || strArr[3] == NULL) {

@@ -112,7 +112,7 @@ int exhaustive_backtracking(Board* original, Board* temp);
  *
  * Board*	boardPtr		-	A pointer a game board.
  */
-unsigned int validate(Board* boardPtr) {
+int validate(Board* boardPtr) {
 	unsigned int isSolvable = ilpSolver(boardPtr,getSolutionBoardPtr()); /* try to solve the board and update the sol board if solvable. */
 	return isSolvable;
 }

@@ -401,7 +401,7 @@ unsigned int hasErrors(Board* boardPtr) {
  * Board*		gBoard	-	A pointer to the game board.
  * Board*		sBoard	-	A pointer to the solution board.
  * unsigned int	m		-	number of rows in each block on the board.
- * unsigned int	m		-	number of columns in each block on the board.
+ * unsigned int	n		-	number of columns in each block on the board.
  */
 void initializeGame(Board* gBoard, Board* sBoard, unsigned int m, unsigned int n) {
 	gameBoard = (*gBoard);					/* copy gameBoard to Game.c */

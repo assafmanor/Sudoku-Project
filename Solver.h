@@ -25,7 +25,7 @@
  *	Pre: board is not erroneous	(Checked in MainAux.c)
  * Board*	boardPtr		-	A pointer a game board.
  */
-unsigned int validate(Board*);
+int validate(Board*);
 
 
 /*
