@@ -7,7 +7,7 @@
 /********** Private method declarations **********/
 
 unsigned int	get_index(unsigned int, unsigned int, unsigned int, unsigned int);
-unsigned int	createGurobiEnvModel(GRBenv*, GRBmodel**);
+unsigned int	createGurobiEnvModel(GRBenv**, GRBmodel**);
 unsigned int	initObjectiveFunction(GRBenv*, GRBmodel**, unsigned int, char*);
 unsigned int	addConstraints(GRBenv*, GRBmodel*, Board*, unsigned int, unsigned int);
 void			updateSolution(Board*, double*, unsigned int);
@@ -59,7 +59,7 @@ int ilpSolver(Board* boardPtr, Board* solBoardPtr) {
 
 
 	/*--------- step1: Create environment and model ------------------*/
-	error = createGurobiEnvModel(env,&model);
+	error = createGurobiEnvModel(&env,&model);
 	if(error) {
 		ret = -1;
 	}
@@ -149,19 +149,19 @@ unsigned int get_index(unsigned int N, unsigned int row, unsigned int col, unsig
  * GRBenv* 		env			-	Gurobi envorinment.
  * GRBmodel**	modelPtr	-	A pointer to a Gurobi model.
  */
-unsigned int createGurobiEnvModel(GRBenv *env, GRBmodel **modelPtr){
+unsigned int createGurobiEnvModel(GRBenv **envPtr, GRBmodel **modelPtr){
 	unsigned int error;
 	/* Create environment - log file is mip1.log */
-	error = GRBloadenv(&env, "mip1.log");
+	error = GRBloadenv(envPtr, "mip1.log");
 	if (error) {
-		printf("ERROR %d GRBloadenv(): %s\n", error, GRBgeterrormsg(env));
+		printf("ERROR %d GRBloadenv(): %s\n", error, GRBgeterrormsg(*envPtr));
 		return TRUE; /* Has an error */
 	}
 
 	/* Create an empty model named "mip1" */
-	error = GRBnewmodel(env, modelPtr, "mip1", 0, NULL, NULL, NULL, NULL, NULL);
+	error = GRBnewmodel(*envPtr, modelPtr, "mip1", 0, NULL, NULL, NULL, NULL, NULL);
 	if (error) {
-		printf("ERROR %d GRBnewmodel(): %s\n", error, GRBgeterrormsg(env));
+		printf("ERROR %d GRBnewmodel(): %s\n", error, GRBgeterrormsg(*envPtr));
 		return TRUE; /* Has an error */
 	}
 
@@ -319,7 +319,7 @@ unsigned int addConstraints(GRBenv *env, GRBmodel *model, Board* boardPtr, unsig
 	if(!ret) {/* no errors yet */
 		for(v = 0; v < N; v++) {
 			for(block = 0; block < N; block++) {
-				/* block's top-left cell's coordinations */
+				/* block's top-left cell's coordinates */
 				r = (block/m)*m;
 				c = (block%m)*n;
 				for(block_r = 0; block_r < m; block_r++) {

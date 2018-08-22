@@ -278,10 +278,10 @@ void freeBoard(Board* boardPtr) {
 	unsigned int N;
 	Cell* temp_cell;
 
-	/* Board is uninitialized */
+/*	 Board is uninitialized
 	if(boardPtr == NULL) {
 		return;
-	}
+	}*/
 	N = boardPtr->m*boardPtr->n;
 	/* free allocated possible_vals for each cell, and free rows */
 	for(i = 0; i < N; i++) {
@@ -302,8 +302,9 @@ void freeBoard(Board* boardPtr) {
 		free(boardPtr->board);
 	}
 
-	boardPtr = NULL;
+/*	boardPtr = NULL;*/
 }
+
 
 
 /*
