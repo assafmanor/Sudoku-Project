@@ -31,7 +31,7 @@ void getUserInput(char* str) {
 		printf("Enter your command:\n");
 		while((ch=fgetc(stdin)) != '\n') {
 			if(i > MAX_INPUT_LENGTH) { /* Treat as invalid input */
-				str[0] = '\0';
+				str[0] = '@'; /* Change to an invalid command. Not NULL so it won't get confused with an EOF. */
 				while((ch = fgetc(stdin)) != '\n' && ch != EOF); /* Flush buffer */
 				if(ferror(stdin)) {
 					printf("Error: fgetc has failed\n");

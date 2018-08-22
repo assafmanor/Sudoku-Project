@@ -190,8 +190,33 @@ void setCellVal(Board* boardPtr, unsigned int row, unsigned int col, unsigned in
 
 
 /*
+ * Frees all allocated space used by board
+ *
+ * Board*	boardPtr	-	A pointer to a game board.
+ */
+void freeBoard(Board* boardPtr) {
+	unsigned int i, j;
+	unsigned int N;
+	Cell* temp_cell;
+
+	N = boardPtr->m*boardPtr->n;
+	/* free allocated possible_vals for each cell, and free rows */
+	for(i = 0; i < N; i++) {
+		for(j = 0; j < N; j++) {
+			temp_cell = getCell(boardPtr,i,j);
+			free(temp_cell->possible_vals);
+		}
+		/* free allocated row */
+		free(boardPtr->board[i]);
+	}
+	/* free the board itself */
+	free(boardPtr->board);
+}
+
+
+/*
  * Initializes the game board's parameters for a new game
- * with the same m and n.
+ * with the same m and n, assuming memory has already been allocated.
  *
  * Board*		boardPtr	-	A pointer to a game board.
  *
@@ -225,10 +250,9 @@ void initializeBoard(Board* boardPtr, unsigned int m, unsigned int n) {
 	/* Free previously allocated space */
 	if(boardPtr != NULL && boardPtr->m == m && boardPtr->n == n) {
 		nullifyBoard(boardPtr);
+		return; /* memory already allocated accordingly */
 	}
-	else if(boardPtr != NULL){
-		freeBoard(boardPtr);
-	}
+	freeBoard(boardPtr);
 	boardPtr->m = m;
 	boardPtr->n = n;
 
@@ -266,45 +290,6 @@ void initializeBoard(Board* boardPtr, unsigned int m, unsigned int n) {
 
 	boardPtr->cellsDisplayed = 0;
 }
-
-
-/*
- * Frees all allocated space used by board
- *
- * Board*	boardPtr	-	A pointer to a game board.
- */
-void freeBoard(Board* boardPtr) {
-	unsigned int i, j;
-	unsigned int N;
-	Cell* temp_cell;
-
-/*	 Board is uninitialized
-	if(boardPtr == NULL) {
-		return;
-	}*/
-	N = boardPtr->m*boardPtr->n;
-	/* free allocated possible_vals for each cell, and free rows */
-	for(i = 0; i < N; i++) {
-		for(j = 0; j < N; j++) {
-			if(boardPtr->board[i][j].possible_vals != NULL) {
-				temp_cell = getCell(boardPtr,i,j);
-				free(temp_cell->possible_vals);
-			}
-		}
-		/* free allocated row */
-		if(boardPtr->board[i] != NULL) {
-			free(boardPtr->board[i]);
-		}
-	}
-	/* free the board itself */
-	if(boardPtr->board != NULL) {
-
-		free(boardPtr->board);
-	}
-
-/*	boardPtr = NULL;*/
-}
-
 
 
 /*

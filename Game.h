@@ -79,7 +79,7 @@ unsigned int	isCellFixed(Board*, unsigned int, unsigned int);
  * unsigned int	col		-	Column number (between 0 and N-1).
  * unsigned int	row		-	Row number (between 0 and N-1).
  */
-unsigned int isErroneous(Board*, unsigned int, unsigned int);
+unsigned int	isErroneous(Board*, unsigned int, unsigned int);
 
 
 /*
@@ -115,7 +115,7 @@ void			setCellVal(Board*, unsigned int, unsigned int, unsigned int);
  * Board*		boardPtr	-	A pointer to a game board.
  *
  */
-void nullifyBoard(Board*);
+void			nullifyBoard(Board*);
 
 /*
  * Initializes the game board's parameters for a new game.
@@ -126,14 +126,14 @@ void nullifyBoard(Board*);
  * unsigned int	m			-	Number of columns in each block on the board.
  *
  */
-void initializeBoard(Board*, unsigned int m, unsigned int n);
+void			initializeBoard(Board*, unsigned int m, unsigned int n);
 
 /*
  * Frees all allocated space used by board
  *
  * Board*	boardPtr	-	A pointer to a game board.
  */
-void freeBoard(Board*);
+void			freeBoard(Board*);
 
 
 /*
@@ -178,7 +178,7 @@ Board*			getSolutionBoardPtr();
  *
  * Board*	boardPtr	-	A pointer to a game board.
  */
-unsigned int hasErrors(Board*);
+unsigned int	hasErrors(Board*);
 
 
 /* --------------- Game functions --------------- */
@@ -192,7 +192,7 @@ unsigned int hasErrors(Board*);
  * unsigned int	m		-	number of rows in each block on the board.
  * unsigned int	m		-	number of columns in each block on the board.
  */
-void initializeGame(Board*, Board*, unsigned int, unsigned int);
+void 			initializeGame(Board*, Board*, unsigned int, unsigned int);
 
 /*
  * Updates all cells that may have changed from erroneous to not erroneous or the other way around,
@@ -203,7 +203,7 @@ void initializeGame(Board*, Board*, unsigned int, unsigned int);
  * unsigned int	row		-	Row number (between 0 and N-1).
  * unsigned int	lastVal	-	The previous value of cell[row][col] of boardPtr->board (before its value has changed)
  */
-void updateErroneous(Board*, unsigned int, unsigned int, unsigned int);
+void 			updateErroneous(Board*, unsigned int, unsigned int, unsigned int);
 
 /*
  * Sets the value of gameMode to newGameMode.
@@ -227,7 +227,7 @@ void			setMarkErrors(unsigned int);
 /*
  * Returns the value of markErrors.
  */
-unsigned int getMarkErrors();
+unsigned int	getMarkErrors();
 
 
 /* --------------- Move-list functions --------------- */
@@ -236,13 +236,13 @@ unsigned int getMarkErrors();
 /*
  * Clears all allocated memory used by the field moveList.
  */
-void clearMoveList();
+void			clearMoveList();
 
 
 /*
  * Initializes a new empty move list (sets and autofills).
  */
-void initializeMoveList();
+void			initializeMoveList();
 
 
 /*
@@ -250,24 +250,24 @@ void initializeMoveList();
  *
  * SinglyLinkedList		*move	-	Said move (a list of set(s)).
  */
-void addMove(SinglyLinkedList*);
+void			addMove(SinglyLinkedList*);
 
 
 /*
  * Set the current move pointer to the previous move and update the board accordingly.
  * returns TRUE iff successful.
  */
-unsigned int undoMove(unsigned int);
+unsigned int	undoMove(unsigned int);
 
 
 /*
  * Set the current move pointer to the next move and update the board accordingly.
  * returns TRUE iff successful.
  */
-unsigned int redoMove();
+unsigned int	redoMove();
 
 
 /*
  * Undo all moves, reverting the board to its original loaded state.
  */
-void resetGame();
+void			resetGame();
