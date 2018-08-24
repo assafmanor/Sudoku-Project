@@ -128,7 +128,7 @@ unsigned int autofill(Board* boardPtr){
 	Board 				constBoard = {'\0'};		/* This board will be a copy of board, and won't change*/
 	unsigned int		m = boardPtr->m, n = boardPtr->n;
 	unsigned int 		N = m*n;
-	unsigned int 		errounous, i , j, k;
+	unsigned int 		errounous, row , col, val;
 	unsigned int* 		possible;
 	unsigned int		posValsCount;
 	unsigned int		lastVal;
@@ -160,33 +160,33 @@ unsigned int autofill(Board* boardPtr){
 	 * cell->sug_value is not changing , while cell->value
 	 * can be changed in the nested for loop*/
 	move = createNewSinglyLinkedList();
-	for(i = 0; i < N; i++) {
-		for(j = 0; j < N; j++) {
-			cell = getCell(&constBoard,i,j);
+	for(row = 0; row < N; row++) {
+		for(col = 0; col < N; col++) {
+			cell = getCell(&constBoard,row,col);
 			if (cell->value!=0)continue; /*cell is not empty-->continue*/
 			/* Calculate all the possible values for current cell, and save in possible:*/
-			possibleVals(&constBoard,i,j,possible);
+			possibleVals(&constBoard,row,col,possible);
 			posValsCount = possible[N];  /*Number of possible values*/
 			/* if there are a few choices- ignore this cell:*/
 			if(posValsCount != 1)continue;
 			/*there is only one choice-->find it*/
-			for(k=0; k<N; k++){
-				if(possible[k]){
-					printf("Cell <%d,%d> set to %d\n",j+1,i+1,k+1);
+			for(val=0; val<N; val++){
+				if(possible[val]){
+					printf("Cell <%d,%d> set to %d\n",col+1,row+1,val+1);
 					lastVal = cell->value;
-					setCellVal(boardPtr,i,j,k+1);
-					singly_addLast(move,i,j,k+1,lastVal);
-					updateErroneous(boardPtr, i, j, lastVal);
+					setCellVal(boardPtr,row,col,val+1);
+					singly_addLast(move,row,col,val+1,lastVal);
+					updateErroneous(boardPtr, row, col, lastVal); /* an erroneous cell might have been added due to a wrong set command that occurred in the past */
 					break;
 				}
 			}
 		}
 	}
 
-	if(move->size > 0) {
+	if(move->size > 0) { /* if the number of cells autofilled is greater than zero - add to move list */
 		addMove(move);
 	}
-	else { /* No moves to add */
+	else { /* no autofills */
 		singly_clear(move);
 	}
 

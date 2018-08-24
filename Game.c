@@ -408,25 +408,35 @@ void initializeGame(Board* gBoard, Board* sBoard, unsigned int m, unsigned int n
  * unsigned int	lastVal	-	The previous value of cell[row][col] of boardPtr->board (before its value has changed)
  */
 void updateErroneous(Board* boardPtr, unsigned int row, unsigned int col, unsigned int lastVal) {
-	unsigned int i,j, count_i, count_j;
-	unsigned int m = boardPtr->m, n = boardPtr->n;
-	unsigned int N = m*n;
-	Cell* cell;
+	unsigned int	i,j, count_i, count_j;
+	unsigned int	m = boardPtr->m, n = boardPtr->n;
+	unsigned int	N = m*n;
+	unsigned int	newVal = getCell(boardPtr,row,col)->value; /* the new value of cell[row][col] */
+	Cell*			cell;
+
+	cell = getCell(boardPtr,row,col);
+	cell->isErroneous = isErroneous(boardPtr,row,col); /* First update the changed cell */
 
 	/* Row */
 	for(j = 0; j < N; j++) {
+		if(j == col) continue; /* no need to re-check the changed cell */
 		cell = getCell(boardPtr,row,j);
-		cell->isErroneous = isErroneous(boardPtr, row, j);
-		if(cell->value == lastVal) { /* Might have been erroneous and but now isn't now. check if erroneous. */
+		if(newVal != 0 && cell->value == newVal) { /* another cell in the row with the same non-zero value */
+			cell->isErroneous = TRUE;
+		}
+		else if(cell->value == lastVal) { /* Might have been erroneous and but now isn't. check if erroneous. */
 			cell->isErroneous = isErroneous(boardPtr,row,j);
 		}
 	}
 
 	/* Column */
 	for(i = 0; i < N; i++) {
+		if(i == row) continue; /* no need to re-check the changed cell */
 		cell = getCell(boardPtr,i,col);
-		cell->isErroneous = isErroneous(boardPtr,i,col);
-		if(cell->value == lastVal) { /* Might have been erroneous and but now isn't now. check if erroneous. */
+		if(newVal != 0 && cell->value == newVal) { /* another cell in the row with the same non-zero value */
+			cell->isErroneous = TRUE;
+		}
+		else if(cell->value == lastVal) { /* Might have been erroneous and but now isn't now. check if erroneous. */
 			cell->isErroneous = isErroneous(boardPtr,i,col);
 		}
 	}
@@ -436,10 +446,13 @@ void updateErroneous(Board* boardPtr, unsigned int row, unsigned int col, unsign
 	j = n*((col)/n); /* Index of the first column of the block */
 	for(count_i = 0; count_i < m; count_i++) {
 		for(count_j = 0; count_j < n; count_j++) {
-			cell = getCell(boardPtr,i+count_i,j+count_j);
-			cell->isErroneous = isErroneous(boardPtr,i+count_i,j+count_j);
-			if(cell->value == lastVal) {
-				cell->isErroneous = isErroneous(boardPtr,i+count_i,j+count_j);
+			if(i+count_i == row || j+count_j == col) continue; /* no need to re-check cells from the same row or column as they were already checked previously */
+			cell = getCell(boardPtr, i+count_i, j+count_j);
+			if(newVal != 0 && cell->value == newVal) { /* another cell in the row with the same non-zero value */
+				cell->isErroneous = TRUE;
+			}
+			else if(cell->value == lastVal) {
+				cell->isErroneous = isErroneous(boardPtr, i+count_i, j+count_j);
 			}
 		}
 	}
@@ -543,7 +556,7 @@ unsigned int undoMove(unsigned int toPrint) {
 			printf("Undo %d,%d: from %c to %c\n",col+1,row+1,val==0? '_':val+'0',lastVal==0? '_':lastVal+'0');
 		}
 		setCellVal(&gameBoard,row,col,lastVal);
-		updateErroneous(&gameBoard, row, col, lastVal);
+		updateErroneous(&gameBoard, row, col, val);
 		node = node->next;
 	}
 	return TRUE;
@@ -582,7 +595,7 @@ unsigned int redoMove() {
 		lastVal = node->data[3];
 		printf("Redo %d,%d: from %c to %c\n",col+1,row+1,lastVal==0? '_':lastVal+'0',val==0? '_':val+'0');
 		setCellVal(&gameBoard,row,col,val);
-		updateErroneous(&gameBoard, row, col, val);
+		updateErroneous(&gameBoard, row, col, lastVal);
 		node = node->next;
 	}
 	return TRUE;
