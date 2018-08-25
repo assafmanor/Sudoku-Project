@@ -522,7 +522,6 @@ void init_cell (Board* original, Board* temp, info** def, unsigned int N){
 int exhaustive_backtracking(Board* original, Board* temp) {
 	/* Variables */
 	unsigned int	  N         = (original->m * original->n);
-	unsigned int	  res_counter;
 	struct StackNode* root 		= NULL;		/* beautiful stack who mimic recursion */
 	info* cd = NULL; 						/* data of current cell */
 	unsigned int counter;
@@ -596,8 +595,5 @@ int exhaustive_backtracking(Board* original, Board* temp) {
 	counter = cd->counter;
 	free(cd);
 	return counter;
-	res_counter = cd->counter;
-	free (cd);
-	return res_counter;
 }
 
