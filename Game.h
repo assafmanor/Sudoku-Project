@@ -112,7 +112,8 @@ void			setCellVal(Board*, unsigned int, unsigned int, unsigned int);
 
 /*
  * Initializes the game board's parameters for a new game
- * with the same m and n.
+ * with the same m and n, assuming memory has already been allocated.
+ * we are not using setCellVal() because the current application is faster,
  *
  * Board*		boardPtr	-	A pointer to a game board.
  *

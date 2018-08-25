@@ -228,6 +228,7 @@ void freeBoard(Board* boardPtr) {
 /*
  * Initializes the game board's parameters for a new game
  * with the same m and n, assuming memory has already been allocated.
+ * we are not using setCellVal() because the current application is faster,
  *
  * Board*		boardPtr	-	A pointer to a game board.
  *
@@ -237,12 +238,15 @@ void nullifyBoard(Board* boardPtr) {
 	unsigned int	i,j,k;
 	for(i = 0; i < N; i++) {
 		for(j = 0; j < N; j++) {
-			setCellVal(boardPtr,i,j,0);
+			boardPtr->board[i][j].value = 0;
+			boardPtr->board[i][j].fixed = FALSE;
+			boardPtr->board[i][j].isErroneous = FALSE;
 			for(k = 0; k < N; k++) {
-				getCell(boardPtr,i,j)->possible_vals[k] = TRUE;
+				boardPtr->board[i][j].possible_vals[k] = TRUE;
 			}
 		}
 	}
+	boardPtr->cellsDisplayed = 0;
 }
 
 
@@ -255,7 +259,7 @@ void nullifyBoard(Board* boardPtr) {
  *
  */
 void initializeBoard(Board* boardPtr, unsigned int m, unsigned int n) {
-	unsigned int i, j, k;
+	unsigned int i, j;
 	unsigned int N = m*n;
 
 	/* Free previously allocated space */
@@ -287,19 +291,10 @@ void initializeBoard(Board* boardPtr, unsigned int m, unsigned int n) {
         		}
          }
     }
-    /* set empty values */
-	for(i = 0; i < N; i++) {
-		for(j = 0; j < N; j++) {
-			boardPtr->board[i][j].value = 0;
-			boardPtr->board[i][j].fixed = FALSE;
-			boardPtr->board[i][j].isErroneous = FALSE;
-			for(k = 0; k < N; k++) {
-				boardPtr->board[i][j].possible_vals[k] = TRUE;
-			}
-		}
-	}
 
-	boardPtr->cellsDisplayed = 0;
+    /* set empty values */
+    nullifyBoard(boardPtr);
+
 }
 
 
