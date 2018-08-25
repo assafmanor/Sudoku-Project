@@ -176,7 +176,6 @@ unsigned int autofill(Board* boardPtr){
 					lastVal = cell->value;
 					setCellVal(boardPtr,row,col,val+1);
 					singly_addLast(move,row,col,val+1,lastVal);
-					updateErroneous(boardPtr, row, col, lastVal); /* an erroneous cell might have been added due to a wrong set command that occurred in the past */
 					break;
 				}
 			}

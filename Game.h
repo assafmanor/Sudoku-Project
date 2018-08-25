@@ -94,12 +94,14 @@ unsigned int	isErroneous(Board*, unsigned int, unsigned int);
 void			updatePossibleValues(Board*, unsigned int, unsigned int, unsigned int);
 
 /*
- * Assigns the value of val to cell[row-1][col-1].value (assuming value is possible),
- * updates the possible values of all the cells in the row, column and block,
+ * 1 - updates the erroneous values of all the cells in the row, column and block
+ * 2 - updates the possible values of all the cells in the row, column and block
+ * 3 - Assigns the value of val to cell[row][col]->value (assuming value is possible),
+ * 4 - update the number of cells displayed (used for checking if game over)
  *
- * Cell**		board	-	A game board.
- * unsigned int	col		-	Column number (between 1 and N).
- * unsigned int	row		-	Row number (between 1 and N).
+ * Board*	boardPtr	-	A pointer to a game board.
+ * unsigned int	col		-	Column number (between 0 and N-1).
+ * unsigned int	row		-	Row number (between 0 and N-1).
  * unsigned int	val		-	The value being assigned to the cell. (Between 0 and N).
  */
 void			setCellVal(Board*, unsigned int, unsigned int, unsigned int);

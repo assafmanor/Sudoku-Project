@@ -105,7 +105,7 @@ unsigned int isErroneous(Board* boardPtr, unsigned int row, unsigned int col) {
 
 /*
  * Given a row a column and a new value, updates the possible values for the row,
- * column, and block. also marks as erroneous if necessary.
+ * column, and block.
  *
  * Board*	boardPtr	-	A pointer to a game board.
  * unsigned int	col		-	Column number (between 0 and N-1).
@@ -160,8 +160,10 @@ void updatePossibleValues(Board* boardPtr, unsigned int row, unsigned int col, u
 
 
 /*
- * Assigns the value of val to cell[row][col]->value (assuming value is possible),
- * updates the possible values of all the cells in the row, column and block,
+ * 1 - updates the erroneous values of all the cells in the row, column and block
+ * 2 - updates the possible values of all the cells in the row, column and block
+ * 3 - Assigns the value of val to cell[row][col]->value (assuming value is possible),
+ * 4 - update the number of cells displayed (used for checking if game over)
  *
  * Board*	boardPtr	-	A pointer to a game board.
  * unsigned int	col		-	Column number (between 0 and N-1).
@@ -174,9 +176,17 @@ void setCellVal(Board* boardPtr, unsigned int row, unsigned int col, unsigned in
 	if(val == lastVal) { /* if you want to change the value to be the same as before - there's nothing to do */
 		return;
 	}
+
+	/* step 1 : updates the possible values */
 	updatePossibleValues(boardPtr, row, col, val);
+
+	/* step 2 : updates the erroneous values */
+	updateErroneous(boardPtr, row, col, val);
+
+	/* step 3 : updates the cell's value */
 	getCell(boardPtr,row,col)->value = val;
-	/* update the number of cells displayed (used for checking if game over) */
+
+	/* step 4 :update the number of cells displayed (used for checking if game over) */
 	if(val > 0 && lastVal == 0) {
 		boardPtr->cellsDisplayed++;
 	}
@@ -193,6 +203,7 @@ void setCellVal(Board* boardPtr, unsigned int row, unsigned int col, unsigned in
  * Frees all allocated space used by board
  *
  * Board*	boardPtr	-	A pointer to a game board.
+ * pre: boardPtr != NULL
  */
 void freeBoard(Board* boardPtr) {
 	unsigned int i, j;
@@ -556,7 +567,6 @@ unsigned int undoMove(unsigned int toPrint) {
 			printf("Undo %d,%d: from %c to %c\n",col+1,row+1,val==0? '_':val+'0',lastVal==0? '_':lastVal+'0');
 		}
 		setCellVal(&gameBoard,row,col,lastVal);
-		updateErroneous(&gameBoard, row, col, val);
 		node = node->next;
 	}
 	return TRUE;
@@ -594,7 +604,7 @@ unsigned int redoMove() {
 		val = node->data[2];
 		lastVal = node->data[3];
 		printf("Redo %d,%d: from %c to %c\n",col+1,row+1,lastVal==0? '_':lastVal+'0',val==0? '_':val+'0');
-		setCellVal(&gameBoard,row,col,val);
+
 		updateErroneous(&gameBoard, row, col, lastVal);
 		node = node->next;
 	}
