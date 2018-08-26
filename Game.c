@@ -180,11 +180,14 @@ void setCellVal(Board* boardPtr, unsigned int row, unsigned int col, unsigned in
 	/* step 1 : updates the possible values */
 	updatePossibleValues(boardPtr, row, col, val);
 
-	/* step 2 : updates the erroneous values */
-	updateErroneous(boardPtr, row, col, val);
 
 	/* step 3 : updates the cell's value */
 	getCell(boardPtr,row,col)->value = val;
+
+	/* step 2 : updates the erroneous values */
+	updateErroneous(boardPtr, row, col, val);
+
+
 
 	/* step 4 :update the number of cells displayed (used for checking if game over) */
 	if(val > 0 && lastVal == 0) {
