@@ -599,8 +599,7 @@ unsigned int redoMove() {
 		val = node->data[2];
 		lastVal = node->data[3];
 		printf("Redo %d,%d: from %c to %c\n",col+1,row+1,lastVal==0? '_':lastVal+'0',val==0? '_':val+'0');
-
-		updateErroneous(&gameBoard, row, col, lastVal);
+		setCellVal(&gameBoard,row,col,lastVal);
 		node = node->next;
 	}
 	return TRUE;
