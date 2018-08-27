@@ -177,15 +177,15 @@ void setCellVal(Board* boardPtr, unsigned int row, unsigned int col, unsigned in
 		return;
 	}
 
-	/* step 1 : updates the possible values */
+	/* step 1 : update cell's possible values */
 	updatePossibleValues(boardPtr, row, col, val);
 
 
-	/* step 3 : updates the cell's value */
+	/* step 3 : update cell's value */
 	getCell(boardPtr,row,col)->value = val;
 
-	/* step 2 : updates the erroneous values */
-	updateErroneous(boardPtr, row, col, val);
+	/* step 2 : update erroneous values */
+	updateErroneous(boardPtr, row, col, lastVal);
 
 
 
@@ -602,7 +602,7 @@ unsigned int redoMove() {
 		val = node->data[2];
 		lastVal = node->data[3];
 		printf("Redo %d,%d: from %c to %c\n",col+1,row+1,lastVal==0? '_':lastVal+'0',val==0? '_':val+'0');
-		setCellVal(&gameBoard,row,col,lastVal);
+		setCellVal(&gameBoard,row,col,val);
 		node = node->next;
 	}
 	return TRUE;
