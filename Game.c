@@ -424,7 +424,7 @@ void updateErroneous(Board* boardPtr, unsigned int row, unsigned int col, unsign
 		if(newVal != 0 && cell->value == newVal) { /* another cell in the row with the same non-zero value */
 			cell->isErroneous = TRUE;
 		}
-		else if(cell->value == lastVal) { /* Might have been erroneous and but now isn't. check if erroneous. */
+		else if(cell->value == lastVal) { /* Might have been erroneous but now isn't. check if erroneous. */
 			cell->isErroneous = isErroneous(boardPtr,row,j);
 		}
 	}
@@ -433,10 +433,10 @@ void updateErroneous(Board* boardPtr, unsigned int row, unsigned int col, unsign
 	for(i = 0; i < N; i++) {
 		if(i == row) continue; /* no need to re-check the changed cell */
 		cell = getCell(boardPtr,i,col);
-		if(newVal != 0 && cell->value == newVal) { /* another cell in the row with the same non-zero value */
+		if(newVal != 0 && cell->value == newVal) { /* another cell in the column with the same non-zero value */
 			cell->isErroneous = TRUE;
 		}
-		else if(cell->value == lastVal) { /* Might have been erroneous and but now isn't now. check if erroneous. */
+		else if(cell->value == lastVal) { /* Might have been erroneous but now isn't. check if erroneous. */
 			cell->isErroneous = isErroneous(boardPtr,i,col);
 		}
 	}
@@ -448,7 +448,7 @@ void updateErroneous(Board* boardPtr, unsigned int row, unsigned int col, unsign
 		for(count_j = 0; count_j < n; count_j++) {
 			if(i+count_i == row || j+count_j == col) continue; /* no need to re-check cells from the same row or column as they were already checked previously */
 			cell = getCell(boardPtr, i+count_i, j+count_j);
-			if(newVal != 0 && cell->value == newVal) { /* another cell in the row with the same non-zero value */
+			if(newVal != 0 && cell->value == newVal) { /* another cell in the block with the same non-zero value */
 				cell->isErroneous = TRUE;
 			}
 			else if(cell->value == lastVal) {
