@@ -213,8 +213,9 @@ unsigned int executeSolve(char* path) {
 	if(loadBoard(&gameBoard, path, SOLVE)) {
 		initializeMoveList();
 		initializeBoard(&solutionBoard, gameBoard.m, gameBoard.n);
+		printBoard(&gameBoard);
 		if(!hasErrors(&gameBoard)) { /* If board has erroneous values, then the board has no valid solution */
-			ilpSuccess = ilpSolver(&gameBoard, &solutionBoard);
+			ilpSuccess = ilpSolver(&gameBoard, &solutionBoard); /* solve board in order to update the solution board (used for hints)*/
 			if(ilpSuccess == -1) { /* Gurobi failure */
 				printf("Error: Gurobi failure. Please try again\n");
 			}
@@ -242,8 +243,10 @@ unsigned int executeEdit(char* path) {
 		}
 		else {
 			printf("Error: File cannot be opened\n");
+			return TRUE;
 		}
 	}
+	printBoard(&gameBoard);
 	return TRUE;
 }
 
@@ -274,7 +277,7 @@ unsigned int executeSet(int* command) {
 	unsigned int 		N = m*n;
 	unsigned int		lastVal;
 	int					row, col, val;
-
+	int					boardComplete;
 	SinglyLinkedList 	*move;
 
 	col = command[1]-1;
@@ -294,7 +297,6 @@ unsigned int executeSet(int* command) {
 	else if(isCellFixed(&gameBoard, row, col)) {
 		printf("Error: cell is fixed\n");
 	}
-
 	/*  We can use set command: */
 	else {
 		lastVal = getCell(&gameBoard, row, col)->value;
@@ -310,13 +312,14 @@ unsigned int executeSet(int* command) {
 		printBoard(&gameBoard); /* h */
 
 		/* i - this is the last cell to be filled in solve mode: */
-		if(isBoardComplete(gameBoard) && gameMode == SOLVE) {
-			if(validate(&gameBoard) == TRUE){ /*solved the board correctly*/
+		if(gameMode == SOLVE) {
+			boardComplete = isBoardComplete(&gameBoard);
+			if(boardComplete == TRUE) {
 				printf("Puzzle solved successfully\n");
 				/* Set game mode to INIT */
 				setGameMode(INIT);
 			}
-			else{ /* solved the board un-correctly */
+			else if(boardComplete == FALSE) { /* board is filled but contains erroneous values */
 				printf("Puzzle solution erroneous\n");
 			}
 
@@ -476,14 +479,20 @@ unsigned int executeNumSolutions() {
 
 
 unsigned int executeAutofill() {
+	int boardComplete;
 	if(getGameMode() != SOLVE) return FALSE;
 	if(autofill(&gameBoard)) {
 		printBoard(&gameBoard);
 	}
-	if(isBoardComplete(gameBoard)) {
+	/* Check if the puzzle was solved */
+	boardComplete = isBoardComplete(&gameBoard);
+	if(boardComplete == TRUE) {
 		printf("Puzzle solved successfully\n");
 		/* Set game mode to INIT */
 		setGameMode(INIT);
+	}
+	else if(boardComplete == FALSE) { /* board is filled but contains erroneous values */
+		printf("Puzzle solution erroneous\n");
 	}
 	return TRUE;
 }

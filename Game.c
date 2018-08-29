@@ -302,17 +302,6 @@ void initializeBoard(Board* boardPtr, unsigned int m, unsigned int n) {
 
 
 /*
- * Returns TRUE iff all cells are filled on a game board.
- *
- * Board	board	-	A game board.
- */
-unsigned int isBoardComplete(Board board) {
-	unsigned int N = board.m*board.n;
-	return board.cellsDisplayed == N*N;
-}
-
-
-/*
  * Returns TRUE iff all cells are Empty on a game board.
  *
  * Board	board	-	A game board.

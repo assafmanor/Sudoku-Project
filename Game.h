@@ -140,14 +140,6 @@ void			freeBoard(Board*);
 
 
 /*
- * Returns TRUE iff all cells are filled on a game board.
- *
- * Board	board	-	A game board.
- */
-unsigned int	isBoardComplete(Board);
-
-
-/*
  * Returns TRUE iff all cells are empty on a game board.
  *
  * Board	board	-	A game board.

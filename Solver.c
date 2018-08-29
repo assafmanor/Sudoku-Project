@@ -29,79 +29,6 @@ int exhaustive_backtracking(Board* original, Board* temp);
 
 /************************* Public methods *************************/
 
-/*
- * Solve an empty board, and reveal numOfHints cells.
- *
- * Board*	gameBoardPtr		-	A pointer to the game board.
- * Board*	solutionBoardPtr	-	A pointer to the solution board.
- * unsigned int	numOfHints	-	The number of cells with the solution value revealed (given from user input).
- */
-/*void generateBoard(Board* gameBoardPtr, Board* solutionBoardPtr, unsigned int numOfHints) {
-	Cell*			cell;
-	Board 			tempBoard = {'\0'};		 This board will be a copy of board, and will be solved instead of it.
-	unsigned int	row, col;
-	unsigned int	m = gameBoardPtr->m, n = gameBoardPtr->n;
-	unsigned int 	N = m*n;
-	unsigned int	value;
-	initializeBoard(&tempBoard,m,n);
-
-	copyBoard(gameBoardPtr, &tempBoard);
-
-	 Solve game board using randomly chosen values (random backtracking)
-	randomSolve(gameBoardPtr, &tempBoard, 0, 0);
-
-	 Update solution board
-	copyBoard(&tempBoard, solutionBoardPtr);
-
-	 Randomly choose which cells to reveal to the user and set as fixed
-	while(numOfHints > 0){
-		col = rand()%N;
-		row = rand()%N;
-		cell = getCell(gameBoardPtr,row,col);
-		value = getCell(&tempBoard, row, col)->value;
-		if(cell->fixed){
-			continue;
-		}
-		setCellVal(gameBoardPtr, row, col, value);
-		cell->fixed = TRUE;
-		numOfHints--;
-	}
-	if(getGameMode() == EDIT) {  Un-fix all cells
-		for(row = 0; row < N; row++) {
-			for(col = 0; col < N; col++) {
-				getCell(gameBoardPtr,row,col)->fixed = FALSE;
-			}
-		}
-	}
-	 Free allocated space used by tempBoard
-	freeBoard(&tempBoard);
-}*/
-
-
-/*
- * Updates the solutionBoardPtr->board according to gameBoardPtr->board.
- *
- * Board*	gameBoardPtr		-	A pointer to the game board.
- * Board*	solutionBoardPtr	-	A pointer to the solution board.
- */
-/*void updateSolBoard(Board* gameBoardPtr, Board* solutionBoardPtr) {
-	Board 			tempBoard = {'\0'};		 This board will be a copy of board, and will be solved instead of it.
-	unsigned int	m = gameBoardPtr->m, n = gameBoardPtr->n;
-	initializeBoard(&tempBoard,m,n);
-
-	 First, copy the game board to a temporary board
-	copyBoard(gameBoardPtr, &tempBoard);
-
-	 Then solve the game board using randomly chosen values (random backtracking)
-	randomSolve(gameBoardPtr, &tempBoard, 0, 0);
-
-	update solution board
-	copyBoard(&tempBoard, solutionBoardPtr);
-
-	 Free tempBoard
-	freeBoard(&tempBoard);
-}*/
-
 
 /*
  * Checks if the current configuration of the game board is solvable.
@@ -115,6 +42,22 @@ int exhaustive_backtracking(Board* original, Board* temp);
 int validate(Board* boardPtr) {
 	unsigned int isSolvable = ilpSolver(boardPtr,getSolutionBoardPtr()); /* try to solve the board and update the sol board if solvable. */
 	return isSolvable;
+}
+
+
+/*
+ * Returns TRUE if all cells are filled on a game board and are not erroneous.
+ * Returns FALSE if all cells are filled but there are erroneous values.
+ * Returns -1 if not all cells are filled.
+ *
+ * Board*	boardPtr	-	A game board pointer.
+ */
+int isBoardComplete(Board* boardPtr) {
+	unsigned int N = boardPtr->m*boardPtr->n;
+	if(boardPtr->cellsDisplayed == N*N) { /* all cells are filled */
+		return validate(boardPtr); /* return TRUE iff board is solvable, ie - all values are legal. */
+	}
+	return -1; /* not all cells are filled */
 }
 
 

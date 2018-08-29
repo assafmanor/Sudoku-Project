@@ -1,20 +1,5 @@
 #include "Game.h"
 
-/*
- * Solve an empty board, and then update for each cell: val<-sug_val.
- *
- * unsigned int	numOfHints	-	The number of cells with the solution value revealed (given from user input).
- */
-/*void			generateBoard(Board*, Board*, unsigned int);*/
-
-
-/*
- * Updates the solutionBoardPtr->board according to gameBoardPtr->board.
- *
- * Board*	gameBoardPtr		-	A pointer to the game board.
- * Board*	solutionBoardPtr	-	A pointer to the solution board.
- */
-/*void updateSolBoard(Board*, Board*);*/
 
 
 /*
@@ -26,6 +11,16 @@
  * Board*	boardPtr		-	A pointer a game board.
  */
 int validate(Board*);
+
+
+/*
+ * Returns TRUE if all cells are filled on a game board and are not erroneous.
+ * Returns FALSE if all cells are filled but there are erroneous values.
+ * Returns -1 if not all cells are filled.
+ *
+ * Board*	boardPtr	-	A game board pointer.
+ */
+int isBoardComplete(Board*);
 
 
 /*
