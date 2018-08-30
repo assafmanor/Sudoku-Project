@@ -306,7 +306,7 @@ void initializeBoard(Board* boardPtr, unsigned int m, unsigned int n) {
  *
  * Board	board	-	A game board.
  */
-unsigned int	isBoardEmpty(Board board){
+unsigned int isBoardEmpty(Board board){
 	return board.cellsDisplayed == 0;
 }
 

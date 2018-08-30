@@ -20,10 +20,9 @@ int				toInt(char*);
 
 
 /*
- * @@@@@@@@@@NEEDS MORE DESCRIPTION (WILL BE ADDED LATER)@@@@@@@
  * -Reads user command and returns if valid or not.
  *
- * -updates array command such that:
+ * -updates array, command, such that:
  *
  * 	command[0] = :
  * 		1 - solve
@@ -42,19 +41,36 @@ int				toInt(char*);
  * 		14 - reset
  * 		15 - exit
  *
+ *	 if command[0] == 1 (solve):
+ * 		path	   = the path and filename to load the puzzle from.
  *
- *	 if command[0] == 11 (hint):
- * 		command[1] = column number (1-9)
- * 		command[2] = row number (1-9)
+ * 	 if command[0] == 2 (edit):
+ * 		path	   = the path and filename to load the puzzle from (optional, if provided).
+ *
+ * 	 if command[0] == 3 (mark_errors):
+ * 		command[1] = a binary number indicating if to mark errors (0-1)
  *
  *	 if command[0] == 5 (set):
- * 		command[1] = column number (1-9)
- * 		command[2] = row number (1-9)
- * 		command[3] = value (0-9)
+ * 		command[1] = column number (1-N)
+ * 		command[2] = row number (1-N)
+ * 		command[3] = value (0-N)
+ *
+ * 	 if command[0] == 7 (generate):
+ * 		command[1] = X, number of random legal values (0-N*N)
+ * 		command[2] = Y, number of cells to display on the board (0-N*N)
+ *
+ * 	 if command[0] == 10 (save):
+ * 		path	   = the path and filename to save the puzzle to.
+ *
+ *	 if command[0] == 11 (hint):
+ * 		command[1] = column number (1-N)
+ * 		command[2] = row number (1-N)
+ *
  *
  * returns TRUE iff valid command.
  *
  * char*			input		-	User input.
  * unsigned int*	command		-	The encoded command will be stored on this array.
+ * char*			path		-	Used only by the solve, edit, and save commands. Assumes memory allocated already, will store a path to load form/save to.
  */
 unsigned int	interpretCommand (char* , int*, char*);

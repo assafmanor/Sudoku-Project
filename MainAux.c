@@ -1,11 +1,8 @@
 /* declarations */
 #include <stdio.h>
 #include <stdlib.h>
-/*#include "MainAux.h"*/
-/*#include "Parser.h"*/
 #include "Solver.h"
 #include "FileManager.h"
-/*#include "LinkedList.h"*/
 #include "ILP_Solver.h"
 
 
@@ -35,24 +32,10 @@ void printBoard(Board*);
 /* 14*/ unsigned int executeReset();
 /* 15*/ unsigned int executeExit();
 
-/*//////////// TEMPORARY ///////////*/
-/*16*/ unsigned int executeCreate(int*);
-
 /******* End of private method declarations ******/
 
 
 /************************* Public methods *************************/
-
-/*////////////////////// TEMPORARY //////////////////////*/
-void startNewGame(unsigned int m, unsigned int n, unsigned int x) {
-
-	/* initialize gameBoard and solutionBoard */
-	initializeGame(&gameBoard, &solutionBoard, m, n);
-	initializeMoveList();
-	generate(&gameBoard, x, x);
-/*	printBoard(&gameBoard);*/
-}
-
 
 /*
  * Given an interpreted command from the user - executes it and prints the result of the execution.
@@ -94,9 +77,6 @@ unsigned int executeCommand (int* command, char* path){
 	case 15: 	/*	EXIT	*/
 		return executeExit();
 
-	/* TODO: /////////// TEMPORARY /////////////// */
-	case 16:		/* CREATE		*/
-		return executeCreate(command);
 	default: /* shouldn't get here */
 		return FALSE;
 	}/*switch-end*/
@@ -187,7 +167,6 @@ void printBoard(Board* boardPtr) {
 	separatorRow[sepSize+1] = '\0';
 	repeatChar('-',sepSize,separatorRow);
 
-	/* NEW BOARD PRINT FORMAT */
 	printf("%s",separatorRow);
 
 	for(i = 0; i < n; i++) {
@@ -253,18 +232,18 @@ unsigned int executeEdit(char* path) {
 
 unsigned int executeMarkErrors(int* command) {
 	unsigned int	gameMode = getGameMode();
+	int				toMarkErrors = command[1];
 	if(gameMode != SOLVE) return FALSE;
-	if(command[1] != 0 && command[1] != 1) {
+	if(toMarkErrors != 0 && toMarkErrors != 1) {
 		printf("Error: the value should be 0 or 1\n");
 		return TRUE;
 	}
-	setMarkErrors(command[1]);
+	setMarkErrors(toMarkErrors);
 	return TRUE;
 }
 
 
 unsigned int executePrintBoard() {
-
 	if(getGameMode() == INIT) return FALSE;
 	printBoard(&gameBoard);
 	return TRUE;
@@ -355,15 +334,15 @@ unsigned int executeValidate() {
 
 unsigned int executeGenerate(int* command) {
 	int N = gameBoard.m * gameBoard.n;
-
+	int X = command[1]; /* Number of random legal values */
+	int Y = command[2]; /* Number of cells to display on the board */
 	if(getGameMode() != EDIT) return FALSE;
-	/* check x, y to have legal coordinates:
-	 * command[1] is x, command[2] is y */
-	if ((command[1] < 0)||(command[2] < 0)||(command[1] > (N*N))||(command[2] > (N*N))){
-		printf("Error: value not in range 0-%d\n",(N*N));
+	/* check x, y to have legal coordinates: */
+	if ((X < 0) || (Y < 0) || (X > N*N) || (Y > N*N)){
+		printf("Error: value not in range 0-%d\n",N*N);
 	    return TRUE;
 	}
-	if(generate(&gameBoard, (command[1]), (command[2]))) {
+	if(generate(&gameBoard, X, Y)) { /* try to generate board. returns TRUE if successful */
 		printBoard(&gameBoard);
 	}
 	return TRUE;
@@ -464,10 +443,9 @@ unsigned int executeHint(int* command) {
 		printf("Hint: set cell to %d\n",getHint(row,col));
 	}
 	else {
-		printf("Error: board is unsolvable %d\n",getHint(row,col));
+		printf("Error: board is unsolvable\n");
 	}
 	return TRUE;
-
 }
 
 
@@ -512,24 +490,6 @@ unsigned int executeExit() {
 	freeBoard(gameBoardPtr);
 	freeBoard(solBoardPtr);
 	clearMoveList();
-	return TRUE;
-}
-
-
-
-/* TODO: remove this when comfortable enough */
-unsigned int executeCreate(int* command) {
-	setGameMode(EDIT);
-	/*  ///////////////////////// TEMPORARY IF ///////////////////////// */
-	if(command[1] <= 0 || command[1] > 5 ||
-	   command[2] <= 0 || command[2] > 5 ||
-	   command[3] < 0 || command[3] > (command[1]*command[2])*(command[1]*command[2])) {
-		printf("Invalid board parameters.\nPlease try again.\n\tCommand format: \"create X Y Z\"; where X = m, Y = n, Z = numOfHints.\n");
-		printf("\tcommand[1]=%d\n\tcommand[2]=%d\n\tcommand[3]=%d\n",command[1],command[2],command[3]);
-	}
-	else {
-		startNewGame(command[1],command[2],command[3]);
-	}
 	return TRUE;
 }
 

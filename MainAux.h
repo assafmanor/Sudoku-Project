@@ -1,8 +1,3 @@
-void			initGame();
-
-
-/*void startNewGame(unsigned int, unsigned int);*/
-
 /*
  * Given an interpreted command from the user - executes it and prints the result of the execution.
  * returns TRUE iff command executed successfully.

@@ -9,8 +9,6 @@
 /********** Private method declarations **********/
 /* Includes *some* of the private methods in this module */
 
-/*int randomSolve(Board*, Board*, unsigned int, unsigned int);*/
-
 void possibleVals(Board* boardPtr, unsigned int row, unsigned int col, unsigned int* possible);
 
 unsigned int chooseRandVal(unsigned int* possible, unsigned int posValsCount);
@@ -55,7 +53,7 @@ int validate(Board* boardPtr) {
 int isBoardComplete(Board* boardPtr) {
 	unsigned int N = boardPtr->m*boardPtr->n;
 	if(boardPtr->cellsDisplayed == N*N) { /* all cells are filled */
-		return validate(boardPtr); /* return TRUE iff board is solvable, ie - all values are legal. */
+		return !hasErrors(boardPtr); /* return TRUE iff all values are legal ie no erroneous values. */
 	}
 	return -1; /* not all cells are filled */
 }

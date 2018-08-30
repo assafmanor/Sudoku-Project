@@ -10,7 +10,7 @@
  *	Pre: board is not erroneous	(Checked in MainAux.c)
  * Board*	boardPtr		-	A pointer a game board.
  */
-int validate(Board*);
+int				validate(Board*);
 
 
 /*
@@ -20,7 +20,7 @@ int validate(Board*);
  *
  * Board*	boardPtr	-	A game board pointer.
  */
-int isBoardComplete(Board*);
+int				isBoardComplete(Board*);
 
 
 /*
@@ -29,7 +29,7 @@ int isBoardComplete(Board*);
  *
  * Board*	boardPtr		-	A pointer a game board.
  */
-unsigned int autofill(Board*);
+unsigned int	autofill(Board*);
 
 
 /*
@@ -39,7 +39,7 @@ unsigned int autofill(Board*);
  *
  * Board*	boardPtr		-	A pointer a game board.
  */
-unsigned int num_solutions(Board*);
+unsigned int	num_solutions(Board*);
 
 
 /*
@@ -52,4 +52,4 @@ unsigned int num_solutions(Board*);
  * pre :x, y have legal coordinates (Checked in MainAux.c)
  *
  */
-unsigned int generate(Board* ,int, int);
+unsigned int	generate(Board* ,int, int);

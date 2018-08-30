@@ -7,7 +7,7 @@
  * char*		path		-	The path to which the file will be saved to (including file name and extension).
  * unsigned int	gameMode	-	The current game mode.
  */
-unsigned int saveBoard(Board, char*, unsigned int);
+unsigned int	saveBoard(Board, char*, unsigned int);
 
 
 /*
@@ -18,4 +18,4 @@ unsigned int saveBoard(Board, char*, unsigned int);
  * char*		path		-	The path to which the file will be saved to (including file name and extension).
  * unsigned int	gameMode	-	The current game mode.
  */
-int loadBoard(Board*, char*, unsigned int);
+int				loadBoard(Board*, char*, unsigned int);

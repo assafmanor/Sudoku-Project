@@ -109,6 +109,13 @@ void			setCellVal(Board*, unsigned int, unsigned int, unsigned int);
 
 /* --------------- Board functions --------------- */
 
+/*
+ * Frees all allocated space used by board
+ *
+ * Board*	boardPtr	-	A pointer to a game board.
+ */
+void			freeBoard(Board*);
+
 
 /*
  * Initializes the game board's parameters for a new game
@@ -130,13 +137,6 @@ void			nullifyBoard(Board*);
  *
  */
 void			initializeBoard(Board*, unsigned int m, unsigned int n);
-
-/*
- * Frees all allocated space used by board
- *
- * Board*	boardPtr	-	A pointer to a game board.
- */
-void			freeBoard(Board*);
 
 
 /*
