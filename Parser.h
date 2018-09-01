@@ -48,23 +48,23 @@ int				toInt(char*);
  * 		path	   = the path and filename to load the puzzle from (optional, if provided).
  *
  * 	 if command[0] == 3 (mark_errors):
- * 		command[1] = a binary number indicating if to mark errors (0-1)
+ * 		command[1] = a binary number indicating if to mark errors (0-1).
  *
  *	 if command[0] == 5 (set):
- * 		command[1] = column number (1-N)
- * 		command[2] = row number (1-N)
- * 		command[3] = value (0-N)
+ * 		command[1] = column number (1-N).
+ * 		command[2] = row number (1-N).
+ * 		command[3] = value (0-N).
  *
  * 	 if command[0] == 7 (generate):
- * 		command[1] = X, number of random legal values (0-N*N)
- * 		command[2] = Y, number of cells to display on the board (0-N*N)
+ * 		command[1] = X, number of random legal values (0-N*N).
+ * 		command[2] = Y, number of cells to display on the board (0-N*N).
  *
  * 	 if command[0] == 10 (save):
  * 		path	   = the path and filename to save the puzzle to.
  *
  *	 if command[0] == 11 (hint):
- * 		command[1] = column number (1-N)
- * 		command[2] = row number (1-N)
+ * 		command[1] = column number (1-N).
+ * 		command[2] = row number (1-N).
  *
  *
  * returns TRUE iff valid command.

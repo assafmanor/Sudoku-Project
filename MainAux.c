@@ -182,23 +182,18 @@ void printBoard(Board* boardPtr) {
 
 
 unsigned int executeSolve(char* path) {
-	int ilpSuccess;
+	unsigned int loadSuccessful;
 	setGameMode(SOLVE);
 	if(path[0] == '\0') { /* No path given */
 		return FALSE;
 	}
 
 	/* Try to load board from file path, if failed to load - print error. */
-	if(loadBoard(&gameBoard, path, SOLVE)) {
+	loadSuccessful = loadBoard(&gameBoard, path, SOLVE);
+	if(loadSuccessful) {
 		initializeMoveList();
 		initializeBoard(&solutionBoard, gameBoard.m, gameBoard.n);
 		printBoard(&gameBoard);
-		if(!hasErrors(&gameBoard)) { /* If board has erroneous values, then the board has no valid solution */
-			ilpSuccess = ilpSolver(&gameBoard, &solutionBoard); /* solve board in order to update the solution board (used for hints)*/
-			if(ilpSuccess == -1) { /* Gurobi failure */
-				printf("Error: Gurobi failure. Please try again\n");
-			}
-		}
 	}
 	else {
 		printf("Error: File doesn't exist or cannot be opened\n");
@@ -209,6 +204,7 @@ unsigned int executeSolve(char* path) {
 
 
 unsigned int executeEdit(char* path) {
+	unsigned int loadSuccessful;
 	setGameMode(EDIT);
 	if(path[0] == '\0') { /* No path given. Generate an empty m=3 n=3 board. */
 		initializeBoard(&gameBoard,3,3);
@@ -216,7 +212,9 @@ unsigned int executeEdit(char* path) {
 		initializeMoveList();
 	}
 	else {
-		if(loadBoard(&gameBoard, path, EDIT)) {
+		/* Try to load board from file path, if failed to load - print error. */
+		loadSuccessful = loadBoard(&gameBoard, path, EDIT);
+		if(loadSuccessful) {
 			initializeBoard(&solutionBoard, gameBoard.m, gameBoard.n);
 			initializeMoveList();
 		}
@@ -263,34 +261,36 @@ unsigned int executeSet(int* command) {
 	row = command[2]-1;
 	val = command[3];
 
-	/* b - This command is available in Edit or Solve mode only */
+	/* This command is available in Edit or Solve mode only */
 	if(gameMode == INIT) return FALSE;
 
-	/* c - The values of X,Y,Z are not guaranteed to be correct */
+	/* The values of X,Y,Z are not guaranteed to be correct */
 	if(row < 0 || col < 0 || val < 0 ||
 	   row >= (int)N || col >= (int)N || val > (int)N) {
 		printf("Error: value not in range 0-%d\n",N);
 	}
 
-	/* e - Cell is fixed */
+	/* Cell is fixed */
 	else if(isCellFixed(&gameBoard, row, col)) {
 		printf("Error: cell is fixed\n");
 	}
-	/*  We can use set command: */
+	/*  If this is a valid set: */
 	else {
 		lastVal = getCell(&gameBoard, row, col)->value;
+		/* if cell value changes: */
+		if(lastVal != (unsigned int)val) {
+			/* update cell value and erroneous values */
+			setCellVal(&gameBoard, row, col, val);
+			updateErroneous(&gameBoard, row, col, lastVal);
+			/* Add move to list (for undo/redo) */
+			move = createNewSinglyLinkedList();
+			singly_addLast(move,row,col,val,lastVal);
+			addMove(move);
+		}
+		/* then. print the board either way */
+		printBoard(&gameBoard);
 
-		/* Add move to list (for undo/redo) */
-		move = createNewSinglyLinkedList();
-		singly_addLast(move,row,col,val,lastVal);
-		addMove(move);
-
-		/* update and print the board */
-		setCellVal(&gameBoard, row, col, val);
-		updateErroneous(&gameBoard, row, col, lastVal);
-		printBoard(&gameBoard); /* h */
-
-		/* i - this is the last cell to be filled in solve mode: */
+		/* If this is the last cell to be filled in solve mode: */
 		if(gameMode == SOLVE) {
 			boardComplete = isBoardComplete(&gameBoard);
 			if(boardComplete == TRUE) {
@@ -373,20 +373,33 @@ unsigned int executeRedo() {
 
 unsigned int executeSave(char* path) {
 	unsigned int gameMode = getGameMode();
+	unsigned int solvable;
+	unsigned int saveSuccessful;
 	if(gameMode == INIT) return FALSE;
-	if(gameMode == EDIT && hasErrors(&gameBoard)) {
-		printf("Error: board contains erroneous values\n");
-		return TRUE;
-	}
-	if(path[0] == '\0') { /* No path given */
+	if(path[0] == '\0') { /* no path given */
 		return FALSE;
 	}
-	if(gameMode == EDIT && !validate(&gameBoard)) {
-		printf("Error: board validation failed\n");
-		return TRUE;
+	/* in edit mode - the board has to have a valid solution, thus there cannot be any erroneous cells and also it should pass a validation */
+	if(gameMode == EDIT) {
+		/* check that the puzzle doesn't have any erroneous cells */
+		if(hasErrors(&gameBoard)) {
+			printf("Error: board contains erroneous values\n");
+			return TRUE;
+		}
+		/* check that the puzzle has a solution */
+		solvable = validate(&gameBoard);
+		if(!solvable) {
+			printf("Error: board validation failed\n");
+			return TRUE;
+		}
 	}
-	if(saveBoard(gameBoard, path, gameMode)) { /* Try to board to path, and print message if successful */
+	/* try to save the puzzle to the given path, and print message indicating the success or failure */
+	saveSuccessful = saveBoard(gameBoard, path, gameMode);
+	if(saveSuccessful) {
 		printf("Saved to: %s\n", path);
+	}
+	else {
+		printf("Error: File cannot be created or modified\n");
 	}
 	return TRUE;
 }
@@ -432,10 +445,8 @@ unsigned int executeHint(int* command) {
 		return TRUE;
 	}
 
-	/* h - solutionBoard not solved - solve with ILP */
-	if(getHint(row,col) == 0) {
-		isSolvable = ilpSolver(&gameBoard, &solutionBoard);
-	}
+	/* try to solve with ILP */
+	isSolvable = ilpSolve(&gameBoard, &solutionBoard);
 	if(isSolvable == -1) { /* Gurobi failure */
 		printf("Error: Gurobi failure. Please try again\n");
 	}

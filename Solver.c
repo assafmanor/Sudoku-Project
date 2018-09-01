@@ -38,7 +38,7 @@ int exhaustive_backtracking(Board* original, Board* temp);
  * Board*	boardPtr		-	A pointer a game board.
  */
 int validate(Board* boardPtr) {
-	unsigned int isSolvable = ilpSolver(boardPtr,getSolutionBoardPtr()); /* try to solve the board and update the sol board if solvable. */
+	unsigned int isSolvable = ilpSolve(boardPtr,getSolutionBoardPtr()); /* try to solve the board and update the sol board if solvable. */
 	return isSolvable;
 }
 
@@ -229,7 +229,7 @@ unsigned int generate(Board* gameBoardPtr,int x, int y ) {
 		}/* finished current board building, maybe with illegal board */
 
 		if(x_values_successfully){ /* Try to solve board */
-			ilp_Successful = ilpSolver(gameBoardPtr,getSolutionBoardPtr());
+			ilp_Successful = ilpSolve(gameBoardPtr,getSolutionBoardPtr());
 		}
 
 		if(ilp_Successful) break;

@@ -265,7 +265,7 @@ void initializeBoard(Board* boardPtr, unsigned int m, unsigned int n) {
 	unsigned int i, j;
 	unsigned int N = m*n;
 
-	/* Free previously allocated space */
+	/* if possible, do not allocate memory again but only nullify the already initialized board */
 	if(boardPtr != NULL && boardPtr->m == m && boardPtr->n == n) {
 		nullifyBoard(boardPtr);
 		return; /* memory already allocated accordingly */
@@ -275,13 +275,13 @@ void initializeBoard(Board* boardPtr, unsigned int m, unsigned int n) {
 	boardPtr->n = n;
 
 	/* Allocate space */
-    boardPtr->board = (Cell**)malloc(N * sizeof(Cell*)); 											/* rows */
+    boardPtr->board = (Cell**)malloc(N * sizeof(Cell*)); 												/* rows */
 	if(boardPtr->board == NULL) {
 		printf("Error: malloc has failed\n");
 		exit(1);
 	}
     for (i = 0; i < N; i++) {
-    	boardPtr->board[i] = (Cell*)malloc(N * sizeof(Cell));	 									/* Cells */
+    	boardPtr->board[i] = (Cell*)malloc(N * sizeof(Cell));	 										/* Cells */
      	if(boardPtr->board[i] == NULL) {
      		printf("Error: malloc has failed\n");
      		exit(1);

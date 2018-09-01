@@ -9,7 +9,7 @@
  * Saves board to given path path.
  *
  * Board		board		-	A game board.
- * char*		path		-	The path to which the file will be saved to (including file name and extension).
+ * char*		path		-	The path to which the file will be saved to (including filename and extension).
  * unsigned int	gameMode	-	The current game mode.
  */
 unsigned int saveBoard(Board board, char* path, unsigned int gameMode) {
@@ -20,7 +20,6 @@ unsigned int saveBoard(Board board, char* path, unsigned int gameMode) {
 
 	ofp = fopen(path, "w");
 	if(ofp == NULL) {
-		printf("Error: File cannot be created or modified\n");
 		return FALSE;
 	}
 
@@ -42,6 +41,7 @@ unsigned int saveBoard(Board board, char* path, unsigned int gameMode) {
 				fprintf(ofp, "%c", col==N-1?'\n':' ');
 		}
 	}
+	/* Done writing to the file - close it */
 	fclose(ofp);
 	return TRUE;
 }
@@ -65,8 +65,6 @@ int loadBoard(Board* boardPtr, char* path, unsigned int gameMode) {
 	char			str_val[3];
 	FILE			*ifp;
 
-	/*printf("Load started\n");*/
-
 	str_val[2] = '\0';
 
 	ifp = fopen(path, "r");
@@ -84,9 +82,7 @@ int loadBoard(Board* boardPtr, char* path, unsigned int gameMode) {
 		exit(1);
 	}
 	/* Then initialize board (space allocation etc.) */
-	/*printf("	initializeBoard started\n");*/
 	initializeBoard(boardPtr,m,n);
-	/*printf("	initializeBoard complete\n");*/
 	/* Scan through the rest of the file to get values of all cells */
 	N = m*n;
 	for(row = 0; row < N; row++) {
@@ -121,15 +117,13 @@ int loadBoard(Board* boardPtr, char* path, unsigned int gameMode) {
 			}
 		}
 	}
-
+	/* Done reading from the file - close it */
+	fclose(ifp);
 	/* Check for erroneous cells */
 	for(row = 0; row < N; row++) {
 		for(col = 0; col < N; col++) {
 			getCell(boardPtr,row,col)->isErroneous = isErroneous(boardPtr,row,col);
 		}
 	}
-
-	fclose(ifp);
-	/*printf("Load complete\n");*/
 	return TRUE;
 }

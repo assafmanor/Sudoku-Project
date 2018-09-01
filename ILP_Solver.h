@@ -1,1 +1,1 @@
-int ilpSolver(Board*, Board*);
+int ilpSolve(Board*, Board*);

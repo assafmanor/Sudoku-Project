@@ -26,7 +26,7 @@ void			updateSolution(Board*, double*, unsigned int);
  *  Board*	boardPtr	-	A pointer a game board.
  *  Board*	solBoardPtr	-	A pointer to the solution board. used to update the solution board.
  */
-int ilpSolver(Board* boardPtr, Board* solBoardPtr) {
+int ilpSolve(Board* boardPtr, Board* solBoardPtr) {
 	/* Gurobi variables */
 	GRBenv			*env   = NULL;
 	GRBmodel		*model = NULL;
