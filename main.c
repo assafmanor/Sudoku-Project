@@ -27,8 +27,8 @@ int main() {
 
 	/* Ask user for commands and execute them until user enters "exit". */
 	while(command[0] != 15) { /* While command is not "exit". */
-		printf("Enter your command:\n");
 		if(exitProgram) {
+			printf("Enter your command:\n"); /* Print added so it would work exactly like an exit command */
 			command[0] = 15; /* exit command code */
 			isValidCommand = TRUE;
 		}

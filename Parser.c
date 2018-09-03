@@ -29,6 +29,7 @@ void getUserInput(char* str, unsigned int *exitProgram) {
 	unsigned int	i = 0;
 	char			ch;
 	do {
+		printf("Enter your command:\n");
 		while((ch=fgetc(stdin)) != '\n') {
 			if(i > MAX_INPUT_LENGTH) { /* Treat as invalid input */
 				str[0] = '@'; /* Change to an invalid command. */

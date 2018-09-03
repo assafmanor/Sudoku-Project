@@ -535,7 +535,8 @@ void addMove(SinglyLinkedList* move) {
  * unsigned int	toPrint	-	if TRUE, prints "Undo: X,Y: from Z1 to Z2\n".
  */
 unsigned int undoMove(unsigned int toPrint) {
-	unsigned int row, col, val, lastVal;
+	unsigned int		row, col, val, lastVal;
+	char				s_val[2] = {'\0'}, s_lastVal[2] = {'\0'};
 	SinglyLinkedList	*move;
 	SinglyNode			*node;
 	if(curMove == NULL) { /* No moves to undo */
@@ -551,7 +552,19 @@ unsigned int undoMove(unsigned int toPrint) {
 		val = node->data[2];
 		lastVal = node->data[3];
 		if(toPrint) {
-			printf("Undo %d,%d: from %c to %c\n",col+1,row+1,val==0? '_':val+'0',lastVal==0? '_':lastVal+'0');
+			if(val == 0) {
+				s_val[0] = '_';
+			}
+			else {
+				sprintf(s_val,"%d",val);
+			}
+			if(lastVal == 0) {
+				s_lastVal[0] = '_';
+			}
+			else {
+				sprintf(s_lastVal,"%d",lastVal);
+			}
+			printf("Undo %d,%d: from %s to %s\n",col+1,row+1,s_val,s_lastVal);
 		}
 		setCellVal(&gameBoard,row,col,lastVal);
 		node = node->next;
@@ -565,7 +578,8 @@ unsigned int undoMove(unsigned int toPrint) {
  * returns TRUE iff successful.
  */
 unsigned int redoMove() {
-	unsigned int row, col, val, lastVal;
+	unsigned int		row, col, val, lastVal;
+	char				s_val[2] = {'\0'}, s_lastVal[2] = {'\0'};
 	SinglyLinkedList	*move;
 	SinglyNode			*node;
 	if(curMove == NULL) {
@@ -590,7 +604,19 @@ unsigned int redoMove() {
 		col = node->data[1];
 		val = node->data[2];
 		lastVal = node->data[3];
-		printf("Redo %d,%d: from %c to %c\n",col+1,row+1,lastVal==0? '_':lastVal+'0',val==0? '_':val+'0');
+		if(val == 0) {
+			s_val[0] = '_';
+		}
+		else {
+			sprintf(s_val,"%d",val);
+		}
+		if(lastVal == 0) {
+			s_lastVal[0] = '_';
+		}
+		else {
+			sprintf(s_lastVal,"%d",lastVal);
+		}
+		printf("Redo %d,%d: from %s to %s\n",col+1,row+1,s_lastVal,s_val);
 		setCellVal(&gameBoard,row,col,val);
 		node = node->next;
 	}
