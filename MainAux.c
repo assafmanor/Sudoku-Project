@@ -301,7 +301,6 @@ unsigned int executeSet(int* command) {
 			else if(boardComplete == FALSE) { /* board is filled but contains erroneous values */
 				printf("Puzzle solution erroneous\n");
 			}
-
 		}
 	}
 	return TRUE;

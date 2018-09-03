@@ -22,16 +22,16 @@ unsigned int stringsEqual(char*, char*);
 /*
  * Use this whenever you want to get the user's input and ignore an input of whitespaces.
  *
- * char*	str		-	user input will be stored on this string (assumes memory was already allocated).
+ * char*			str			-	user input will be stored on this string (assumes memory was already allocated).
+ * unsigned int*	exitProgram	-	Signals the program to exit after executing the last command (occurs after an EOF).
  */
-void getUserInput(char* str) {
+void getUserInput(char* str, unsigned int *exitProgram) {
 	unsigned int	i = 0;
 	char			ch;
 	do {
-		printf("Enter your command:\n");
 		while((ch=fgetc(stdin)) != '\n') {
 			if(i > MAX_INPUT_LENGTH) { /* Treat as invalid input */
-				str[0] = '@'; /* Change to an invalid command. Not NULL so it won't get confused with an EOF. */
+				str[0] = '@'; /* Change to an invalid command. */
 				while((ch = fgetc(stdin)) != '\n' && ch != EOF); /* Flush buffer */
 				if(ferror(stdin)) {
 					printf("Error: fgetc has failed\n");
@@ -39,8 +39,9 @@ void getUserInput(char* str) {
 				}
 				return;
 			}
-			if(ch == EOF) { /* done reading input from file. exit program */
-				str[0] = '\0';
+			if(ch == EOF) { /* done reading input from file. exit program after executing the last command. */
+				*exitProgram = TRUE;
+				str[i] = '\0';
 				return;
 			}
 			str[i] = ch;

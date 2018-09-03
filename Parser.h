@@ -2,12 +2,15 @@
 #define	INVALID				(-1)
 /* TRUE and FALSE are defined in Game.h. */
 
+/************************* Public methods *************************/
+
 /*
  * Use this whenever you want to get the user's input and ignore an input of whitespaces.
  *
- * char*	str		-	user input will be stored on this string (assumes memory was already allocated).
+ * char*			str			-	user input will be stored on this string (assumes memory was already allocated).
+ * unsigned int*	exitProgram	-	Signals the program to exit after executing the last command (occurs after an EOF).
  */
-void			getUserInput(char*);
+void			getUserInput(char*, unsigned int*);
 
 
 /*

@@ -11,6 +11,8 @@
  */
 int main() {
 	unsigned int    isValidCommand;
+	unsigned int	exitProgram = FALSE;
+	unsigned int	executedSuccessfully;
 	char            input[MAX_INPUT_LENGTH] = {'\0'};
 	int				command[4] = { 0 };
 	char			path[MAX_INPUT_LENGTH];
@@ -25,17 +27,20 @@ int main() {
 
 	/* Ask user for commands and execute them until user enters "exit". */
 	while(command[0] != 15) { /* While command is not "exit". */
-		getUserInput(input); /* Ask and Wait for user input */
-		path[0] = '\0'; /* Nullify path */
-		if(input[0]== '\0') {
-			command[0] = 15;
+		printf("Enter your command:\n");
+		if(exitProgram) {
+			command[0] = 15; /* exit command code */
 			isValidCommand = TRUE;
 		}
 		else {
+			getUserInput(input, &exitProgram); /* Ask and Wait for user input */
+			path[0] = '\0'; /* Nullify path */
 			isValidCommand = interpretCommand(input,command,path); /* Determine if input is valid, and if it is - store it in command array. */
 		}
 		if(isValidCommand) {
-			if(!executeCommand(command,path)) { /* Try to execute command. If not executed print error message */
+			/* Try to execute command. If not executed print error message */
+			executedSuccessfully = executeCommand(command,path);
+			if(!executedSuccessfully) {
 				printf("ERROR: invalid command\n");
 			}
 		}
