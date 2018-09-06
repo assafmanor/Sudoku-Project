@@ -55,8 +55,8 @@ unsigned int isCellFixed(Board* boardPtr, unsigned int row, unsigned int col) {
  * Checks if cell[row][col] of boardPtr->board contains an erroneous value.
  *
  * Board*	boardPtr	-	A pointer to a game board.
- * unsigned int	col		-	Column number (between 0 and N-1).
  * unsigned int	row		-	Row number (between 0 and N-1).
+ * unsigned int	col		-	Column number (between 0 and N-1).
  */
 unsigned int isErroneous(Board* boardPtr, unsigned int row, unsigned int col) {
 	unsigned int i,j, count_i, count_j;
@@ -401,8 +401,8 @@ void initializeGame(Board* gBoard, Board* sBoard, unsigned int m, unsigned int n
  * given that cell[row][col] of boardPtr->board has changed its value.
  *
  * Board*	boardPtr	-	A pointer to a game board.
- * unsigned int	col		-	Column number (between 0 and N-1).
  * unsigned int	row		-	Row number (between 0 and N-1).
+ * unsigned int	col		-	Column number (between 0 and N-1).
  * unsigned int	lastVal	-	The previous value of cell[row][col] of boardPtr->board (before its value has changed)
  */
 void updateErroneous(Board* boardPtr, unsigned int row, unsigned int col, unsigned int lastVal) {
@@ -634,6 +634,6 @@ void resetGame() {
 	doubly_clear(moveList);
 	/* create a new empty move list */
 	moveList = createNewDoublyLinkedList();
-	/* and set current move to NULL, as there were any moves on the cleared board yet */
+	/* and set current move to NULL, as there shouldn't be any moves made on the cleared board yet */
 	curMove = NULL;
 }

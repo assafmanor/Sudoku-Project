@@ -18,15 +18,15 @@ void printBoard(Board*);
 
 /* 1 */ unsigned int executeSolve(char*);
 /* 2 */ unsigned int executeEdit(char*);
-/* 3 */ unsigned int executeMarkErrors(int*);
+/* 3 */ unsigned int executeMarkErrors(int);
 /* 4 */ unsigned int executePrintBoard();
-/* 5 */ unsigned int executeSet(int*);
+/* 5 */ unsigned int executeSet(int,int,int);
 /* 6 */ unsigned int executeValidate();
-/* 7 */ unsigned int executeGenerate(int*);
+/* 7 */ unsigned int executeGenerate(int,int);
 /* 8 */ unsigned int executeUndo();
 /* 9 */ unsigned int executeRedo();
 /* 10*/ unsigned int executeSave(char*);
-/* 11*/ unsigned int executeHint(int*);
+/* 11*/ unsigned int executeHint(int,int);
 /* 12*/ unsigned int executeNumSolutions();
 /* 13*/ unsigned int executeAutofill();
 /* 14*/ unsigned int executeReset();
@@ -42,7 +42,7 @@ void printBoard(Board*);
  * returns TRUE iff command executed successfully.
  *
  * unsigned int*	command		-	The already encoded user command (after interpretation).
- * char*			path		-	An file path (used by edit, solve, and save commands).
+ * char*			path		-	A file path (used by edit, solve, and save commands).
  */
 unsigned int executeCommand (int* command, char* path){
 	switch(command[0]) {
@@ -51,15 +51,15 @@ unsigned int executeCommand (int* command, char* path){
 	case 2:		/* EDIT		*/
 		return executeEdit(path);
 	case 3:		/* MARK ERRORS */
-		return executeMarkErrors(command);
+		return executeMarkErrors(command[1]);
 	case 4:		/* PRINT BOARD */
 		return executePrintBoard();
 	case 5:		/*	SET		*/
-		return executeSet(command);
+		return executeSet(command[2]-1, command[1]-1, command[3]);
 	case 6: 	/* VALIDATE	*/
 		return executeValidate();
 	case 7:		/* GENERATE */
-		return executeGenerate(command);
+		return executeGenerate(command[1], command[2]);
 	case 8:		/* UNDO */
 		return executeUndo();
 	case 9:		/* REDO */
@@ -67,7 +67,7 @@ unsigned int executeCommand (int* command, char* path){
 	case 10:	/* SAVE */
 		return executeSave(path);
 	case 11: 	/*	HINT	*/
-		return executeHint(command);
+		return executeHint(command[2]-1, command[1]-1);
 	case 12:	/* NUM SOLUTIONS */
 		return executeNumSolutions();
 	case 13:	/* AUTOFILL */
@@ -87,6 +87,7 @@ unsigned int executeCommand (int* command, char* path){
 
 
 /************************* Private methods *************************/
+
 
 /*
  * Repeats the character c n times in string out.
@@ -180,17 +181,45 @@ void printBoard(Board* boardPtr) {
 }
 
 
+/*
+ * Checks if the board is complete and prints a message accordingly.
+ * If:		the board is completely filled and does not contain erroneous value - prints "Puzzle solved successfully\n"
+ * 			and changes game mode to INIT.
+ * Else if:	the board is completely filled but contains erroneous values - prints "Puzzle solution erroneous\n",
+ * Otherwise, prints nothing.
+ */
+void handleBoardCompletion() {
+	int boardComplete;
+	boardComplete = isBoardComplete(&gameBoard);
+	if(boardComplete == TRUE) {
+		printf("Puzzle solved successfully\n");
+		/* Set game mode to INIT */
+		setGameMode(INIT);
+	}
+	else if(boardComplete == FALSE) { /* board is filled but contains erroneous values */
+		printf("Puzzle solution erroneous\n");
+	}
+	/* else: (boardComplete == -1 -- board is not completely filled) do nothing. */
+}
 
+/*
+ * Available in all game modes.
+ * Tries to load a puzzle from the given path address.
+ * If successful, changes game mode to SOLVE, loads the puzzle and prints the board.
+ * Otherwise, prints an error message.
+ * returns TRUE iff the path string isn't empty (meaning that the command was a valid format).
+ *
+ * char*	path	-	A file path (might be empty or invalid).
+ */
 unsigned int executeSolve(char* path) {
 	unsigned int loadSuccessful;
-	setGameMode(SOLVE);
 	if(path[0] == '\0') { /* No path given */
 		return FALSE;
 	}
-
 	/* Try to load board from file path, if failed to load - print error. */
 	loadSuccessful = loadBoard(&gameBoard, path, SOLVE);
 	if(loadSuccessful) {
+		setGameMode(SOLVE);
 		initializeMoveList();
 		initializeBoard(&solutionBoard, gameBoard.m, gameBoard.n);
 		printBoard(&gameBoard);
@@ -203,10 +232,20 @@ unsigned int executeSolve(char* path) {
 }
 
 
+/*
+ * Available in all game modes.
+ * Tries to either load a game from file (if a path was given), or initializes an empty 9x9 game.
+ * If a path was given but an invalid one, prints an error message and returns.
+ * Otherwise, changes game mode to EDIT and prints the boards.
+ * returns TRUE - always (the command was in the right format - no arguments missing).
+ *
+ * char*	path	-	A file path (might be empty or invalid).
+ *
+ */
 unsigned int executeEdit(char* path) {
 	unsigned int loadSuccessful;
-	setGameMode(EDIT);
 	if(path[0] == '\0') { /* No path given. Generate an empty m=3 n=3 board. */
+		setGameMode(EDIT);
 		initializeBoard(&gameBoard,3,3);
 		initializeBoard(&solutionBoard, gameBoard.m, gameBoard.n);
 		initializeMoveList();
@@ -215,6 +254,7 @@ unsigned int executeEdit(char* path) {
 		/* Try to load board from file path, if failed to load - print error. */
 		loadSuccessful = loadBoard(&gameBoard, path, EDIT);
 		if(loadSuccessful) {
+			setGameMode(EDIT);
 			initializeBoard(&solutionBoard, gameBoard.m, gameBoard.n);
 			initializeMoveList();
 		}
@@ -228,10 +268,16 @@ unsigned int executeEdit(char* path) {
 }
 
 
-unsigned int executeMarkErrors(int* command) {
-	unsigned int	gameMode = getGameMode();
-	int				toMarkErrors = command[1];
-	if(gameMode != SOLVE) return FALSE;
+/*
+ * Available in SOLVE mode only.
+ * Changes game mode to either 0 or 1, if given a valid argument. It does not assume the argument is valid though.
+ * If the argument is invalid - prints an error message.
+ * returns TRUE iff the game mode is SOLVE.
+ *
+ * int	toMarkErrors	-	The desired value of markErrors - should be 0 or 1. might be invalid.
+ */
+unsigned int executeMarkErrors(int toMarkErrors) {
+	if(getGameMode() != SOLVE) return FALSE;
 	if(toMarkErrors != 0 && toMarkErrors != 1) {
 		printf("Error: the value should be 0 or 1\n");
 		return TRUE;
@@ -241,6 +287,11 @@ unsigned int executeMarkErrors(int* command) {
 }
 
 
+/*
+ * Available in EDIT and SOLVE modes.
+ * Prints the game board.
+ * returns TRUE iff the game mode is EDIT or SOLVE.
+ */
 unsigned int executePrintBoard() {
 	if(getGameMode() == INIT) return FALSE;
 	printBoard(&gameBoard);
@@ -248,25 +299,33 @@ unsigned int executePrintBoard() {
 }
 
 
-unsigned int executeSet(int* command) {
+/*
+ * Available in EDIT and SOLVE modes.
+ * Tries to set a new value to a cell.
+ * The arguments are not guaranteed to be correct, and if they aren't -
+ * error messages will be printed and the set will not be executed.
+ * If they are correct - Changes cell value, updates erroneous and possible cells, adds the move to the move list,
+ * Updates the number of cells displayed, and finally prints the updated board.
+ * In SOLVE mode: if the board is completely filled - prints a message accordingly (puzzle solved/erroneous values) and changes game mode to INIT complete.
+ * returns TRUE iff the game mode is EDIT or SOLVE.
+ *
+ * int	row		-	Row number (between 0 and N-1 if valid).
+ * int	col		-	Column number (between 0 and N-1 if valid).
+ * int	val		-	The value to be set (between 0 and N if valid).
+ */
+unsigned int executeSet(int row, int col, int val) {
 	unsigned int		m = gameBoard.m, n = gameBoard.n;
+	int 				N = m*n;
 	unsigned int		gameMode = getGameMode();
-	unsigned int 		N = m*n;
 	unsigned int		lastVal;
-	int					row, col, val;
-	int					boardComplete;
 	SinglyLinkedList 	*move;
-
-	col = command[1]-1;
-	row = command[2]-1;
-	val = command[3];
 
 	/* This command is available in Edit or Solve mode only */
 	if(gameMode == INIT) return FALSE;
 
 	/* The values of X,Y,Z are not guaranteed to be correct */
-	if(row < 0 || col < 0 || val < 0 ||
-	   row >= (int)N || col >= (int)N || val > (int)N) {
+	if(row <  0 || col <  0 || val < 0 ||
+	   row >= N || col >= N || val > N) {
 		printf("Error: value not in range 0-%d\n",N);
 	}
 
@@ -290,23 +349,22 @@ unsigned int executeSet(int* command) {
 		/* then. print the board either way */
 		printBoard(&gameBoard);
 
-		/* If this is the last cell to be filled in solve mode: */
+		/* Check if the puzzle was solved and print a message and change game mode if needed */
 		if(gameMode == SOLVE) {
-			boardComplete = isBoardComplete(&gameBoard);
-			if(boardComplete == TRUE) {
-				printf("Puzzle solved successfully\n");
-				/* Set game mode to INIT */
-				setGameMode(INIT);
-			}
-			else if(boardComplete == FALSE) { /* board is filled but contains erroneous values */
-				printf("Puzzle solution erroneous\n");
-			}
+			handleBoardCompletion();
 		}
 	}
 	return TRUE;
 }
 
 
+/*
+ * Available in EDIT and SOLVE modes.
+ * Validates game if the game doesn't contain erroneous values.
+ * Uses ILP to find out if whether the current game has a solution, and tells it to the player.
+ *
+ * returns TRUE iff the game mode is EDIT or SOLVE.
+ */
 unsigned int executeValidate() {
 	int isSolvable;
 	/* return TRUE iff the command is legal */
@@ -331,10 +389,20 @@ unsigned int executeValidate() {
 }
 
 
-unsigned int executeGenerate(int* command) {
+/*
+ * Available in EDIT mode only.
+ * If the arguments are valid (as described below):
+ * Generates a puzzle by randomly filling X cells with random legal values,
+ * running ILP to solve the resulting board, and then clearing all but Y random cells.
+ * Finally prints the board.
+ * returns TRUE iff the game mode is EDIT.
+ *
+ * int	X	-	Number of random legal values (between 0 and N*N if valid).
+ * int	Y	-	Number of cells to display on the board (between 0 and N*N if valid).
+ *
+ */
+unsigned int executeGenerate(int X, int Y) {
 	int N = gameBoard.m * gameBoard.n;
-	int X = command[1]; /* Number of random legal values */
-	int Y = command[2]; /* Number of cells to display on the board */
 	if(getGameMode() != EDIT) return FALSE;
 	/* check x, y to have legal coordinates: */
 	if ((X < 0) || (Y < 0) || (X > N*N) || (Y > N*N)){
@@ -348,6 +416,12 @@ unsigned int executeGenerate(int* command) {
 }
 
 
+/*
+ * Available in EDIT and SOLVE modes.
+ * Undo previous move done by the player.
+ * Prints an error message if there are no moves to undo.
+ * returns TRUE iff the game mode is EDIT or SOLVE.
+ */
 unsigned int executeUndo() {
 	unsigned int successful;
 	if(getGameMode() == INIT) return FALSE;
@@ -359,17 +433,39 @@ unsigned int executeUndo() {
 }
 
 
+/*
+ * Available in EDIT and SOLVE modes.
+ * Redo a move previously done by the player.
+ * Prints an error message if there are no moves to redo.
+ * returns TRUE iff the game mode is EDIT or SOLVE.
+ */
 unsigned int executeRedo() {
 	unsigned int successful;
-	if(getGameMode() == INIT) return FALSE;
+	unsigned int gameMode = getGameMode();
+	if(gameMode == INIT) return FALSE;
 	successful = redoMove();
-	if(!successful) {
+	if(successful) {
+ 		/* Check if the board was completely filled and contains erroneous values (other options aren't possible) */
+		if(gameMode == SOLVE) {
+			handleBoardCompletion();
+		}
+	}
+	else { /* unsuccessful redo */
 		printf("Error: no moves to redo\n");
 	}
 	return TRUE;
 }
 
 
+/*
+ * Available in EDIT and SOLVE modes.
+ * If given a valid path, saves the current game board to the given path address.
+ * In EDIT mode, saves only if the board does not contain erroneous values and the board is solvable, else - prints an error message.
+ * Othewise (invalid path), prints an error message.
+ * returns TRUE iff the game mode is SOLVE or EDIT and string path is not empty (a path was given by the player).
+ *
+ * char*	path	-	A file path (might be empty or invalid).
+ */
 unsigned int executeSave(char* path) {
 	unsigned int gameMode = getGameMode();
 	unsigned int solvable;
@@ -404,41 +500,47 @@ unsigned int executeSave(char* path) {
 }
 
 
-unsigned int executeHint(int* command) {
+/*
+ * Available in SOLVE mode only.
+ * Give a hint to the player by showing the solution of a single cell[row,col].
+ * A hint will be given only if the arguments are in range, the board doesn't contain any erroneous values,
+ * the cell isn't fixed, and doesn't already contain a value. Otherwise - an error message will be printed.
+ * returns TRUE iff the game mode is SOLVE.
+ *
+ * int	row		-	Row number (between 0 and N-1 if valid).
+ * int	col		-	Column number (between 0 and N-1 if valid).
+ */
+unsigned int executeHint(int row, int col) {
 	unsigned int	m = gameBoard.m, n = gameBoard.n;
 	unsigned int	gameMode 		= getGameMode();
 	unsigned int 	N 				= m*n;
 	int				isSolvable = TRUE;
-	int	row, col;
 	Cell* 			cur_cell;
 
-	col = command[1]-1;
-	row = command[2]-1;
-
-	/*b - check gameMode */
+	/* check gameMode */
 	if(gameMode != SOLVE) return FALSE;
 
-	/*c,d - check coordinates */
+	/* check coordinates */
 	if(row < 0 || col < 0 ||
 	   row >= (int)N || col >= (int)N) {
 		printf("Error: value not in range 1-%d\n",N);
 		return TRUE;
 	}
 
-	/*e - check errors */
+	/* check errors */
 	if(hasErrors(&gameBoard)) {
 		printf("Error: board contains erroneous values\n");
 		return TRUE;
 	}
 
-	/*f - check if cell is fixed */
+	/* check if cell is fixed */
 	cur_cell = getCell(&gameBoard,row,col);
 	if(cur_cell->fixed){
 		printf("Error: cell is fixed\n");
 		return TRUE;
 	}
 
-	/*g - check if cell already has value */
+	/* check if cell already has value */
 	if(cur_cell->value != 0){
 		printf("Error: cell already contains a value\n");
 		return TRUE;
@@ -459,6 +561,12 @@ unsigned int executeHint(int* command) {
 }
 
 
+/*
+ * Available in EDIT and SOLVE modes.
+ * Prints the number of solutions for the current board, but only if the board does not contain erroneous values,
+ * Otherwise, an error message is printed.
+ * returns TRUE iff the game mode is EDIT or SOLVE.
+ */
 unsigned int executeNumSolutions() {
 	if(getGameMode() == INIT) return FALSE;
 	num_solutions(&gameBoard);
@@ -466,26 +574,36 @@ unsigned int executeNumSolutions() {
 }
 
 
+/*
+ * Available in SOLVE mode only.
+ * Automatically fills "obvious" values -- cells which contain a single legal value.
+ * If there are erroneous cells - an error messages will be printed and the autofill will not be executed.
+ * If they are correct - Changes cell values, updates erroneous and possible cells, adds the move to the move list,
+ * Updates the number of cells displayed, and finally prints the updated board.
+ * If the board is completely filled - prints a message accordingly (puzzle solved/erroneous values) and changes game mode to INIT complete.
+
+ * Returns TRUE iff the game mode is SOLVE.
+ */
 unsigned int executeAutofill() {
-	int boardComplete;
+	unsigned int autofillExecuted;
 	if(getGameMode() != SOLVE) return FALSE;
-	if(autofill(&gameBoard)) {
+	/* Try to execute an autofill. If executed - print board afterwards.  */
+	autofillExecuted = autofill(&gameBoard);
+	if(autofillExecuted) {
 		printBoard(&gameBoard);
 	}
-	/* Check if the puzzle was solved */
-	boardComplete = isBoardComplete(&gameBoard);
-	if(boardComplete == TRUE) {
-		printf("Puzzle solved successfully\n");
-		/* Set game mode to INIT */
-		setGameMode(INIT);
-	}
-	else if(boardComplete == FALSE) { /* board is filled but contains erroneous values */
-		printf("Puzzle solution erroneous\n");
-	}
+	/* Check if the puzzle was solved and print a message and change game mode if needed */
+	handleBoardCompletion();
 	return TRUE;
 }
 
 
+/*
+ * Available in EDIT and SOLVE modes.
+ * Undos all modes, reverting the board to its original loaded state.
+ * Once the board is reset, the undo/redo list is cleared entirely, and the program prints: "Board reset\n".
+ * returns TRUE iff the game mode is EDIT or SOLVE.
+ */
 unsigned int executeReset() {
 	if(getGameMode() == INIT) return FALSE;
 	resetGame();
@@ -494,6 +612,12 @@ unsigned int executeReset() {
 }
 
 
+/*
+ * Available in all game modes.
+ * Frees all memory resources.
+ * This method is followed by a termination of the program in the main module.
+ * returns TRUE - always.
+ */
 unsigned int executeExit() {
 	Board* gameBoardPtr = &gameBoard;
 	Board* solBoardPtr = &solutionBoard;

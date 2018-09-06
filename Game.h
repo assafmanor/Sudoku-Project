@@ -76,8 +76,8 @@ unsigned int	isCellFixed(Board*, unsigned int, unsigned int);
  * Checks if cell[row][col] of boardPtr->board contains an erroneous value.
  *
  * Board*	boardPtr	-	A pointer to a game board.
- * unsigned int	col		-	Column number (between 0 and N-1).
  * unsigned int	row		-	Row number (between 0 and N-1).
+ * unsigned int	col		-	Column number (between 0 and N-1).
  */
 unsigned int	isErroneous(Board*, unsigned int, unsigned int);
 
@@ -87,8 +87,8 @@ unsigned int	isErroneous(Board*, unsigned int, unsigned int);
  * column, and block in boardPtr->board. Also marks as erroneous if necessary.
  *
  * Board*	boardPtr	-	A pointer to a game board.
- * unsigned int	col		-	Column number (between 0 and N-1).
  * unsigned int	row		-	Row number (between 0 and N-1).
+ * unsigned int	col		-	Column number (between 0 and N-1).
  * unsigned int	val		-	The value the user assigned to the cell. (Between 0 and N).
  */
 void			updatePossibleValues(Board*, unsigned int, unsigned int, unsigned int);

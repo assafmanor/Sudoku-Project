@@ -138,7 +138,7 @@ int toInt(char* str) {
  * 		command[2] = row number (1-N).
  *
  *
- * returns TRUE iff valid command.
+ * returns TRUE iff a valid command (i.e. the number of arguments given by the player is valid, regardless of the game mode).
  *
  * char*			input		-	User input.
  * unsigned int*	command		-	The encoded command will be stored on this array.
@@ -278,7 +278,7 @@ unsigned int stringsEqual(char* str1, char* str2) {
 }
 
 
-/* Determines whether a string consists only of empty spaces.
+/* Determines whether a string consists only of whitespaces.
  *
  * char*	str		-	Said string.
  */
