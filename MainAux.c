@@ -402,15 +402,25 @@ unsigned int executeValidate() {
  *
  */
 unsigned int executeGenerate(int X, int Y) {
-	int N = gameBoard.m * gameBoard.n;
+	int				N = gameBoard.m * gameBoard.n;
+	unsigned int	generateSuccessful;
 	if(getGameMode() != EDIT) return FALSE;
 	/* check x, y to have legal coordinates: */
 	if ((X < 0) || (Y < 0) || (X > N*N) || (Y > N*N)){
 		printf("Error: value not in range 0-%d\n",N*N);
 	    return TRUE;
 	}
-	if(generate(&gameBoard, X, Y)) { /* try to generate board. returns TRUE if successful */
+	/* board must be empty */
+	if (!isBoardEmpty(gameBoard)){
+		printf("Error: board is not empty\n");
+	    return TRUE;
+	}
+	generateSuccessful = generate(&gameBoard, X, Y);
+	if(generateSuccessful) { /* try to generate board. returns TRUE if successful */
 		printBoard(&gameBoard);
+	}
+	else {
+		printf("Error: puzzle generator failed\n");
 	}
 	return TRUE;
 }
@@ -461,7 +471,7 @@ unsigned int executeRedo() {
  * Available in EDIT and SOLVE modes.
  * If given a valid path, saves the current game board to the given path address.
  * In EDIT mode, saves only if the board does not contain erroneous values and the board is solvable, else - prints an error message.
- * Othewise (invalid path), prints an error message.
+ * Otherwise (invalid path), prints an error message.
  * returns TRUE iff the game mode is SOLVE or EDIT and string path is not empty (a path was given by the player).
  *
  * char*	path	-	A file path (might be empty or invalid).
@@ -568,8 +578,24 @@ unsigned int executeHint(int row, int col) {
  * returns TRUE iff the game mode is EDIT or SOLVE.
  */
 unsigned int executeNumSolutions() {
+	unsigned int	n; /* number of solutions */
+	Board*			boardPtr = &gameBoard;
 	if(getGameMode() == INIT) return FALSE;
-	num_solutions(&gameBoard);
+	/* check if there are erroneous cells*/
+	if (hasErrors(boardPtr)){
+		printf("Error: board contains erroneous values\n");
+		return TRUE;
+	}
+	/* Calculate the number of solutions using exhaustive backtracking (implemented using a stack) */
+	n = numSolutions(boardPtr);
+	/* print results */
+	printf("Number of solutions: %d\n",n);
+	if(n == 1) {
+		printf("This is a good board!\n");
+	}
+	else if(n > 1) {
+		printf("The puzzle has more than 1 solution, try to edit it further\n");
+	}
 	return TRUE;
 }
 
@@ -585,13 +611,16 @@ unsigned int executeNumSolutions() {
  * Returns TRUE iff the game mode is SOLVE.
  */
 unsigned int executeAutofill() {
-	unsigned int autofillExecuted;
+	Board*			boardPtr = &gameBoard;
 	if(getGameMode() != SOLVE) return FALSE;
-	/* Try to execute an autofill. If executed - print board afterwards.  */
-	autofillExecuted = autofill(&gameBoard);
-	if(autofillExecuted) {
-		printBoard(&gameBoard);
+	/* check if there are errounous cells*/
+	if (hasErrors(boardPtr)){
+		printf("Error: board contains erroneous values\n");
+		return TRUE;
 	}
+	/* Execute an autofill and print the board afterwards.  */
+	autofill(&gameBoard);
+	printBoard(&gameBoard);
 	/* Check if the puzzle was solved and print a message and change game mode if needed */
 	handleBoardCompletion();
 	return TRUE;

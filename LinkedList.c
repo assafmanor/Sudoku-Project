@@ -49,10 +49,9 @@ int singly_isEmpty(SinglyLinkedList *list) {
  * unsigned int 		col		-	Column number (between 0 and N-1).
  * unsigned int			val		-	The value being assigned to the cell. (Between 0 and N).
  * unsigned int			lastVal	-	The last value that cell had.
- *
  */
 void singly_addLast(SinglyLinkedList *list,
-			 unsigned int row, unsigned int col, unsigned int val, unsigned int lastVal) {
+			 	 	unsigned int row, unsigned int col, unsigned int val, unsigned int lastVal) {
 	SinglyNode *newNode = singly_createNewNode(row,col,val,lastVal);
 	SinglyNode *head = list->head;
 	SinglyNode *tail = list->tail;
@@ -78,7 +77,6 @@ void singly_addLast(SinglyLinkedList *list,
  * if the list is empty, returns a null pointer.
  *
  * SinglyLinkedList*	list	-	Said singly linked list.
-
  */
 unsigned int* singly_removeFirst(SinglyLinkedList* list) {
     SinglyNode *head = list->head;
@@ -150,7 +148,6 @@ DoublyNode* doubly_createNewNode(SinglyLinkedList *data) {
  * Returns TRUE iff doubly linked list is empty
  *
  * DoublyLinkedList*	list	-	Said doubly linked list.
- *
 */
 int doubly_isEmpty(DoublyLinkedList *list) {
 	if(list == NULL) {
@@ -220,7 +217,6 @@ void doubly_removeLast(DoublyLinkedList *list) {
 	}
 	return;
 }
-
 
 
 /*

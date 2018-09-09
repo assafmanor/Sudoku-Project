@@ -181,10 +181,10 @@ void setCellVal(Board* boardPtr, unsigned int row, unsigned int col, unsigned in
 	updatePossibleValues(boardPtr, row, col, val);
 
 
-	/* step 3 : update cell's value */
+	/* step 2 : update cell's value */
 	getCell(boardPtr,row,col)->value = val;
 
-	/* step 2 : update erroneous values */
+	/* step 3 : update erroneous values */
 	updateErroneous(boardPtr, row, col, lastVal);
 
 
@@ -544,9 +544,8 @@ unsigned int undoMove(unsigned int toPrint) {
 	}
 	move = curMove->data;
 	curMove = curMove->prev;
-
-	node = move->head;
-	while(node != NULL) {
+	/* loop through the whole move and change all cells to their previous values */
+	for(node = move->head; node != NULL; node = node->next) {
 		row = node->data[0];
 		col = node->data[1];
 		val = node->data[2];
@@ -567,7 +566,6 @@ unsigned int undoMove(unsigned int toPrint) {
 			printf("Undo %d,%d: from %s to %s\n",col+1,row+1,s_val,s_lastVal);
 		}
 		setCellVal(&gameBoard,row,col,lastVal);
-		node = node->next;
 	}
 	return TRUE;
 }
@@ -597,9 +595,8 @@ unsigned int redoMove() {
 		curMove = curMove->next;
 	}
 	move = curMove->data;
-
-	node = move->head;
-	while(node != NULL) {
+	/* loop through the whole move and change all cells to their previously undone values */
+	for(node = move->head; node != NULL; node = node->next) {
 		row = node->data[0];
 		col = node->data[1];
 		val = node->data[2];
@@ -618,7 +615,6 @@ unsigned int redoMove() {
 		}
 		printf("Redo %d,%d: from %s to %s\n",col+1,row+1,s_lastVal,s_val);
 		setCellVal(&gameBoard,row,col,val);
-		node = node->next;
 	}
 	return TRUE;
 }

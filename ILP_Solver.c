@@ -98,13 +98,16 @@ int ilpSolve(Board* boardPtr, Board* solBoardPtr) {
 	/* --------- step6: get the solution - the assignment to each variable --------------- */
 	if(ret) { /* no errors */
 		if(optimstatus == GRB_OPTIMAL) { /* Model is feasible. Solution found. */
+			/* fetch the solution (saved in sol) */
 			error = GRBgetdblattrarray(model, GRB_DBL_ATTR_X, 0, N3, sol);
 			if (error) {
 				printf("ERROR %d GRBgetdblattrarray(): %s\n", error, GRBgeterrormsg(env));
 				ret = -1;
 			}
-			ret = TRUE; /* solution found */
-			updateSolution(solBoardPtr,sol,N); /* Update solution board to the values assigned by the optimized model */
+			else {
+				ret = TRUE; /* solution found */
+				updateSolution(solBoardPtr,sol,N); /* Update solution board to the values assigned by the optimized model */
+			}
 		}
 		else { /* Model is infeasible. No solution found. */
 			ret = FALSE;
@@ -114,7 +117,7 @@ int ilpSolve(Board* boardPtr, Board* solBoardPtr) {
 	/* Free model and environment */
 	GRBfreemodel(model);
 	GRBfreeenv(env);
-	/* Free allocated space */
+	/* Free arrays */
 	free(sol);
 	free(vtype);
 
@@ -262,7 +265,7 @@ unsigned int addConstraints(GRBenv *env, GRBmodel *model, Board* boardPtr, unsig
 		printf("Error: malloc has failed\n");
 		exit(1);
 	}
-	/* Type A: each cell has exactly  1 value */
+	/* Type A: each cell has exactly one value */
 	for(r = 0; r < N; r++) {
 		for(c = 0; c < N; c++) {
 			for(v = 0; v < N; v++) {

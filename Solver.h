@@ -29,7 +29,7 @@ int				isBoardComplete(Board*);
  *
  * Board*	boardPtr		-	A pointer a game board.
  */
-unsigned int	autofill(Board*);
+void			autofill(Board*);
 
 
 /*
@@ -39,7 +39,7 @@ unsigned int	autofill(Board*);
  *
  * Board*	boardPtr		-	A pointer a game board.
  */
-unsigned int	num_solutions(Board*);
+unsigned int	numSolutions(Board*);
 
 
 /*

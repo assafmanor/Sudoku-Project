@@ -10,16 +10,11 @@
 /* Includes *some* of the private methods in this module */
 
 void possibleVals(Board* boardPtr, unsigned int row, unsigned int col, unsigned int* possible);
-
 unsigned int chooseRandVal(unsigned int* possible, unsigned int posValsCount);
-
 void calcNextCell(unsigned int N, unsigned int row, unsigned int col, unsigned int* nextRow, unsigned int* nextCol);
-
 void getNextCellCordinates(info** cd, unsigned int N);
-
-void init_cell (Board* original, Board* temp, info** def, unsigned int N);
-
-int exhaustive_backtracking(Board* original, Board* temp);
+void initCell (Board* original, Board* temp, info** def, unsigned int N);
+int exhaustiveBacktracking(Board* original, Board* temp);
 
 /******* End of private method declarations ******/
 
@@ -65,24 +60,16 @@ int isBoardComplete(Board* boardPtr) {
  *
  * Board*	boardPtr		-	A pointer a game board.
  */
-unsigned int autofill(Board* boardPtr){
+void autofill(Board* boardPtr){
 	Board 				constBoard = {'\0'};		/* This board will be a copy of board, and won't change*/
 	unsigned int		m = boardPtr->m, n = boardPtr->n;
 	unsigned int 		N = m*n;
-	unsigned int 		errounous, row , col, val;
+	unsigned int 		row , col, val;
 	unsigned int* 		possible;
 	unsigned int		posValsCount;
 	unsigned int		lastVal;
 	Cell* 				cell;
 	SinglyLinkedList*	move;
-
-
-	/* c - check if there are errounous cells*/
-	errounous = hasErrors(boardPtr); /*if there are errors --> errounous = TRUE*/
-	if (errounous){
-		printf("Error: board contains erroneous values\n");
-		return FALSE;
-	}
 
 	/* allocate array of possibilities */
 	possible = (unsigned int*)calloc(N+1, sizeof(unsigned int));
@@ -91,15 +78,13 @@ unsigned int autofill(Board* boardPtr){
 		exit(1);
 	}
 
-	/* d1 - copy:
+	/* copy:
 	 * all the suggested values by autofill
 	 * are the values which already on the board:*/
 	initializeBoard(&constBoard,m,n);
 	copyBoard(boardPtr, &constBoard);
 
-	/* d2 - update the board with new values.
-	 * cell->sug_value is not changing , while cell->value
-	 * can be changed in the nested for loop*/
+	/* update the board with new values and add all changed cells to the move list as one move. */
 	move = createNewSinglyLinkedList();
 	for(row = 0; row < N; row++) {
 		for(col = 0; col < N; col++) {
@@ -123,7 +108,8 @@ unsigned int autofill(Board* boardPtr){
 		}
 	}
 
-	if(move->size > 0) { /* if the number of cells autofilled is greater than zero - add to move list */
+	/* if the number of cells autofilled is greater than zero - add to move list */
+	if(move->size > 0) {
 		addMove(move);
 	}
 	else { /* no autofills */
@@ -133,7 +119,7 @@ unsigned int autofill(Board* boardPtr){
 	free(possible);
 	freeBoard(&constBoard);
 
-	return TRUE;
+	return;
 }
 
 
@@ -144,31 +130,20 @@ unsigned int autofill(Board* boardPtr){
  *
  * Board*	boardPtr		-	A pointer a game board.
  */
-unsigned int num_solutions(Board* boardPtr){
-	unsigned int	 errounous;
+unsigned int numSolutions(Board* boardPtr){
+/*	unsigned int	 errounous;*/
 	unsigned int	 counter = 0;
 	Board 			 tempBoard = {'\0'};
 
-	/* c - check if there are errounous cells*/
-	errounous = hasErrors(boardPtr); /*if there are errors --> errounous = TRUE*/
-	if (errounous){
-		printf("Error: board contains erroneous values\n");
-		return TRUE;
-	}
-
-	/* preapere temp board -
+	/* prepare temp board -
 	 * This board will be a copy of board, and will be solved instead of it.*/
 	initializeBoard(&tempBoard, boardPtr->m, boardPtr->n);
 	copyBoard(boardPtr, &tempBoard);
 	/*try to solve the board */
-	counter =  exhaustive_backtracking (boardPtr, &tempBoard);
+	counter =  exhaustiveBacktracking (boardPtr, &tempBoard);
 	/* Free allocated temporary board */
 	freeBoard(&tempBoard);
 
-	/* print result*/
-	printf("Number of solutions: %d\n",counter);
-	if(counter==1){ printf("This is a good board!\n");}
-	if(counter> 1){ printf("The puzzle has more than 1 solution, try to edit it further\n");}
 	return counter;
 }
 
@@ -182,27 +157,20 @@ unsigned int num_solutions(Board* boardPtr){
  * pre: we are in EDIT mode			(Checked in MainAux.c)
  * pre: x, y to are int 			(Checked in MainAux.c)
  * pre :x, y have legal coordinates (Checked in MainAux.c)
- *
  */
 unsigned int generate(Board* gameBoardPtr,int x, int y ) {
 	SinglyLinkedList*	move;
-	unsigned int	x_values_successfully, ilp_Successful;
+	unsigned int	x_values_successfully, ilpSuccessful;
 	unsigned int	rand_row, rand_col, rand_val, posValsCount;
 	unsigned int	m = gameBoardPtr->m, n = gameBoardPtr->n;
 	int	N = m*n;
 	int i,j,try;
 	Cell* cur_cell;
 
-	/* board must be empty */
-	if (!isBoardEmpty(*gameBoardPtr)){
-		printf("Error: board is not empty\n");
-	    return FALSE;
-	}
-
 	/* try 1000 times(max) to fill x cells */
 	for(try = 0; try < 1000; try++){
 		x_values_successfully = TRUE;
-		ilp_Successful = FALSE;
+		ilpSuccessful = FALSE;
 		for (i=0; i<x; i++){ /* find x good values */
 			/* choose random cell */
 			rand_col = rand()%N;
@@ -229,10 +197,10 @@ unsigned int generate(Board* gameBoardPtr,int x, int y ) {
 		}/* finished current board building, maybe with illegal board */
 
 		if(x_values_successfully){ /* Try to solve board */
-			ilp_Successful = ilpSolve(gameBoardPtr,getSolutionBoardPtr());
+			ilpSuccessful = ilpSolve(gameBoardPtr,getSolutionBoardPtr());
 		}
 
-		if(ilp_Successful) break;
+		if(ilpSuccessful) break;
 		else{
 			nullifyBoard(gameBoardPtr);
 				continue;
@@ -240,8 +208,7 @@ unsigned int generate(Board* gameBoardPtr,int x, int y ) {
 
 	}/* Outer for loop was ended */
 
-	if(!ilp_Successful){	/* Failed to generate the board */
-		printf("Error: puzzle generator failed\n");
+	if(!ilpSuccessful){	/* Failed to generate the board */
 		nullifyBoard(gameBoardPtr);
 	    return FALSE;
 	}
@@ -402,9 +369,6 @@ void calcNextCell(unsigned int N, unsigned int row, unsigned int col, unsigned i
 }
 
 
-
-
-
 /****************** num_solutions() Private methods *******************/
 
 /*
@@ -435,7 +399,7 @@ void getNextCellCordinates(info** cd, unsigned int N){
  * info** 			def			-	Current cell's info.
  * unsigned int 	N			-	Number of rows/columns in the board.
  */
-void init_cell (Board* original, Board* temp, info** def, unsigned int N){
+void initCell (Board* original, Board* temp, info** def, unsigned int N){
 	/* Allocate memory for possible values.
 	 * we free this memory at the while loop */
 	(*def)->possible  = (unsigned int*)calloc(N+1, sizeof(unsigned int));
@@ -459,7 +423,7 @@ void init_cell (Board* original, Board* temp, info** def, unsigned int N){
  * Board* 			original	-	A pointer a game board.
  * Board* 			temp		-	A pointer a temp board.
  */
-int exhaustive_backtracking(Board* original, Board* temp) {
+int exhaustiveBacktracking(Board* original, Board* temp) {
 	/* Variables */
 	unsigned int	  N         = (original->m * original->n);
 	struct StackNode* root 		= NULL;		/* beautiful stack who mimic recursion */
@@ -476,7 +440,7 @@ int exhaustive_backtracking(Board* original, Board* temp) {
 	/*--For each cell:--*/
 	do {
 			if(cd->first_time){  /* first time we meet a cell-->init cell */
-				init_cell (original,temp, &cd, N);
+				initCell (original,temp, &cd, N);
 			}
 
 			/* If Last cell */
