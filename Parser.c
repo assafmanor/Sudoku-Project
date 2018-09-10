@@ -26,11 +26,11 @@ unsigned int stringsEqual(char*, char*);
  * unsigned int*	exitProgram	-	Signals the program to exit after executing the last command (occurs after an EOF).
  */
 void getUserInput(char* str, unsigned int *exitProgram) {
-	unsigned int	i = 0;
+	unsigned int	i;
 	char			ch;
 	do {
 		printf("Enter your command:\n");
-		while((ch=fgetc(stdin)) != '\n') {
+		for(i = 0; (ch=fgetc(stdin)) != '\n'; i++) {
 			if(i > MAX_INPUT_LENGTH) { /* Treat as invalid input */
 				str[0] = '@'; /* Change to an invalid command. */
 				while((ch = fgetc(stdin)) != '\n' && ch != EOF); /* Flush buffer */
@@ -46,7 +46,6 @@ void getUserInput(char* str, unsigned int *exitProgram) {
 				return;
 			}
 			str[i] = ch;
-			i++;
 		}
 		str[i] = '\0';
 		if(ferror(stdin)) {
