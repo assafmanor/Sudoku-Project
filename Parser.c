@@ -149,22 +149,20 @@ unsigned int interpretCommand (char* input, int* command, char* path) {
 	unsigned int	i;
 	char*			strArr[4] = {'\0'};
 	unsigned int 	isValidCommand = TRUE;
-
 	/* Empty input */
 	if(input[0] == '\0') {
 		return FALSE;
 	}
-
-	commandToArray(input,strArr); /* insert each one of the first four words of input into the array strArr */
+	/* split the first four words of input into the strArr array and try to convert the last second, third, and fourth words to integers (not assuming they exist) */
+	commandToArray(input,strArr);
 	i1 = toInt(strArr[1]);
 	i2 = toInt(strArr[2]);
 	i3 = toInt(strArr[3]);
 	if (stringsEqual(strArr[0],"solve")) {
-		/* Copy given path to the string path */
 		if(strArr[1] == NULL) {
 			isValidCommand = FALSE;
 		}
-		else {
+		else { /* Copy given path to the string path */
 			strcpy(path,strArr[1]);
 			command[0] = 1;
 		}
@@ -220,11 +218,10 @@ unsigned int interpretCommand (char* input, int* command, char* path) {
 	}
 	else if (stringsEqual(strArr[0],"save")) {
 		command[0] = 10;
-		/* Copy given path to the string path */
 		if(strArr[1] == NULL) {
 			isValidCommand = FALSE;
 		}
-		else {
+		else { /* Copy given path to the string path */
 			strcpy(path,strArr[1]);
 		}
 	}
@@ -257,7 +254,6 @@ unsigned int interpretCommand (char* input, int* command, char* path) {
 	for(i = 0; i < 4; i++) {
 		free(strArr[i]);
 	}
-
 	return isValidCommand;
 }
 
@@ -284,10 +280,6 @@ unsigned int stringsEqual(char* str1, char* str2) {
  */
 unsigned int isEmptyInput(char* str) {
 	unsigned int	i;
-
-	if(strlen(str) == 0) {
-		return TRUE;
-	}
 	for(i = 0; i < strlen(str); i++) {
 		if(str[i] != '\n' && str[i] != '\t' && str[i] != ' ' && str[i] != '\r') {
 			return FALSE;
@@ -304,19 +296,19 @@ unsigned int isEmptyInput(char* str) {
  * char**	output	-	An empty array of strings. Will store each individual word on separate cells of the array.
  */
 void commandToArray(char* input, char** output) {
-	unsigned int	i = 0;
+	unsigned int	i;
 	char*			tok;
-
 	tok = strtok(input," \t\r\n");
-	while(i < 4 && tok != NULL) {
-		output[i] = (char*) calloc(strlen(tok)+1,sizeof(char));
+	for(i = 0; i < 4 && tok != NULL; i++) {
+		output[i] = (char*) malloc((strlen(tok)+1)*sizeof(char));
 		if(output[i] == NULL) {
-			printf("Error: calloc has failed\n");
+			printf("Error: malloc has failed\n");
 			exit(1);
 		}
-		strcpy(output[i],tok); /* copy current word to output[i] */
-		tok = strtok(NULL," \t\r\n");  /* go to next word */
-		i++;
+		/* copy current word to output[i]. the null terminator is copied as well. */
+		strcpy(output[i],tok);
+		/* go to next word */
+		tok = strtok(NULL," \t\r\n");
 	}
 }
 

@@ -346,7 +346,7 @@ unsigned int executeSet(int row, int col, int val) {
 			singly_addLast(move,row,col,val,lastVal);
 			addMove(move);
 		}
-		/* then. print the board either way */
+		/* then print the board either way */
 		printBoard(&gameBoard);
 
 		/* Check if the puzzle was solved and print a message and change game mode if needed */

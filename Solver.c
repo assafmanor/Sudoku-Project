@@ -131,19 +131,16 @@ void autofill(Board* boardPtr){
  * Board*	boardPtr		-	A pointer a game board.
  */
 unsigned int numSolutions(Board* boardPtr){
-/*	unsigned int	 errounous;*/
 	unsigned int	 counter = 0;
 	Board 			 tempBoard = {'\0'};
-
 	/* prepare temp board -
 	 * This board will be a copy of board, and will be solved instead of it.*/
 	initializeBoard(&tempBoard, boardPtr->m, boardPtr->n);
 	copyBoard(boardPtr, &tempBoard);
-	/*try to solve the board */
+	/* try to solve the board */
 	counter =  exhaustiveBacktracking (boardPtr, &tempBoard);
 	/* Free allocated temporary board */
 	freeBoard(&tempBoard);
-
 	return counter;
 }
 
