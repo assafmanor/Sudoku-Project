@@ -149,9 +149,13 @@ unsigned int interpretCommand (char* input, int* command, char* path) {
 	unsigned int	i;
 	char*			strArr[4] = {'\0'};
 	unsigned int 	isValidCommand = TRUE;
-	/* Empty input */
-	if(input[0] == '\0') {
-		return FALSE;
+	if(isEmptyInput(input)) { /* An empty input that reached this stage is a 'valid' command that should do nothing */
+		if(strlen(input) > 0) { /* there are whitespaces. treat as an empty line (thus there needs to be another "Enter your command\n" print. */
+			printf("Enter your command:\n");
+		}
+		/* set command[0] to INVALID so it would do nothing in executeCommand(...)*/
+		command[0] = INVALID;
+		return TRUE;
 	}
 	/* split the first four words of input into the strArr array and try to convert the last second, third, and fourth words to integers (not assuming they exist) */
 	commandToArray(input,strArr);

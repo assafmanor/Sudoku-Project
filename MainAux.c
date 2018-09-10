@@ -76,9 +76,8 @@ unsigned int executeCommand (int* command, char* path){
 		return executeReset();
 	case 15: 	/*	EXIT	*/
 		return executeExit();
-
-	default: /* shouldn't get here */
-		return FALSE;
+	default:	/* an empty input would reach this */
+		return TRUE;
 	}/*switch-end*/
 }
 

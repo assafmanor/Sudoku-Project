@@ -16,19 +16,14 @@ int main() {
 	char            input[MAX_INPUT_LENGTH] = {'\0'};
 	int				command[4] = { 0 };
 	char			path[MAX_INPUT_LENGTH];
-
 	SP_BUFF_SET()
-
 	srand(time(NULL));
-
 	setGameMode(INIT);
-
 	printf("Sudoku\n------\n");
-
 	/* Ask user for commands and execute them until user enters "exit". */
 	while(command[0] != 15) { /* While command is not "exit". */
 		if(exitProgram) {
-			printf("Enter your command:\n"); /* Print added so it would work exactly like an exit command */
+			if(command[0] != INVALID) printf("Enter your command:\n"); /* Print added so it would work exactly like an exit command */
 			command[0] = 15; /* exit command code */
 			isValidCommand = TRUE;
 		}
@@ -49,6 +44,5 @@ int main() {
 		}
 	}
 	printf("Exiting...\n");
-
 	return 0;
 }
