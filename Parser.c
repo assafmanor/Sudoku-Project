@@ -1,3 +1,19 @@
+/*---Parser.c---
+ *  This module adds the functionality of parse a user input as a command.
+ *
+ * A. Private functions
+ * 	1. isEmptyInput()    : Determines whether a string consists only of whitespaces.
+ * 	2. commandToArray()  : Splits each word of user input, to a separate cell of an array of strings
+ * 	3. stringsEqual()    : Returns TRUE iff str1 and str2 contain exactly the same chars
+ *
+ *
+ * B. Public functions:
+ * 	1.getUserInput() 	 : Get the user's input and ignore an input of whitespaces
+ * 	2.toInt() 			 : Converts a string to the integer it represents if it does represent an integer
+ * 	3.interpretCommand() : Reads user command and returns if valid or not
+ *
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

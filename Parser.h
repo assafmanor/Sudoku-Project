@@ -1,3 +1,14 @@
+/*---Parser.h---
+ *  This module adds the functionality of parse a user input as a command.
+ *
+ * Functions:
+ * 	1.getUserInput() 	 : Get the user's input and ignore an input of whitespaces
+ * 	2.toInt() 			 : Converts a string to the integer it represents if it does represent an integer
+ * 	3.interpretCommand() : Reads user command and returns if valid or not
+ *
+ */
+
+
 #define MAX_INPUT_LENGTH	256
 #define	INVALID				(-1)
 /* TRUE and FALSE are defined in Game.h. */

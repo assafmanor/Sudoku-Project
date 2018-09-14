@@ -1,3 +1,27 @@
+/*---Solver.c---
+ *  This module adds the functionality of solving a sudoku board.
+ *  It includes validating a board, auto-fill a board, check number of solution etc.
+ *
+ * A. Private functions
+ * 	1. possibleVals()  : Calculate all the legal values for cell[row,col], and update the "possible" array.
+ * 	2. chooseRandVal() : Randomly chooses and returns a value from all possible values.
+ * 	3. calcNextCell()  : Given the coordinates of a cell (row and column), calculates the coordinates of the next cell
+ * 	4. getNextCellCordinates() : used for numSolutions - Calculates the next cell to be checked
+ * 	5. initCell()      : used for numSolutions - init default cell settings for every new cell we check
+ * 	6. exhaustiveBacktracking() : used for numSolutions -Exhaustive backtracking on the board, and returns num of solutions
+ *
+ * B. Public functions:
+ * 	1.validate() 		: Checks if the current configuration of the game board is solvable
+ * 	2.isBoardComplete() : Returns TRUE if all cells are filled on a game board and are not erroneous.
+ * 	3.autofill() 		: Fill cells which contain exactly a single legal value
+ * 	4.numSolutions ()   : Calculates the number of solutions for the current board.
+ * 	5.generate() 		:  Try to generate x cells at gameBoardPtr board.
+ * 						   try to solve with ilp(result at "solution_board" so we copy it to gameBoardPtr board).
+ * 						   finally deleting cells values until only y values left.
+ *
+ */
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include "Solver.h"
@@ -124,9 +148,7 @@ void autofill(Board* boardPtr){
 
 
 /*
- * Calculates the next cell to be checked, and
- * init only the relevant variables, so next while loop iteration
- * will work on the (new) next cell.
+ * Calculates the number of solutions for the current board
  *
  * Board*	boardPtr		-	A pointer a game board.
  */
@@ -143,7 +165,6 @@ unsigned int numSolutions(Board* boardPtr){
 	freeBoard(&tempBoard);
 	return counter;
 }
-
 
 
 /*
@@ -314,7 +335,6 @@ void possibleVals(Board* boardPtr, unsigned int row, unsigned int col, unsigned 
 }
 
 
-
 /*
  * Randomly chooses and returns a value from all possible values.
  *
@@ -370,8 +390,6 @@ void calcNextCell(unsigned int N, unsigned int row, unsigned int col, unsigned i
 
 /*
  * Calculates the next cell to be checked, and
- * init only the relevant variables, so next while loop iteration
- * will work on the (new) next cell.
  *
  * info**			cd	-	Current cell's info.
  * unsigned int 	N	-	Number of rows/columns in the board.

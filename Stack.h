@@ -1,3 +1,9 @@
+/*---Stack.h---
+ * An implement of a stack for exhaustive-Backtracking in solver.c
+ * Besides stack structure, also contains "info_t" -
+ * A structure to represent the info in a stack node
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include "Game.h"

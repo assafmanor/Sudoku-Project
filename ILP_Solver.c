@@ -1,3 +1,20 @@
+/*---ILP_Solver.c---
+ * This module adds the functionality of linear programming.
+ * This functionality is being used to solve puzzles and check possible solutions to them.
+ *
+ * The module includes 1 public function:
+ * 	ilpSolve() : Solve a game board and update its solution board,
+ *  			 using Integer Linear Programming (ILP) with the Gurobi library.
+ *  			 return TRUE iff board is solvable.
+ *
+ *  This public function use 5 private functions:
+ * 	1 - get_index() : return the index of cell with row r, column c and value v.
+ * 	2 - createGurobiEnvModel() :  Creates a Gurobi environment and an empty model.
+ * 	3 - initObjectiveFunction() : Initializes the objective function.
+ * 	4 - addConstraints() : Adds all of the constraints needed for the model.
+ * 	5 - updateSolution() : Updates the solution board according to the optimized solution to the model.
+ */
+
 #include <stdlib.h>
 #include <stdio.h>
 #include "Game.h"

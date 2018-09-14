@@ -1,5 +1,10 @@
-#include "LinkedList.h"
+/*---LinkedList.c---
+ *
+ *
+ */
 
+
+#include "LinkedList.h"
 #include <stdio.h>
 #include <stdlib.h>
 

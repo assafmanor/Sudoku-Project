@@ -1,3 +1,8 @@
+/*---Stack.c---
+ * An implement of a stack for exhaustive-Backtracking in solver.c
+ */
+
+
 #include <stdlib.h> /* for malloc */
 #include <stdio.h>	/* for error printing */
 #include "Game.h"   /* for cell structure */
@@ -10,7 +15,11 @@ int isEmpty(struct StackNode *root)
 }
 
 /* First, adjust current cell before pushing it.
- * Then, it push the current cell to the stack.*/
+ * Then, it push the current cell to the stack.
+ * StackNode** root		-	A stack pointer
+ * info**      cd	    -	a sudoku cell info
+ *
+*/
 void push(struct StackNode** root, info** cd)
 {
 	unsigned int last_value;
@@ -49,7 +58,12 @@ void push(struct StackNode** root, info** cd)
  * initialize them as the current cell.
  * this way,the next while loop iteration will
  * handle the popped stack node.
- * pre: we don't pop NULL, but a actual stackNode */
+ * pre: we don't pop NULL, but a actual stackNode
+ *
+ * StackNode** root		-	A stack pointer
+ * info**      cd	    -	a sudoku cell info
+ *
+ */
 void pop(struct StackNode** root, info** cd)
 {
 	/* step 1: pop the stack node to 'top' */
