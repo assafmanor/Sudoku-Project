@@ -8,45 +8,45 @@
  * Here is a short description of the functions (longer descriptions at the functions code)
  *
  * A. Cell functions:
- * 	1. getCell() : Returns a pointer to the specified cell
- * 	2. getHint() : Given a column and row of a cell - returns the solution value of the cell
- * 	3. isCellFixed() : Given a column and row of a cell - return TRUE iff cell is fixed
- *     in boardPtr->board.
- * 	4. isErroneous() : Checks if cell[row][col] of boardPtr->board contains an erroneous value.
- * 	5. updatePossibleValues () : Given a row a column and a new value, updates the possible values for the row
- *     column, and block.
- * 	6. setCellVal () : Assigns value to a cell, and update other variables as necessary.
+ * 	1. getCell()				:	Returns a pointer to the specified cell
+ * 	2. getHint()				:	Given a column and row of a cell - returns the solution value of the cell
+ * 	3. isCellFixed()			:	Given a column and row of a cell - return TRUE iff cell is fixed
+ *     								in boardPtr->board.
+ * 	4. isErroneous()			:	Checks if cell[row][col] of boardPtr->board contains an erroneous value.
+ * 	5. updatePossibleValues ()	:	Given a row a column and a new value, updates the possible values for the row
+ *     								column, and block.
+ * 	6. setCellVal ()			:	Assigns value to a cell, and update other variables as necessary.
  *
  *
  * B. Board functions:
- * 	1. freeBoard() : Frees all allocated space used by board.
- * 	2. nullifyBoard() : Initializes the game board's parameters for a new game-
- * 						 assuming memory has already been allocated.
- * 	3. initializeBoard() : Initializes the game board's parameters for a new game.
- * 	4. isBoardEmpty() : Returns TRUE iff all cells are Empty on a game board.
- * 	5. copyBoard() : Copies the contents of the original board to the copied board.
- * 	6. getGameBoardPtr() : Returns a pointer to gameBoard
- * 	7. getSolutionBoardPtr() : Returns a pointer to solutionBoard.
- *  8. hasErrors() : Checks if boardPtr->board has any erroneous cells.
+ * 	1. freeBoard()				:	Frees all allocated space used by board.
+ * 	2. nullifyBoard()			:	Initializes the game board's parameters for a new game-
+ * 						 			assuming memory has already been allocated.
+ * 	3. initializeBoard()		:	Initializes the game board's parameters for a new game.
+ * 	4. isBoardEmpty()			:	Returns TRUE iff all cells are Empty on a game board.
+ * 	5. copyBoard()				:	Copies the contents of the original board to the copied board.
+ * 	6. getGameBoardPtr()		:	Returns a pointer to gameBoard
+ * 	7. getSolutionBoardPtr()	:	Returns a pointer to solutionBoard.
+ *  8. hasErrors()				:	Checks if boardPtr->board has any erroneous cells.
  *
  *
  * C. Game functions:
- * 	1. initializeGame() : Initializes a new empty game board and a solution board,
- * 	   frees previously allocated space used by these boards.
- * 	2. updateErroneous() : Updates all cells that may have changed from erroneous to not erroneous or the other way around.
- *  3. setGameMode() : Sets the value of gameMode to a new Game Mode.
- *  4. getGameMode() : Returns the value of gameMode.
- *  5. setMarkErrors() : Sets the value of markErrors to mark (assumes mark is 0 or 1).
- *  6. getMarkErrors() : Returns the value of markErrors.
+ * 	1. initializeGame()			:	Initializes a new empty game board and a solution board,
+ * 	   								frees previously allocated space used by these boards.
+ * 	2. updateErroneous()		:	Updates all cells that may have changed from erroneous to not erroneous or the other way around.
+ *  3. setGameMode()			:	Sets the value of gameMode to a new Game Mode.
+ *  4. getGameMode()			:	Returns the value of gameMode.
+ *  5. setMarkErrors()			:	Sets the value of markErrors to mark (assumes mark is 0 or 1).
+ *  6. getMarkErrors()			:	Returns the value of markErrors.
  *
  *
  * D. Move-list functions:
- * 	1. clearMoveList() : Clears all allocated memory used by the field moveList.
- * 	2. initializeMoveList() : Initializes a new empty move list (sets and autofills).
- * 	3. addMove() : Adds move to the move list.
- * 	4. undoMove() : Set the current move pointer to the previous move and update the board accordingly.
- * 	5. redoMove() : Set the current move pointer to the next move and update the board accordingly.
- * 	6. resetGame() : Undo all moves, reverting the board to its original loaded state.
+ * 	1. clearMoveList()			:	Clears all allocated memory used by the field moveList.
+ * 	2. initializeMoveList()		:	Initializes a new empty move list (sets and autofills).
+ * 	3. addMove()				:	Adds move to the move list.
+ * 	4. undoMove()				:	Set the current move pointer to the previous move and update the board accordingly.
+ * 	5. redoMove()				:	Set the current move pointer to the next move and update the board accordingly.
+ * 	6. resetGame()				:	Undo all moves, reverting the board to its original loaded state.
  */
 
 #include "LinkedList.h"

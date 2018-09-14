@@ -1,7 +1,7 @@
 /*---ILP_Solver.h---
- * This module adds the functionality of linear programming.
- * This functionality is being used to solve puzzles and check possible solutions to them.
- * The module includes 1 function - ilpSolve()
+ * This module uses the Gurobi Optimizer Integer Linear Programming solver.
+ * It is being used in order to solve puzzles and check possible solutions to them.
+ * The module includes one public function - ilpSolve().
  */
 
 /*

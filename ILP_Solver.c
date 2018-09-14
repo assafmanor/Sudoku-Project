@@ -1,18 +1,19 @@
 /*---ILP_Solver.c---
- * This module adds the functionality of linear programming.
- * This functionality is being used to solve puzzles and check possible solutions to them.
+ * This module uses the Gurobi Optimizer Integer Linear Programming solver.
+ * It is being used in order to solve puzzles and check possible solutions to them,
+ * much more efficiently than the brute-force backtracking method used in exercise 3.
  *
- * The module includes 1 public function:
- * 	ilpSolve() : Solve a game board and update its solution board,
- *  			 using Integer Linear Programming (ILP) with the Gurobi library.
- *  			 return TRUE iff board is solvable.
+ * The module includes one public function:
+ * 	ilpSolve()					:	Solve a game board and update its solution board,
+ *  			 					using Integer Linear Programming (ILP) with the Gurobi library.
+ *  			 					return TRUE iff board is solvable.
  *
- *  This public function use 5 private functions:
- * 	1 - get_index() : return the index of cell with row r, column c and value v.
- * 	2 - createGurobiEnvModel() :  Creates a Gurobi environment and an empty model.
- * 	3 - initObjectiveFunction() : Initializes the objective function.
- * 	4 - addConstraints() : Adds all of the constraints needed for the model.
- * 	5 - updateSolution() : Updates the solution board according to the optimized solution to the model.
+ *  This public function uses five private functions:
+ * 	1 - getIndex()				:	Return the index of cell with row r, column c and value v, in a one-dimensional array.
+ * 	2 - createGurobiEnvModel()	:	Creates a Gurobi environment and an empty model.
+ * 	3 - initObjectiveFunction()	:	Initializes the objective function.
+ * 	4 - addConstraints()		:	Adds all of the constraints needed for the model.
+ * 	5 - updateSolution()		:	Updates the solution board according to the optimized solution to the model.
  */
 
 #include <stdlib.h>
@@ -23,7 +24,7 @@
 
 /********** Private method declarations **********/
 
-unsigned int	get_index(unsigned int, unsigned int, unsigned int, unsigned int);
+unsigned int	getIndex(unsigned int, unsigned int, unsigned int, unsigned int);
 unsigned int	createGurobiEnvModel(GRBenv**, GRBmodel**);
 unsigned int	initObjectiveFunction(GRBenv*, GRBmodel**, unsigned int, char*);
 unsigned int	addConstraints(GRBenv*, GRBmodel*, Board*, unsigned int, unsigned int);
@@ -148,14 +149,14 @@ int ilpSolve(Board* boardPtr, Board* solBoardPtr) {
 /************************* Private methods *************************/
 
 /*
- * return the index of cell with row r, column c and value v
+ * Return the index of cell with row r, column c and value v, in a one-dimensional array.
  *
  * unsigned int	N	-	number of rows/columns.
  * unsigned int	row	-	Row number (between 0 and N-1).
  * unsigned int col	-	Column number (between 0 and N-1).
  * unsigned int	val	-	cell value (between 0 and N-1).
  */
-unsigned int get_index(unsigned int N, unsigned int row, unsigned int col, unsigned int val){
+unsigned int getIndex(unsigned int N, unsigned int row, unsigned int col, unsigned int val){
 	unsigned int res = (row*N*N) + (col*N) + val;
 	return res;
 }
@@ -209,7 +210,7 @@ unsigned int initObjectiveFunction(GRBenv *env, GRBmodel **modelPtr, unsigned in
 	for(r=0; r < N; r++) {
 		for(c = 0; c < N; c++) {
 			for(v = 0; v < N; v++){
-				index = get_index(N,r,c,v);
+				index = getIndex(N,r,c,v);
 				vtype[index]= GRB_BINARY;
 			}
 		}
@@ -286,7 +287,7 @@ unsigned int addConstraints(GRBenv *env, GRBmodel *model, Board* boardPtr, unsig
 	for(r = 0; r < N; r++) {
 		for(c = 0; c < N; c++) {
 			for(v = 0; v < N; v++) {
-				index = get_index(N,r,c,v);
+				index = getIndex(N,r,c,v);
 				ind[v] = index;
 			}
 			/* Add constraint:*/
@@ -303,7 +304,7 @@ unsigned int addConstraints(GRBenv *env, GRBmodel *model, Board* boardPtr, unsig
 		for(v = 0; v < N; v++) {
 			for(c = 0; c < N; c++) {
 				for(r = 0; r < N; r++) {
-					index = get_index(N,r,c,v);
+					index = getIndex(N,r,c,v);
 					ind[r] = index;
 				}
 				/* Add constraint:*/
@@ -321,7 +322,7 @@ unsigned int addConstraints(GRBenv *env, GRBmodel *model, Board* boardPtr, unsig
 		for(v = 0; v < N; v++) {
 			for(r = 0; r < N; r++) {
 				for(c = 0; c < N; c++) {
-					index = get_index(N,r,c,v);
+					index = getIndex(N,r,c,v);
 					ind[c] = index;
 				}
 				/* Add constraint:*/
@@ -344,7 +345,7 @@ unsigned int addConstraints(GRBenv *env, GRBmodel *model, Board* boardPtr, unsig
 				c = (block%m)*n;
 				for(block_r = 0; block_r < m; block_r++) {
 					for(block_c = 0; block_c < n; block_c++) {
-						index = get_index(N, r+block_r, c+block_c, v);
+						index = getIndex(N, r+block_r, c+block_c, v);
 						ind[block_r*n+block_c] = index; /* ind inside the block*/
 					}
 				}
@@ -364,7 +365,7 @@ unsigned int addConstraints(GRBenv *env, GRBmodel *model, Board* boardPtr, unsig
 			for(c = 0; c < N; c++) {
 				v = getCell(boardPtr,r,c)->value; /* value between 0-N, 0 means empty cell. */
 				if(v > 0) { /* cell(r,c) is not empty */
-					index = get_index(N,r,c,v-1); /* here a value of v translates to v-1 in the indices. */
+					index = getIndex(N,r,c,v-1); /* here a value of v translates to v-1 in the indices. */
 					nonEmptyCellInd[0] = index;
 					/* Add constraint */
 					error = GRBaddconstr(model, 1, nonEmptyCellInd, nonEmptyCellCoef, GRB_EQUAL,1.0, NULL);
@@ -395,7 +396,7 @@ void updateSolution(Board* solBoardPtr, double* sol, unsigned int N) {
 	for(r = 0; r < N; r++) {
 		for(c = 0; c < N; c++) {
 			for(v = 0; v < N; v++) {
-				index = get_index(N,r,c,v);
+				index = getIndex(N,r,c,v);
 				if(sol[index] == 1) {
 					setCellVal(solBoardPtr,r,c,v+1);
 					break;

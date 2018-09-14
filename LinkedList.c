@@ -1,6 +1,34 @@
 /*---LinkedList.c---
+ *  This module adds two data structures: 1. Singly linked list   2. Doubly linked list.
+ *  These modules were implemented using four structs - two for the nodes and two for the lists (described in detail in the header), and various functions, described below.
  *
+ *  The singly linked list is being used to store player's cell changes for one move.
+ *  Because the user can change more than one cell at one move (using the autofill command), we needed a data structure that can store a variable number of cell changes, and for that use, a singly linked list fits perfectly.
  *
+ *  The doubly linked list is being used to store player's moves. Thus, each node of the doubly linked list is a singly linked list that stores one move.
+ *  A doubly linked list is being used instead of another singly linked list, for the ability to undo a move. Instead of finding the previous node in O(n) time, this can be achieved in O(1) using the prev field.
+ *
+ *  It is important to emphasize that this module includes only the implementation of the two data structures, and does NOT implement the undo/redo/reset functionalities.
+ *  These functionalities are implemented in the Game.c module.
+ *
+ * Functions:
+ * A. Singly Linked List functions
+ * 	1. singly_createNewNode()   	:	This is a private method. Creates a new Singly linked list node list and returns a pointer to it.
+ * 	2. singly_isEmpty() 			:	Checks if a singly linked list is empty (does not contain any nodes).
+ * 	3. singly_addLast()				:	Adds a node at the end of the list.
+ *	4. singly_removeFirst()			:	Removes the first node of the and returns its data, also frees allocated memory. If the list is empty - returns a null pointer.
+ *	5. singly_clear()				:	Removes all nodes from the list and frees all allocated space that was used by the list.
+*	6. createNewSinglyLinkedList()	:	Creates a new empty singly linked list. Returns a pointer to the list.
+ *
+ * B. Doubly linked list:
+ * 	1. doubly_createNewNode() 		:	Creates a new DoublyLinkedList node (a SinglyLinkedList) and returns a pointer to it.
+ * 	2. doubly_isEmpty() 			:	Checks if a doubly linked list is empty (does not contains any nodes).
+ * 	3. doubly_addLast()				:	Adds a new node to the end of the list (as tail).
+ * 	4. doubly_removeLast()			:	This is a private method. Removes the last node in a doubly linked list, and frees allocated memory used by the node.
+ * 	5. doubly_removeAfter()			:	Removes all nodes that appear after a given node, in a given doubly linked list (not including the given node).
+ * 	6. doubly_clear()				:	Removes all nodes from the list, and frees all allocated memory used by the list.
+ *	7. doubly_getLastNode()			:	Returns the last node in the doubly linked list, if exists.
+ *	8. createNewDoublyLinkedList()	:	Creates a new empty doubly linked list. Returns a pointer to the list.
  */
 
 
@@ -14,7 +42,7 @@
 
 /*
  * ********************** PRIVATE METHOD *************************
- * Creates a new SinglyLinkedList node and returns a pointer to it
+ * Creates a new SinglyLinkedList node and returns a pointer to it.
  *
  * unsigned int		row		-	Row number (between 0 and N-1).
  * unsigned int 	col		-	Column number (between 0 and N-1).
@@ -78,7 +106,7 @@ void singly_addLast(SinglyLinkedList *list,
 
 
 /*
- * Removes the first node from the list and returns its data.
+ * Removes the first node from the list and returns its data, and frees allocated space.
  * if the list is empty, returns a null pointer.
  *
  * SinglyLinkedList*	list	-	Said singly linked list.
@@ -103,7 +131,7 @@ unsigned int* singly_removeFirst(SinglyLinkedList* list) {
 }
 
 /*
- * Removes all nodes from the list.
+ * Removes all nodes from the list, and frees all allocated space that was used by the list.
  *
  * SinglyLinkedList*	list	-	Said singly linked list.
 */
@@ -191,7 +219,8 @@ void doubly_addLast(DoublyLinkedList *list, SinglyLinkedList *data) {
 
 
 /*
- * Removes the last node in a doubly linked list.
+ * ********************** PRIVATE METHOD *************************
+ * Removes the last node in a doubly linked list, and frees allocated memory used by the node.
  * if the list is empty, does nothing.
  *
  * DoublyLinkedList*	list	-	Said doubly linked list.
@@ -225,7 +254,7 @@ void doubly_removeLast(DoublyLinkedList *list) {
 
 
 /*
- * Removes all nodes that appear after DoublyNode node, in list (not including).
+ * Removes all nodes that appear after DoublyNode node, in list (not including), and frees all allocated memory used by all removed nodes.
  * *** Assumes that the given node is one of the nodes of the linked list. ***
  *
  * DoublyLinkedList*	list	-	Said doubly linked list.
@@ -244,7 +273,7 @@ void doubly_removeAfter(DoublyLinkedList* list, DoublyNode *node) {
 
 
 /*
- * Removes all nodes from the list.
+ * Removes all nodes from the list, and frees all allocated memory used by the list.
  *
  * DoublyLinkedList*	list	-	Said doubly linked list.
 */

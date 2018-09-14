@@ -1,6 +1,6 @@
 /*---MainAux.h---
  *  This module adds the functionality of executing a legal user command.
- *	This is done in executeCommand() function.
+ *	This is done in the executeCommand() function.
  */
 
 

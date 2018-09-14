@@ -1,5 +1,5 @@
 /*---Stack.c---
- * An implement of a stack for exhaustive-Backtracking in solver.c
+ * An implementation of a stack for exhaustive-Backtracking in solver.c
  */
 
 

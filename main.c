@@ -1,4 +1,4 @@
-/*	---Main.c---
+/*	---main.c---
  * This module contains one function - the Main function of the project:
  * The main function set the game mode to "INIT" (by using "Game.h").
  * Then, it waits for user input. The input is parsed (by using "Parser.h) as a command.
@@ -10,10 +10,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#include "SPBufferset.h" /* for srand command */
+#include "SPBufferset.h"
 #include "MainAux.h"
 #include "Parser.h"
 #include "Game.h"
+
 
 int main() {
 	unsigned int    isValidCommand;
