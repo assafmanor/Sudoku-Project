@@ -16,7 +16,7 @@
  *  These functionalities are implemented in the Game.c module.
  *
  * Functions:
- * A. Singly Linked List functions
+ * A. Singly linked list:
  * 	1. singly_isEmpty() 			:	Checks if a singly linked list is empty (does not contain any nodes).
  * 	2. singly_addLast()				:	Adds a node at the end of the list.
  *	3. singly_removeFirst()			:	Removes the first node of the and returns its data, also frees allocated memory. If the list is empty - returns a null pointer.

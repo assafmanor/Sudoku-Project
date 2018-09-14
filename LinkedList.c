@@ -12,7 +12,7 @@
  *  These functionalities are implemented in the Game.c module.
  *
  * Functions:
- * A. Singly Linked List functions
+ * A. Singly linked list:
  * 	1. singly_createNewNode()   	:	This is a private method. Creates a new Singly linked list node list and returns a pointer to it.
  * 	2. singly_isEmpty() 			:	Checks if a singly linked list is empty (does not contain any nodes).
  * 	3. singly_addLast()				:	Adds a node at the end of the list.
