@@ -1,7 +1,17 @@
+/*---FileManager.c---
+ * This module adds the functionality of working with files.
+ * This functionality is being used in "executeSolve", "executeEdit", and "executeSave" user-commands.
+ *
+ * The module includes 2 functions:
+ * 1 - saveBoard() : Saves board to given path.
+ * 2-  loadBoard() : Loads board to *boardPtr from path
+ */
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
-#include "Parser.h"
+#include "Parser.h" /* import toInt() function */
 #include "FileManager.h"
 
 

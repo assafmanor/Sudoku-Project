@@ -1,11 +1,46 @@
+/*---MainAux.c---
+ *  This module adds the functionality of executing a legal user command.
+ *	This is done in executeCommand() public function.
+ *  Here is a short description of the private functions (longer descriptions at the functions code)
+ *
+ *
+ * Functions
+ * 	1. repeatChar()    : Repeats the character c n times in string out.
+ * 	2. printCellRow()  : Prints a specific row of boardPtr->board
+ * 	3. printBoard()    : Prints the game board.
+ *	4. handleBoardCompletion () : Checks if the board is complete and prints a message accordingly
+ *
+ *	5.  executeSolve() : Tries to load a puzzle from the given path address.
+ * 						 If successful, changes game mode to SOLVE, loads the puzzle and prints the board.
+ *	6.  executeEdit()  : Tries to either load a game from file (if a path was given), or initializes an empty 9x9 game.
+ * 						 If a path was given but an invalid one, prints an error message and returns.
+ * 						 Otherwise, changes game mode to EDIT and prints the boards.
+ *	7.  executeMarkErrors() : Changes game mode to either 0 or 1, if given a valid argument. It does not assume the argument is valid though.
+ *		 					 If the argument is invalid - prints an error message.
+ *		 					 returns TRUE iff the game mode is SOLVE.
+ *	8.  executePrintBoard() : Prints the game board.
+ *	9.  executeSet()      : Tries to set a new value to a cell.
+ *	10. executeValidate() : Validates game using ILP, if the game doesn't contain erroneous values.
+ *	11. executeGenerate() : Generates a puzzle by randomly filling X cells with random legal values,
+ * 							running ILP to solve the resulting board, and then clearing all but Y random cells.
+ *	12. executeUndo()     : Undo previous move done by the player.
+ *	13. executeRedo()     : Redo a move previously done by the player.
+ *	14. executeSave()     : If given a valid path, saves the current game board to the given path address.
+ *	15. executeHint()     : Give a hint to the player by showing the solution of a single cell[row,col].
+ *	16. executeNumSolutions () :Prints the number of solutions for the current board, but only if the board does not contain erroneous values
+ *	17. executeAutofill() : Automatically fills "obvious" values -- cells which contain a single legal value.
+ *	18. executeReset() : Undos all modes, reverting the board to its original loaded state.
+ *	19. executeExit()  : Frees all memory resources, and terminate the program in the main module
+ *
+ */
+
+
 /* declarations */
 #include <stdio.h>
 #include <stdlib.h>
 #include "Solver.h"
 #include "FileManager.h"
 #include "ILP_Solver.h"
-
-
 
 Board			gameBoard;
 Board			solutionBoard;
@@ -86,6 +121,8 @@ unsigned int executeCommand (int* command, char* path){
 
 
 /************************* Private methods *************************/
+
+
 
 
 /*

@@ -1,3 +1,11 @@
+/*	---Main.c---
+ * This module contains one function - the Main function of the project:
+ * The main function set the game mode to "INIT" (by using "Game.h").
+ * Then, it waits for user input. The input is parsed (by using "Parser.h) as a command.
+ * If it is a legal command, it is executed (by using "MainAux.h").
+ * The function ends when exit command entered as an input
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -6,9 +14,7 @@
 #include "MainAux.h"
 #include "Parser.h"
 #include "Game.h"
-/*
- * The main function.
- */
+
 int main() {
 	unsigned int    isValidCommand;
 	unsigned int	exitProgram = FALSE;
