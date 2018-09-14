@@ -522,7 +522,7 @@ unsigned int executeSave(char* path) {
 unsigned int executeHint(int row, int col) {
 	unsigned int	m = gameBoard.m, n = gameBoard.n;
 	unsigned int	gameMode 		= getGameMode();
-	unsigned int 	N 				= m*n;
+	int			 	N 				= m*n;
 	int				isSolvable = TRUE;
 	Cell* 			cur_cell;
 
@@ -530,8 +530,8 @@ unsigned int executeHint(int row, int col) {
 	if(gameMode != SOLVE) return FALSE;
 
 	/* check coordinates */
-	if(row < 0 || col < 0 ||
-	   row >= (int)N || col >= (int)N) {
+	if(row < 0  || col < 0 ||
+	   row >= N || col >= N) {
 		printf("Error: value not in range 1-%d\n",N);
 		return TRUE;
 	}

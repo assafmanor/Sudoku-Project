@@ -2,10 +2,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#include "SPBufferset.h" /* for srand command */
+#include "SPBufferset.h"
 #include "MainAux.h"
 #include "Parser.h"
 #include "Game.h"
+
+
 /*
  * The main function.
  */
