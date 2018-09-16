@@ -1,5 +1,5 @@
 /*---FileManager.h---
- * This module adds the functionality of working with files.
+ * This module adds the functionality of working with files, ie. saving and loading puzzles to/from files.
  * This functionality is being used in "executeSolve", "executeEdit", and "executeSave" user-commands.
  *
  * The module includes 2 functions:
@@ -11,12 +11,13 @@
 
 /*
  * Saves board to given path path.
+ * Returns: TRUE (1) - a successful save, FALSE (0) - Unable to open file on given path, INVALID (-1) - fprintf() error.
  *
  * Board		board		-	A game board.
- * char*		path		-	The path to which the file will be saved to (including file name and extension).
+ * char*		path		-	The path to which the file will be saved to (including filename and extension).
  * unsigned int	gameMode	-	The current game mode.
  */
-unsigned int	saveBoard(Board, char*, unsigned int);
+int	saveBoard(Board, char*, unsigned int);
 
 
 /*

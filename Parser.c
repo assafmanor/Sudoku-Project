@@ -1,7 +1,7 @@
 /*---Parser.c---
  *  This module adds the functionality of parsing the player's input and encoding it as a command.
  *
- * A. Private functions
+ * A. Private functions:
  * 	1. isEmptyInput()    :	Determines whether a string consists only of whitespaces.
  * 	2. commandToArray()  :	Splits each word of user input, to a separate cell of an array of strings
  * 	3. stringsEqual()    :	Returns TRUE iff str1 and str2 contain exactly the same chars

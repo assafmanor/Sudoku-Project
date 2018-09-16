@@ -21,7 +21,7 @@
  * 	2. singly_addLast()				:	Adds a node at the end of the list.
  *	3. singly_removeFirst()			:	Removes the first node of the and returns its data, also frees allocated memory. If the list is empty - returns a null pointer.
  *	4. singly_clear()				:	Removes all nodes from the list and frees all allocated space that was used by the list.
-*	5. createNewSinglyLinkedList()	:	Creates a new empty singly linked list. Returns a pointer to the list.
+ *	5. createNewSinglyLinkedList()	:	Creates a new empty singly linked list. Returns a pointer to the list.
  *
  * B. Doubly linked list:
  * 	1. doubly_createNewNode() 		:	Creates a new DoublyLinkedList node (a SinglyLinkedList) and returns a pointer to it.

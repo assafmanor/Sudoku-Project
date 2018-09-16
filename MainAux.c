@@ -536,12 +536,13 @@ unsigned int executeSave(char* path) {
 	}
 	/* try to save the puzzle to the given path, and print message indicating the success or failure */
 	saveSuccessful = saveBoard(gameBoard, path, gameMode);
-	if(saveSuccessful) {
+	if(saveSuccessful == TRUE) {
 		printf("Saved to: %s\n", path);
 	}
-	else {
+	else if(saveSuccessful == FALSE){
 		printf("Error: File cannot be created or modified\n");
 	}
+	/* else: saveSuccessful == INVALID - do nothing */
 	return TRUE;
 }
 
@@ -694,4 +695,3 @@ unsigned int executeExit() {
 
 
 /********************** End of private methods *********************/
-
